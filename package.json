@@ -1,0 +1,24 @@
+{
+  "name": "alice",
+  "version": "0.0.1",
+  "description": "Alice",
+  "main": "index.js",
+  "scripts": {},
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/phonowell/alice.git"
+  },
+  "keywords": [
+    "alice"
+  ],
+  "author": "Mimiko Phonowell <phnonwell@gmail.com>",
+  "license": "GPL-3.0+",
+  "url": "https://github.com/phonowell/alice",
+  "bugs": {
+    "url": "https://github.com/phonowell/alice/issues"
+  },
+  "homepage": "https://github.com/phonowell/alice",
+  "dependencies": {
+    "fire-keeper": "0.0.26"
+  }
+}
