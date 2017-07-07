@@ -19,6 +19,6 @@
   },
   "homepage": "https://github.com/phonowell/alice",
   "dependencies": {
-    "fire-keeper": "0.0.26"
+    "fire-keeper": "^0.0.38"
   }
 }
