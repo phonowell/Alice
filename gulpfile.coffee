@@ -1,5 +1,5 @@
 $$ = require 'fire-keeper'
-{$, _, Promise, gulp} = $$.library
+{Promise} = $$.library
 co = Promise.coroutine
 
 fs = require 'fs'
