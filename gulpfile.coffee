@@ -1,5 +1,5 @@
 $$ = require 'fire-keeper'
-{Promise} = $$.library
+{$, _, Promise} = $$.library
 co = Promise.coroutine
 
 fs = require 'fs'
@@ -10,7 +10,9 @@ path = require 'path'
 ###
 
   backup
+  josh
   lint
+  prepare
 
 ###
 
@@ -35,6 +37,29 @@ $$.task 'backup', co ->
   # backup OneDrive
   yield $$.remove 'E:/OneDrive.zip'
   yield $$.zip 'E:/OneDrive/**/*.*', 'E:/OneDrive.zip'
+
+$$.task 'josh', co ->
+
+  josh = require './source/module/josh.coffee'
+
+  resourceList = yield josh.getResourceList()
+
+    # download
+#    return
+#
+#    for a in res
+#
+#      filename = path.basename a.src
+#      if fs.existsSync "E:/OneDrive/midi/josh/#{a.title}/#{filename}" then continue
+#
+#      $.i a.src
+#
+#      continue
+#
+#      yield $$.download a.src
+#      , "E:/OneDrive/midi/josh/#{a.title}"
+#
+#      #yield $$.delay 5e3
 
 $$.task 'lint', co ->
 
