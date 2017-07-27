@@ -22,11 +22,14 @@ class Josh
   ###
 
   download(resourceList)
+  getCookie()
   getResourceList()
 
   ###
 
   download: co (resourceList, target) ->
+
+    cookie = yield @getCookie()
 
     for title, list of resourceList
       for src in list
@@ -34,8 +37,19 @@ class Josh
         filename = path.basename src
         if fs.existsSync "#{target}/#{title}/#{filename}" then continue
 
+        $.info 'josh', "started to download '#{src}'"
+
         yield $$.download src
-        , "#{target}/#{title}"
+        , "#{target}/#{title}",
+          headers: {cookie}
+
+  getCookie: co ->
+
+    axios = require 'axios'
+
+    data = yield axios.get 'http://josh.agarrado.net/music/anime/index.php'
+    cookieArray = data.request.res.headers['set-cookie']
+    cookieArray.join '; '
 
   getResourceList: co ->
 
@@ -48,7 +62,7 @@ class Josh
     # if there has got no save file
     # get list from net
 
-    res = {}
+    list = {}
 
     tagList = 'abcdefghijklmnopqrstuvwxyz'.toUpperCase().split ''
     tagList.unshift '0-9'
@@ -66,22 +80,31 @@ class Josh
         $a = dom @
         if $a.text() != 'mid' then return
 
-        title = _.trim $a.closest('div.srcdiv').prev().children('a').text()
+        title = $a.closest('div.srcdiv').prev().children('a').text()
+        title = _.trim title.replace /[\\\/:*?"<>|]/g, ''
         src = $a.attr 'href'
 
         if !~src.search 'http'
           src = "http://josh.agarrado.net/music/anime/#{src}"
 
-        res[title] or= []
-        res[title].push src
+        list[title] or= []
+        list[title].push src
 
     # unique & sort
-    for key in res
-      res[key] = _.sort _.uniq res[key]
+
+    res = {}
+
+    for key in _.keys(list).sort()
+      res[key] = _.uniq(list[key]).sort()
 
     # save
+
+    content = $.parseString res
+    content = content.replace /\s{2,}/g, ' '
+    .replace /\\\w/g, ''
+
     yield $$.mkdir './save'
-    fs.writeFileSync './save/josh.json', $.parseString res
+    fs.writeFileSync './save/josh.json', content
 
     $.info 'josh', 'got resource list'
 

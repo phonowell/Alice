@@ -12,14 +12,14 @@ path = require 'path'
   backup
   josh
   lint
-  prepare
+  sfacg
 
 ###
 
 $$.task 'backup', co ->
 
   m = require './source/module/oneDrive.coffee'
-  od = m 'E:/OneDrive'
+  od = new m 'E:/OneDrive'
 
   yield od.backupGameSave()
   yield od.backup()
@@ -30,10 +30,26 @@ $$.task 'josh', co ->
   josh = new m()
 
   resourceList = yield josh.getResourceList()
-  #yield josh.download resourceList, 'E:/midi'
+  yield josh.download resourceList, 'E:/midi'
 
 $$.task 'lint', co ->
 
   yield $$.task('kokoro')()
 
   yield $$.lint './gulpfile.coffee'
+
+$$.task 'sfacg', co ->
+
+  {url} = $$.argv
+  if !url then throw new Error 'invalid url'
+
+  m = require './source/module/sfacg.coffee'
+  sf = new m()
+
+  resourceList = yield sf.getResourceList url
+
+  yield sf.download resourceList
+
+  yield $$.delay 1e4
+
+  yield sf.rename resourceList
