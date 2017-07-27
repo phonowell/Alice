@@ -11,64 +11,82 @@ cheerio = require 'cheerio'
 
 # function
 
-fn = {}
+absPath = (source) -> source.replace /\.\//, "#{process.cwd()}/"
 
-###
+# class
 
+class Josh
+
+  constructor: ->
+
+  ###
+
+  download(resourceList)
   getResourceList()
 
-###
+  ###
 
-fn.getResourceList = co ->
+  download: co (resourceList, target) ->
 
-  # try to get list from disk
+    for title, list of resourceList
+      for src in list
 
-  if fs.existsSync './save/josh.json'
-    res = $.parseJson $.parseString fs.readFileSync './save/josh.json'
-    return res
+        filename = path.basename src
+        if fs.existsSync "#{target}/#{title}/#{filename}" then continue
 
-  # if there has got no save file
-  # get list from net
+        yield $$.download src
+        , "#{target}/#{title}"
 
-  res = {}
+  getResourceList: co ->
 
-  tagList = 'abcdefghijklmnopqrstuvwxyz'.toUpperCase().split ''
-  tagList.unshift '0-9'
+    # try to get list from disk
 
-  for tag in tagList
+    if fs.existsSync './save/josh.json'
+      res = require absPath './save/josh.json'
+      return res
 
-    html = yield $.get 'http://josh.agarrado.net/music/anime/index.php',
-      startswith: tag
+    # if there has got no save file
+    # get list from net
 
-    $.info 'josh', "loaded tag/#{tag}"
+    res = {}
 
-    dom = cheerio.load html
-    dom('a').each ->
+    tagList = 'abcdefghijklmnopqrstuvwxyz'.toUpperCase().split ''
+    tagList.unshift '0-9'
 
-      $a = dom @
-      if $a.text() != 'mid' then return
+    for tag in tagList
 
-      title = _.trim $a.closest('div.srcdiv').prev().children('a').text()
-      src = $a.attr 'href'
+      html = yield $.get 'http://josh.agarrado.net/music/anime/index.php',
+        startswith: tag
 
-      if !~src.search 'http'
-        src = "http://josh.agarrado.net/music/anime/#{src}"
+      $.info 'josh', "loaded tag/#{tag}"
 
-      res[title] or= []
-      res[title].push src
+      dom = cheerio.load html
+      dom('a').each ->
 
-  # unique & sort
-  for key in res
-    res[key] = _.sort _.uniq res[key]
+        $a = dom @
+        if $a.text() != 'mid' then return
 
-  # save
-  yield $$.mkdir './save'
-  fs.writeFileSync './save/josh.json', $.parseString res
+        title = _.trim $a.closest('div.srcdiv').prev().children('a').text()
+        src = $a.attr 'href'
 
-  $.info 'josh', 'got resource list'
+        if !~src.search 'http'
+          src = "http://josh.agarrado.net/music/anime/#{src}"
 
-  # return
-  res
+        res[title] or= []
+        res[title].push src
+
+    # unique & sort
+    for key in res
+      res[key] = _.sort _.uniq res[key]
+
+    # save
+    yield $$.mkdir './save'
+    fs.writeFileSync './save/josh.json', $.parseString res
+
+    $.info 'josh', 'got resource list'
+
+    # return
+    res
 
 # return
-module.exports = fn
+module.exports = (arg...) -> new Josh arg...

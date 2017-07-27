@@ -18,48 +18,19 @@ path = require 'path'
 
 $$.task 'backup', co ->
 
-  # load
-  yield $$.compile './data/data.yml'
-  LIST = require './data/data.json'
-  TARGET = 'E:/OneDrive/存档'
+  m = require './source/module/oneDrive.coffee'
+  od = m 'E:/OneDrive'
 
-  # zip files
-  for source in LIST
-
-    if !fs.existsSync source then continue
-
-    src = "#{source}/**/*.*"
-    tar = "#{TARGET}/#{path.basename source}.zip"
-
-    yield $$.remove tar
-    yield $$.zip src, tar
-
-  # backup OneDrive
-  yield $$.remove 'E:/OneDrive.zip'
-  yield $$.zip 'E:/OneDrive/**/*.*', 'E:/OneDrive.zip'
+  yield od.backupGameSave()
+  yield od.backup()
 
 $$.task 'josh', co ->
 
-  josh = require './source/module/josh.coffee'
+  m = require './source/module/josh.coffee'
+  josh = new m()
 
   resourceList = yield josh.getResourceList()
-
-    # download
-#    return
-#
-#    for a in res
-#
-#      filename = path.basename a.src
-#      if fs.existsSync "E:/OneDrive/midi/josh/#{a.title}/#{filename}" then continue
-#
-#      $.i a.src
-#
-#      continue
-#
-#      yield $$.download a.src
-#      , "E:/OneDrive/midi/josh/#{a.title}"
-#
-#      #yield $$.delay 5e3
+  #yield josh.download resourceList, 'E:/midi'
 
 $$.task 'lint', co ->
 
