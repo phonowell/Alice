@@ -13,6 +13,7 @@ path = require 'path'
   josh
   lint
   sfacg
+  sfacg-all
 
 ###
 
@@ -46,10 +47,13 @@ $$.task 'sfacg', co ->
   m = require './source/module/sfacg.coffee'
   sf = new m()
 
-  resourceList = yield sf.getResourceList url
+  yield sf.get url
 
-  yield sf.download resourceList
+$$.task 'sfacg-all', co ->
 
-  yield $$.delay 1e4
+  m = require './source/module/sfacg.coffee'
+  sf = new m()
 
-  yield sf.rename resourceList
+  for i in [1e3...1e6]
+
+    yield sf.get "http://book.sfacg.com/Novel/#{i}/MainIndex"
