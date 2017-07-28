@@ -54,7 +54,7 @@ class Sfacg
       yield $$.shell "start #{a.source}"
       $.info.isSilent = false
 
-      $.info 'sfacg', "downloaded #{a.source}"
+      $.info 'sfacg', "downloaded '#{a.source}'"
 
   formatUrl: (url) ->
 
@@ -87,7 +87,7 @@ class Sfacg
 
     yield @download resourceList
 
-    time = 5e3 + resourceList.length * 500
+    time = 5e3 + (resourceList.length - 1) * 1e3
     $.info 'sfacg', "should wait '#{time} ms' for downloading"
     yield $$.delay time
 
@@ -108,6 +108,7 @@ class Sfacg
 
       $title = dom @
       title = $title.text()
+      .replace /[\\\/:*?"<>|]/g, ''
       .replace /\[/g, '【'
       .replace /\]/g, '】'
       title = "#{1 + i} - #{_.trim title}"

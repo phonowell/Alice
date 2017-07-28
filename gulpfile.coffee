@@ -54,6 +54,6 @@ $$.task 'sfacg-all', co ->
   m = require './source/module/sfacg.coffee'
   sf = new m()
 
-  for i in [1e3...1e6]
+  for i in [6752..1e4]
 
     yield sf.get "http://book.sfacg.com/Novel/#{i}/MainIndex"
