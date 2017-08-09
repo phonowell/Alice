@@ -9,15 +9,19 @@ path = require 'path'
 
 cheerio = require 'cheerio'
 
-# function
-
-absPath = (source) -> source.replace /\.\//, "#{process.cwd()}/"
-
 # class
 
 class Sfacg
 
   constructor: ->
+
+    @base = switch $$.os
+      when 'macos' then '~/Downloads'
+      when 'windows' then 'F:'
+
+    @open = switch $$.os
+      when 'macos' then 'open'
+      when 'windows' then 'start'
 
   ###
 
@@ -48,10 +52,10 @@ class Sfacg
 
       filename = path.basename a.source
 
-      if fs.existsSync "F:/#{filename}" then continue
+      if yield $$.isExisted "#{@base}/#{filename}" then continue
 
       $.info.isSilent = true
-      yield $$.shell "start #{a.source}"
+      yield $$.shell "#{@open} #{a.source}"
       $.info.isSilent = false
 
       $.info 'sfacg', "downloaded '#{a.source}'"
@@ -130,10 +134,10 @@ class Sfacg
 
       filename = path.basename a.source
 
-      if !fs.existsSync "F:/#{filename}" then continue
+      unless yield $$.isExisted "#{@base}/#{filename}" then continue
 
-      yield $$.copy "F:/#{filename}", 'F:/', "#{a.title}.txt"
-      yield $$.remove "F:/#{filename}"
+      yield $$.copy "#{@base}/#{filename}", null, "#{a.title}.txt"
+      yield $$.remove "#{@base}/#{filename}"
 
   zip: co (list) ->
 
@@ -141,9 +145,9 @@ class Sfacg
     .replace /】.*/, ''
     title = _.trim title
 
-    fileList = ("F:/#{a.title}.txt" for a in list)
+    fileList = ("#{@base}/#{a.title}.txt" for a in list)
 
-    yield $$.zip fileList, 'F:/', "#{title}.zip"
+    yield $$.zip fileList, "#{@base}/", "#{title}.zip"
     yield $$.remove fileList
 
 # return

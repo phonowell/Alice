@@ -11,6 +11,7 @@ path = require 'path'
 
   backup
   josh
+  launchpad
   lint
   sfacg
   sfacg-all
@@ -32,6 +33,13 @@ $$.task 'josh', co ->
 
   resourceList = yield josh.getResourceList()
   yield josh.download resourceList, 'E:/midi'
+
+$$.task 'launchpad', co  ->
+
+  if $$.os != 'macos'
+    return $.info 'launchpad', 'invalid os'
+
+  yield $$.shell 'defaults write com.apple.dock ResetLaunchPad -bool true && killall Dock'
 
 $$.task 'lint', co ->
 
