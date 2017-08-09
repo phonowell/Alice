@@ -14,7 +14,6 @@ path = require 'path'
   launchpad
   lint
   sfacg
-  sfacg-all
 
 ###
 
@@ -56,12 +55,3 @@ $$.task 'sfacg', co ->
   sf = new m()
 
   yield sf.get url
-
-$$.task 'sfacg-all', co ->
-
-  m = require './source/module/sfacg.coffee'
-  sf = new m()
-
-  for i in [6752..1e4]
-
-    yield sf.get "http://book.sfacg.com/Novel/#{i}/MainIndex"
