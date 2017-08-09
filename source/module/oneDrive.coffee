@@ -32,7 +32,7 @@ class OneDrive
 
   backupGameSave: co ->
 
-    yield $$.compile './data/oneDrive/save.yml'
+    yield $$.compile './data/oneDrive/save.yaml'
     sourceList = require absPath './data/oneDrive/save.json'
 
     for source in sourceList

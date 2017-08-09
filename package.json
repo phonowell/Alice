@@ -11,7 +11,7 @@
   "keywords": [
     "alice"
   ],
-  "author": "Mimiko Phonowell <phnonwell@gmail.com>",
+  "author": "Mimiko Phonowell <phonowell@gmail.com>",
   "license": "GPL-3.0+",
   "url": "https://github.com/phonowell/alice",
   "bugs": {
@@ -20,7 +20,7 @@
   "homepage": "https://github.com/phonowell/alice",
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
-    "fire-keeper": "^0.0.43",
+    "fire-keeper": "^0.0.48",
     "iconv-lite": "^0.4.18"
   }
 }
