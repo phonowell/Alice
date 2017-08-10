@@ -21,58 +21,84 @@ class Josh
 
   ###
 
-  download(resourceList)
-  getCookie()
+  download()
+  downloadPage()
   getResourceList()
 
   ###
 
-  download: co (resourceList, target) ->
+  download: co ->
 
-    cookie = yield @getCookie()
+    resourceList = yield @getResourceList()
+
+    base = switch $$.os
+      when 'macos' then '~/Downloads'
+      when 'windows' then 'F:'
+
+    open = switch $$.os
+      when 'macos' then 'open'
+      when 'windows' then 'start'
 
     for title, list of resourceList
-      for src in list
+      for url in list
 
-        filename = path.basename src
-        if fs.existsSync "#{target}/#{title}/#{filename}" then continue
+        filename = path.basename url
+        if yield $$.isExisted "#{base}/midi/#{title}/#{filename}"
+          continue
 
-        $.info 'josh', "started to download '#{src}'"
+        yield $$.remove "#{base}/#{filename}"
 
-        yield $$.download src
-        , "#{target}/#{title}",
-          headers: {cookie}
+        yield $$.shell "#{open} #{url}"
 
-  getCookie: co ->
+        yield $$.delay 5e3
 
-    axios = require 'axios'
+        yield $$.copy "#{base}/#{filename}"
+        , "#{base}/midi/#{title}"
 
-    data = yield axios.get 'http://josh.agarrado.net/music/anime/index.php'
-    cookieArray = data.request.res.headers['set-cookie']
-    cookieArray.join '; '
+        yield $$.remove "#{base}/#{filename}"
 
-  getResourceList: co ->
+    $.info 'josh', 'task finished'
 
-    # try to get list from disk
-
-    if fs.existsSync './save/josh.json'
-      res = require absPath './save/josh.json'
-      return res
-
-    # if there has got no save file
-    # get list from net
-
-    list = {}
+  downloadPage: co ->
 
     tagList = 'abcdefghijklmnopqrstuvwxyz'.toUpperCase().split ''
     tagList.unshift '0-9'
 
     for tag in tagList
 
-      html = yield $.get 'http://josh.agarrado.net/music/anime/index.php',
-        startswith: tag
+      target = './temp/josh/page'
+      filename = "#{tag.toLowerCase()}.html"
 
-      $.info 'josh', "loaded tag/#{tag}"
+      if yield $$.isExisted "#{target}/#{filename}" then continue
+
+      url = "http://josh.agarrado.net/music/anime/index.php?startswith=#{tag}"
+
+      yield $$.download url, target, filename
+
+    $.info 'josh', 'all pages downloaded'
+
+  getResourceList: co ->
+
+    # try to get list from disk
+
+    source = './temp/josh/resource.json'
+
+    if yield $$.isExisted source
+      return yield $$.read source
+
+    # if there has got no resource list
+    # get list from net
+
+    yield @downloadPage()
+
+    list = {}
+
+    tagList = 'abcdefghijklmnopqrstuvwxyz'.split ''
+    tagList.unshift '0-9'
+
+    for tag in tagList
+
+      html = yield $$.read "./temp/josh/page/#{tag}.html"
 
       dom = cheerio.load html
       dom('a').each ->
@@ -82,6 +108,7 @@ class Josh
 
         title = $a.closest('div.srcdiv').prev().children('a').text()
         title = _.trim title.replace /[\\\/:*?"<>|]/g, ''
+        title = title.replace /^\.+/, ''
         src = $a.attr 'href'
 
         if !~src.search 'http'
@@ -103,13 +130,12 @@ class Josh
     content = content.replace /\s{2,}/g, ' '
     .replace /\\\w/g, ''
 
-    yield $$.mkdir './save'
-    fs.writeFileSync './save/josh.json', content
+    yield $$.write source, content
 
     $.info 'josh', 'got resource list'
 
     # return
-    res
+    yield $$.read source
 
 # return
 module.exports = (arg...) -> new Josh arg...

@@ -30,8 +30,7 @@ $$.task 'josh', co ->
   m = require './source/module/josh.coffee'
   josh = new m()
 
-  resourceList = yield josh.getResourceList()
-  yield josh.download resourceList, 'E:/midi'
+  yield josh.download()
 
 $$.task 'launchpad', co  ->
 

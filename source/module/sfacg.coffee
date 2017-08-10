@@ -136,8 +136,7 @@ class Sfacg
 
       unless yield $$.isExisted "#{@base}/#{filename}" then continue
 
-      yield $$.copy "#{@base}/#{filename}", null, "#{a.title}.txt"
-      yield $$.remove "#{@base}/#{filename}"
+      yield $$.rename "#{@base}/#{filename}", "#{a.title}.txt"
 
   zip: co (list) ->
 
