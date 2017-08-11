@@ -13,6 +13,7 @@ path = require 'path'
   josh
   launchpad
   lint
+  seek
   sfacg
 
 ###
@@ -44,6 +45,15 @@ $$.task 'lint', co ->
   yield $$.task('kokoro')()
 
   yield $$.lint './gulpfile.coffee'
+
+$$.task 'seek', co ->
+
+  {target} = $$.argv
+
+  m = require './source/module/seeker.coffee'
+  seeker = new m()
+
+  yield seeker.seek target
 
 $$.task 'sfacg', co ->
 
