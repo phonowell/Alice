@@ -13,6 +13,7 @@ path = require 'path'
   josh
   launchpad
   lint
+  ping
   seek
   sfacg
 
@@ -48,6 +49,13 @@ $$.task 'lint', co ->
     './gulpfile.coffee'
     './source/**/*.coffee'
   ]
+
+$$.task 'ping', co ->
+
+  m = require './source/module/ping.coffee'
+  ping = new m()
+
+  yield ping.ping()
 
 $$.task 'seek', co ->
 

@@ -42,7 +42,7 @@ class Seeker
     list = _.concat sourceList, list
     list = _.uniqBy list, 'url'
     list = _.sortBy list, 'time'
-    if list.length > 50 then list = list[0...50]
+    if list.length > 100 then list = list[0...100]
     yield $$.write source, list
 
     return res
@@ -58,7 +58,7 @@ class Seeker
 
     list = []
 
-    for url in urlList
+    for url, i in urlList
 
       html = yield $.get url
       dom = cheerio.load html
@@ -84,7 +84,7 @@ class Seeker
           url = "#{base}#{url}"
 
         # time
-        time = _.now()
+        time = _.now() + i
 
         # return
         list.push {time, title, url}
@@ -99,6 +99,7 @@ class Seeker
     yield @task 'AcFun'
     yield @task 'AppInn'
     yield @task 'iPlaySoft'
+    yield @task 'Ryf'
     yield @task 'williamLong'
     yield @task 'Zxx'
 
@@ -106,8 +107,12 @@ class Seeker
 
     if !list.length then return
 
-    $.info 'seeker', "<#{title}>"
-    $.i ("#{colors.blue a.title}\n#{colors.gray a.url}" for a in list).join '\n\n'
+    @show.divider or= colors.gray _.trim _.repeat('- ', 16)
+
+    $.i colors.blue title
+    $.i @show.divider
+    $.i ("#{colors.magenta a.title}\n#{colors.gray a.url}" for a in list).join '\n\n'
+    $.i @show.divider
 
   task: co (name) ->
 
@@ -132,6 +137,11 @@ class Seeker
         title: '异次元软件世界'
         url: 'http://www.iplaysoft.com/'
         selector: 'h2.entry-title > a'
+
+      when 'ryf'
+        title: '阮一峰的网络日志'
+        url: 'http://www.ruanyifeng.com/blog/'
+        selector: 'h2.entry-title > a, #homepage li.module-list-item > span ~ a'
 
       when 'williamlong'
         title: '月光博客'
