@@ -44,7 +44,10 @@ $$.task 'lint', co ->
 
   yield $$.task('kokoro')()
 
-  yield $$.lint './gulpfile.coffee'
+  yield $$.lint [
+    './gulpfile.coffee'
+    './source/**/*.coffee'
+  ]
 
 $$.task 'seek', co ->
 

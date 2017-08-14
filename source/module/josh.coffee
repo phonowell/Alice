@@ -17,7 +17,7 @@ absPath = (source) -> source.replace /\.\//, "#{process.cwd()}/"
 
 class Josh
 
-  constructor: ->
+  constructor: -> null
 
   ###
 

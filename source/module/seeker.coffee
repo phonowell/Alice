@@ -14,10 +14,11 @@ colors = require 'colors/safe'
 
 class Seeker
 
-  constructor: ->
+  constructor: -> null
 
   ###
 
+    diff(title, list)
     getList(option)
     seek(name)
     show(list)
@@ -25,9 +26,30 @@ class Seeker
 
   ###
 
+  diff: co (title, list) ->
+
+    source = "./temp/seeker/#{title}.json"
+    list = _.sortBy list, 'time'
+
+    unless yield $$.isExisted source
+      yield $$.write source, list
+      return list
+
+    sourceList = yield $$.read source
+
+    res = _.differenceBy list, sourceList, 'url'
+
+    list = _.concat sourceList, list
+    list = _.uniqBy list, 'url'
+    list = _.sortBy list, 'time'
+    if list.length > 50 then list = list[0...50]
+    yield $$.write source, list
+
+    return res
+
   getList: co (option) ->
 
-    {url, selector} = option
+    {selector, url} = option
 
     urlList = switch $.type url
       when 'array' then url
@@ -61,11 +83,14 @@ class Seeker
         if base = option.urlBase
           url = "#{base}#{url}"
 
+        # time
+        time = _.now()
+
         # return
-        list.push {title, url}
+        list.push {time, title, url}
 
     # return
-    list
+    yield @diff option.title, list
 
   seek: co (name) ->
 
@@ -74,9 +99,12 @@ class Seeker
     yield @task 'AcFun'
     yield @task 'AppInn'
     yield @task 'iPlaySoft'
+    yield @task 'williamLong'
     yield @task 'Zxx'
 
   show: (title, list) ->
+
+    if !list.length then return
 
     $.info 'seeker', "<#{title}>"
     $.i ("#{colors.blue a.title}\n#{colors.gray a.url}" for a in list).join '\n\n'
@@ -104,6 +132,11 @@ class Seeker
         title: '异次元软件世界'
         url: 'http://www.iplaysoft.com/'
         selector: 'h2.entry-title > a'
+
+      when 'williamlong'
+        title: '月光博客'
+        url: 'http://www.williamlong.info/'
+        selector: 'h2.post-title > a'
 
       when 'zxx', 'zhangxinxu'
         title: '鑫空间'
