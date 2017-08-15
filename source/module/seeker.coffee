@@ -31,17 +31,15 @@ class Seeker
     source = "./temp/seeker/#{title}.json"
     list = _.sortBy list, 'time'
 
-    unless yield $$.isExisted source
-      yield $$.write source, list
-      return list
-
     sourceList = yield $$.read source
+    sourceList or= []
 
     res = _.differenceBy list, sourceList, 'url'
 
     list = _.concat sourceList, list
     list = _.uniqBy list, 'url'
     list = _.sortBy list, 'time'
+    list = _.reverse list
     if list.length > 100 then list = list[0...100]
     yield $$.write source, list
 
