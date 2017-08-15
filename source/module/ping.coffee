@@ -22,7 +22,7 @@ class Ping
 
   getList: co ->
 
-    $$.compile './data/ping/list.yaml'
+    yield $$.compile './data/ping/list.yaml'
     yield $$.read './data/ping/list.json'
 
   ping: co ->
