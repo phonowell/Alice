@@ -34,13 +34,6 @@ $$.task 'josh', co ->
 
   yield josh.download()
 
-$$.task 'launchpad', co  ->
-
-  if $$.os != 'macos'
-    return $.info 'launchpad', 'invalid os'
-
-  yield $$.shell 'defaults write com.apple.dock ResetLaunchPad -bool true && killall Dock'
-
 $$.task 'lint', co ->
 
   yield $$.task('kokoro')()
@@ -75,3 +68,13 @@ $$.task 'sfacg', co ->
   sf = new m()
 
   yield sf.get url
+
+$$.task 'shell', co  ->
+
+  {cmd} = $$.argv
+  if !cmd then throw new Error 'invalid cmd'
+
+  m = require './source/module/shell.coffee'
+  shell = new m()
+
+  yield shell.execute cmd
