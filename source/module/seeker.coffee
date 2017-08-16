@@ -18,8 +18,8 @@ class Seeker
 
   ###
 
-    diff(title, list)
-    download()
+    diff(title, list, [cacheSize])
+    download(list, [lifetime])
     getFilename(url)
     getList(option)
     seek(name)
@@ -28,9 +28,10 @@ class Seeker
 
   ###
 
-  diff: co (title, list) ->
+  diff: co (title, list, cacheSize) ->
 
     source = "./temp/seeker/list/#{title}.json"
+    list = _.uniqBy list, 'url'
     list = _.sortBy list, 'time'
 
     sourceList = yield $$.read source
@@ -42,19 +43,19 @@ class Seeker
     list = _.uniqBy list, 'url'
     list = _.sortBy list, 'time'
     list = _.reverse list
-    if list.length > 100 then list = list[0...100]
+    if list.length > cacheSize then list = list[0...cacheSize]
     yield $$.write source, list
 
     return res
 
-  download: co (list) ->
+  download: co (list, lifetime = 3e5) ->
 
     for url in list
 
       filename = @getFilename url
       stat = yield $$.stat "./temp/seeker/page/#{filename}"
 
-      if stat and _.now() - stat.ctime.getTime() < 3e5
+      if stat and _.now() - stat.ctime.getTime() < lifetime
         continue
 
       yield $$.download url
@@ -75,7 +76,7 @@ class Seeker
       when 'string' then [url]
       else throw new Error 'invalid argument type'
 
-    yield @download urlList
+    yield @download urlList, option.lifetime
 
     list = []
 
@@ -113,7 +114,7 @@ class Seeker
         list.push {time, title, url}
 
     # return
-    yield @diff option.title, list
+    yield @diff option.title, list, option.cacheSize
 
   seek: co (name) ->
 
@@ -125,6 +126,7 @@ class Seeker
     yield @task 'iPlaySoft'
     yield @task 'Ryf'
     yield @task 'williamLong'
+    yield @task 'Yqh'
     yield @task 'Zxx'
 
   show: (title, list) ->
@@ -148,8 +150,13 @@ class Seeker
           'http://www.acfun.cn/v/list110/index.htm'
           'http://www.acfun.cn/v/list164/index.htm'
         ]
-        selector: '#block-content-article a.title'
+        selector: '#block-content-article a.title,
+          #block-recom-article a.title,
+          #block-rank-article a.title,
+          #block-reply-article a.title'
         urlBase: 'http://www.acfun.cn'
+        lifetime: 6e4
+        cacheSize: 200
 
       when 'alloyteam'
         title: 'AlloyTeam'
@@ -177,11 +184,17 @@ class Seeker
         url: 'http://www.williamlong.info/'
         selector: 'h2.post-title > a'
 
-      when 'zxx', 'zhangxinxu'
+      when 'yqh'
+        title: '有趣网址之家'
+        url: 'http://youquhome.com/'
+        selector:'#content h1.entry-title a'
+
+      when 'zxx'
         title: '鑫空间'
         url: 'http://www.zhangxinxu.com/wordpress/'
         selector:'a.entry-title'
         titleReplace: (title) -> title.replace /的永久链接/, ''
+        lifetime: 35e5
 
       else throw new Error "invalid task name <#{name}>"
 

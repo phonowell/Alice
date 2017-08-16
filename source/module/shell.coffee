@@ -30,10 +30,6 @@ class Shell
         macos: 'defaults write com.apple.dock ResetLaunchPad -bool true && killall Dock'
         windows: null
 
-      when 'wechat'
-        macos: 'open https://wx2.qq.com'
-        windows: 'start https://wx2.qq.com'
-
       else throw new Error 'invalid cmd'
 
     unless lines = lines[$$.os]
