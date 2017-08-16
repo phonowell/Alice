@@ -54,9 +54,9 @@ class Sfacg
 
       if yield $$.isExisted "#{@base}/#{filename}" then continue
 
-      $.info.isSilent = true
+      $.info.pause 'sfacg.download'
       yield $$.shell "#{@open} #{a.source}"
-      $.info.isSilent = false
+      $.info.resume 'sfacg.download'
 
       $.info 'sfacg', "downloaded '#{a.source}'"
 

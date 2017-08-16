@@ -19,6 +19,8 @@ class Seeker
   ###
 
     diff(title, list)
+    download()
+    getFilename(url)
     getList(option)
     seek(name)
     show(list)
@@ -28,7 +30,7 @@ class Seeker
 
   diff: co (title, list) ->
 
-    source = "./temp/seeker/#{title}.json"
+    source = "./temp/seeker/list/#{title}.json"
     list = _.sortBy list, 'time'
 
     sourceList = yield $$.read source
@@ -45,6 +47,25 @@ class Seeker
 
     return res
 
+  download: co (list) ->
+
+    for url in list
+
+      filename = @getFilename url
+      stat = yield $$.stat "./temp/seeker/page/#{filename}"
+
+      if stat and _.now() - stat.ctime.getTime() < 3e5
+        continue
+
+      yield $$.download url
+      , './temp/seeker/page'
+      , filename
+
+  getFilename: (url) ->
+
+    filename = url.replace /[:\/.]/g, ''
+    "#{filename}.html"
+
   getList: co (option) ->
 
     {selector, url} = option
@@ -54,12 +75,16 @@ class Seeker
       when 'string' then [url]
       else throw new Error 'invalid argument type'
 
+    yield @download urlList
+
     list = []
 
     for url, i in urlList
 
-      html = yield $.get url
-      dom = cheerio.load html
+      filename = @getFilename url
+
+      cont = yield $$.read "./temp/seeker/page/#{filename}"
+      dom = cheerio.load cont.toString()
 
       dom(selector).each ->
 
@@ -95,6 +120,7 @@ class Seeker
     if name then return yield @task name
 
     yield @task 'AcFun'
+    yield @task 'AlloyTeam'
     yield @task 'AppInn'
     yield @task 'iPlaySoft'
     yield @task 'Ryf'
@@ -125,6 +151,11 @@ class Seeker
         selector: '#block-content-article a.title'
         urlBase: 'http://www.acfun.cn'
 
+      when 'alloyteam'
+        title: 'AlloyTeam'
+        url: 'http://www.alloyteam.com/page/0/'
+        selector: '#content a.blogTitle'
+
       when 'appinn'
         title: '小众软件'
         url: 'http://www.appinn.com/'
@@ -154,7 +185,10 @@ class Seeker
 
       else throw new Error "invalid task name <#{name}>"
 
+    $.info.pause 'seeker.task'
     list = yield @getList option
+    $.info.resume 'seeker.task'
+
     @show option.title, list
 
 # return
