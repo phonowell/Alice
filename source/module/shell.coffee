@@ -20,18 +20,26 @@ class Shell
 
   execute: co (cmd) ->
 
-    if $$.os != 'macos'
-      return $.info 'os', "invalid os <#{$$.os}>"
-
-    yield $$.shell switch cmd.toLowerCase()
+    lines = switch cmd.toLowerCase()
 
       when 'flushdns', 'dns'
-        'sudo killall mDNSResponder'
+        macos: 'sudo killall mDNSResponder'
+        windows: null
 
       when 'resetlaunchpad', 'launchpad'
-        'defaults write com.apple.dock ResetLaunchPad -bool true && killall Dock'
+        macos: 'defaults write com.apple.dock ResetLaunchPad -bool true && killall Dock'
+        windows: null
+
+      when 'wechat'
+        macos: 'open https://wx2.qq.com'
+        windows: 'start https://wx2.qq.com'
 
       else throw new Error 'invalid cmd'
+
+    unless lines = lines[$$.os]
+      return $.info 'os', "invalid os <#{$$.os}>"
+
+    yield $$.shell lines
 
 # return
 module.exports = (arg...) -> new Shell arg...
