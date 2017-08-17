@@ -28,7 +28,7 @@ class Seeker
 
   ###
 
-  diff: co (title, list, cacheSize) ->
+  diff: co (title, list, cacheSize = 50) ->
 
     source = "./temp/seeker/list/#{title}.json"
     list = _.uniqBy list, 'url'
@@ -50,6 +50,8 @@ class Seeker
 
   download: co (list, lifetime = 3e5) ->
 
+    res = false
+
     for url in list
 
       filename = @getFilename url
@@ -61,6 +63,11 @@ class Seeker
       yield $$.download url
       , './temp/seeker/page'
       , filename
+
+      res = true
+
+    # return
+    res
 
   getFilename: (url) ->
 
@@ -76,7 +83,8 @@ class Seeker
       when 'string' then [url]
       else throw new Error 'invalid argument type'
 
-    yield @download urlList, option.lifetime
+    unless yield @download urlList, option.lifetime
+      return []
 
     list = []
 
@@ -120,14 +128,20 @@ class Seeker
 
     if name then return yield @task name
 
-    yield @task 'AcFun'
-    yield @task 'AlloyTeam'
-    yield @task 'AppInn'
-    yield @task 'iPlaySoft'
-    yield @task 'Ryf'
-    yield @task 'williamLong'
-    yield @task 'Yqh'
-    yield @task 'Zxx'
+    taskList = [
+      'AcFun'
+      'AlloyTeam'
+      'AppInn'
+      'iPlaySoft'
+      'Ryf'
+      'waitSun'
+      'williamLong'
+      'Yqh'
+      'Zxx'
+    ]
+
+    for name in taskList
+      yield @task name
 
   show: (title, list) ->
 
@@ -148,12 +162,11 @@ class Seeker
         title: 'AcFun文章区'
         url: [
           'http://www.acfun.cn/v/list110/index.htm'
+          'http://www.acfun.cn/v/list110/index_2.htm'
           'http://www.acfun.cn/v/list164/index.htm'
+          'http://www.acfun.cn/v/list164/index_2.htm'
         ]
-        selector: '#block-content-article a.title,
-          #block-recom-article a.title,
-          #block-rank-article a.title,
-          #block-reply-article a.title'
+        selector: '#block-content-article a.title'
         urlBase: 'http://www.acfun.cn'
         lifetime: 6e4
         cacheSize: 200
@@ -178,6 +191,14 @@ class Seeker
         title: '阮一峰的网络日志'
         url: 'http://www.ruanyifeng.com/blog/'
         selector: 'h2.entry-title > a, #homepage li.module-list-item > span ~ a'
+
+      when 'waitsun'
+        title: '爱情守望者'
+        url: [
+          'https://www.waitsun.com/'
+          'https://www.waitsun.com/page/2'
+        ]
+        selector: '.masonry h1 > a'
 
       when 'williamlong'
         title: '月光博客'

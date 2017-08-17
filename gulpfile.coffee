@@ -88,3 +88,5 @@ $$.task 'shell', co  ->
   shell = new m()
 
   yield shell.execute cmd
+
+#$$.task 'z', co ->
