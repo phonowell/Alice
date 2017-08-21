@@ -9,6 +9,7 @@ path = require 'path'
 
 ###
 
+  acfun
   backup
   josh
   launchpad
@@ -19,6 +20,13 @@ path = require 'path'
   sfacg
 
 ###
+
+$$.task 'acfun', co ->
+
+  m = require './source/module/acfun.coffee'
+  ac = new m()
+
+  yield ac.seek()
 
 $$.task 'backup', co ->
 
@@ -88,5 +96,3 @@ $$.task 'shell', co  ->
   shell = new m()
 
   yield shell.execute cmd
-
-#$$.task 'z', co ->
