@@ -60,9 +60,10 @@ class Seeker
       if stat and _.now() - stat.ctime.getTime() < lifetime
         continue
 
-      yield $$.download url
-      , './temp/seeker/page'
-      , filename
+      try yield $$.download url, './temp/seeker/page',
+        filename: filename
+        timeout: 5e3
+      catch err then $.info 'timeout', url
 
       res = true
 
