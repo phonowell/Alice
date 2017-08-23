@@ -60,10 +60,9 @@ class Seeker
       if stat and _.now() - stat.ctime.getTime() < lifetime
         continue
 
-      try yield $$.download url, './temp/seeker/page',
+      yield $$.download url, './temp/seeker/page',
         filename: filename
-        timeout: 5e3
-      catch err then $.info 'timeout', url
+        timeout: 1e4
 
       res = true
 
@@ -137,7 +136,6 @@ class Seeker
       'Ryf'
       'waitSun'
       'williamLong'
-      'Yqh'
       'Zxx'
     ]
 
@@ -205,11 +203,6 @@ class Seeker
         title: '月光博客'
         url: 'http://www.williamlong.info/'
         selector: 'h2.post-title > a'
-
-      when 'yqh'
-        title: '有趣网址之家'
-        url: 'http://youquhome.com/'
-        selector:'#content h1.entry-title a'
 
       when 'zxx'
         title: '鑫空间'
