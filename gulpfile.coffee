@@ -14,7 +14,6 @@ path = require 'path'
   launchpad
   lint
   open
-  ping
   seek
   sfacg
 
@@ -53,13 +52,6 @@ $$.task 'open', co ->
 
   yield open.open name
 
-$$.task 'ping', co ->
-
-  m = require './source/module/ping.coffee'
-  ping = new m()
-
-  yield ping.ping()
-
 $$.task 'seek', co ->
 
   {target} = $$.argv
@@ -88,3 +80,5 @@ $$.task 'shell', co  ->
   shell = new m()
 
   yield shell.execute cmd
+
+#$$.task 'z', co ->
