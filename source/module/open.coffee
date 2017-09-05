@@ -20,6 +20,9 @@ class Open
 
   open: co (name) ->
 
+    if !name
+      throw new Error 'empty name'
+
     url = switch name.toLowerCase()
 
       when 'github' then 'https://github.com/phonowell/'
