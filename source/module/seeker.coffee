@@ -13,10 +13,7 @@ class Seeker
 
   constructor: ->
 
-    @base = switch $$.os
-      when 'macos' then '~/OneDrive/缓存'
-      when 'windows' then 'E:/OneDrive/缓存'
-      else throw new Error 'invalid os'
+    @base = './temp'
 
   ###
 
