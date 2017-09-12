@@ -4,14 +4,9 @@ $$ = require 'fire-keeper'
 {$, _, Promise} = $$.library
 co = Promise.coroutine
 
-fs = require 'fs'
 path = require 'path'
 
 cheerio = require 'cheerio'
-
-# function
-
-absPath = (source) -> source.replace /\.\//, "#{process.cwd()}/"
 
 # class
 

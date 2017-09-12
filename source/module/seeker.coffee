@@ -4,9 +4,6 @@ $$ = require 'fire-keeper'
 {$, _, Promise} = $$.library
 co = Promise.coroutine
 
-fs = require 'fs'
-path = require 'path'
-
 cheerio = require 'cheerio'
 colors = require 'colors/safe'
 
@@ -14,7 +11,12 @@ colors = require 'colors/safe'
 
 class Seeker
 
-  constructor: -> null
+  constructor: ->
+
+    @base = switch $$.os
+      when 'macos' then '~/OneDrive/缓存'
+      when 'windows' then 'E:/OneDrive/缓存'
+      else throw new Error 'invalid os'
 
   ###
 
@@ -30,7 +32,7 @@ class Seeker
 
   diff: co (title, list, cacheSize = 50) ->
 
-    source = "./temp/seeker/list/#{title}.json"
+    source = "#{@base}/seeker/list/#{title}.json"
     list = _.uniqBy list, 'url'
     list = _.sortBy list, 'time'
 
@@ -55,12 +57,12 @@ class Seeker
     for url in list
 
       filename = @getFilename url
-      stat = yield $$.stat "./temp/seeker/page/#{filename}"
+      stat = yield $$.stat "#{@base}/seeker/page/#{filename}"
 
       if stat and _.now() - stat.ctime.getTime() < lifetime
         continue
 
-      yield $$.download url, './temp/seeker/page',
+      yield $$.download url, "#{@base}/seeker/page",
         filename: filename
         timeout: 1e4
 
@@ -71,8 +73,12 @@ class Seeker
 
   getFilename: (url) ->
 
-    filename = url.replace /[:\/.]/g, ''
-    "#{filename}.html"
+    url = _.trim url.replace(/.*\/{2}/, ''), '/'
+    url = url.replace /www\./, ''
+    .replace /\.(?:asp|aspx|htm|html|php|shtml)/, ''
+    .replace /\//g, '-'
+
+    "#{url}.html"
 
   getList: co (option) ->
 
@@ -92,7 +98,7 @@ class Seeker
 
       filename = @getFilename url
 
-      cont = yield $$.read "./temp/seeker/page/#{filename}"
+      cont = yield $$.read "#{@base}/seeker/page/#{filename}"
       dom = cheerio.load cont.toString()
 
       dom(selector).each ->

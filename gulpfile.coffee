@@ -9,23 +9,34 @@ path = require 'path'
 
 ###
 
-  backup
-  josh
-  launchpad
-  lint
-  open
-  seek
-  sfacg
+  backup([target])
+  josh()
+  lint()
+  open(name)
+  seek([target])
+  sfacg(url)
+  shell(cmd)
+  upgrade()
 
 ###
 
 $$.task 'backup', co ->
 
-  m = require './source/module/oneDrive.coffee'
-  od = new m 'E:/OneDrive'
+  {target} = $$.argv
+  target or= 'OneDrive'
 
-  yield od.backupGameSave()
-  yield od.backup()
+  m = require './source/module/onedrive.coffee'
+  od = new m()
+
+  switch target.toLowerCase()
+
+    when 'one', 'onedrive'
+      od.backup()
+
+    when 'game'
+      od.backupGameSave()
+
+    else throw new Error "invalid target '#{target}'"
 
 $$.task 'josh', co ->
 
@@ -80,5 +91,12 @@ $$.task 'shell', co  ->
   shell = new m()
 
   yield shell.execute cmd
+
+$$.task 'upgrade', co ->
+
+  yield $$.shell [
+    'git fetch'
+    'git pull'
+  ]
 
 #$$.task 'z', co ->

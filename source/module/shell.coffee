@@ -4,8 +4,6 @@ $$ = require 'fire-keeper'
 {$, _, Promise} = $$.library
 co = Promise.coroutine
 
-colors = require 'colors/safe'
-
 # class
 
 class Shell
