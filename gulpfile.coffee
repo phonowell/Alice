@@ -31,10 +31,10 @@ $$.task 'backup', co ->
   switch target.toLowerCase()
 
     when 'one', 'onedrive'
-      od.backup()
+      yield od.backup()
 
     when 'game'
-      od.backupGameSave()
+      yield od.backupGameSave()
 
     else throw new Error "invalid target '#{target}'"
 

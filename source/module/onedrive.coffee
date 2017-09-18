@@ -40,7 +40,7 @@ class OneDrive
 
     for pathSave in listSave
 
-      unless $$.isExisted pathSave
+      unless yield $$.isExisted pathSave
         continue
 
       source = "#{pathSave}/**/*.*"
