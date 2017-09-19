@@ -5,6 +5,11 @@ co = Promise.coroutine
 fs = require 'fs'
 path = require 'path'
 
+# function
+
+$$.require = (name) ->
+  require "./source/module/#{name}.coffee"
+
 # task
 
 ###
@@ -12,35 +17,29 @@ path = require 'path'
   backup([target])
   josh()
   lint()
-  open(name)
+  list([target])
+  open([target])
   seek([target])
   sfacg(url)
-  shell(cmd)
+  shell([cmd])
   upgrade()
 
 ###
 
 $$.task 'backup', co ->
 
-  {target} = $$.argv
-  target or= 'OneDrive'
-
-  m = require './source/module/onedrive.coffee'
+  m = $$.require 'onedrive'
   od = new m()
 
-  switch target.toLowerCase()
+  {target} = $$.argv
+  if !target
+    return $.info 'target', $$.fn.wrapList od.validTarget
 
-    when 'one', 'onedrive'
-      yield od.backup()
-
-    when 'game'
-      yield od.backupGameSave()
-
-    else throw new Error "invalid target '#{target}'"
+  yield od.execute target
 
 $$.task 'josh', co ->
 
-  m = require './source/module/josh.coffee'
+  m = $$.require 'josh'
   josh = new m()
 
   yield josh.download()
@@ -54,41 +53,55 @@ $$.task 'lint', co ->
     './source/**/*.coffee'
   ]
 
+$$.task 'list', ->
+
+  m = $$.require 'list'
+  list = new m()
+
+  {target} = $$.argv
+  if !target
+    return $.info 'target', $$.fn.wrapList list.validTarget
+
+  list.list target
+
 $$.task 'open', co ->
 
-  {name} = $$.argv
-
-  m = require './source/module/open.coffee'
+  m = $$.require 'open'
   open = new m()
 
-  yield open.open name
+  {target} = $$.argv
+  if !target
+    return $.info 'target', $$.fn.wrapList open.validTarget
+
+  yield open.open target
 
 $$.task 'seek', co ->
 
-  {target} = $$.argv
-
-  m = require './source/module/seeker.coffee'
+  m = $$.require 'seeker'
   seeker = new m()
+
+  {target} = $$.argv
 
   yield seeker.seek target
 
 $$.task 'sfacg', co ->
 
+  m = $$.require 'sfacg'
+  sf = new m()
+
   {url} = $$.argv
   if !url then throw new Error 'invalid url'
-
-  m = require './source/module/sfacg.coffee'
-  sf = new m()
 
   yield sf.get url
 
 $$.task 'shell', co  ->
 
-  {cmd} = $$.argv
-  if !cmd then throw new Error 'invalid cmd'
-
-  m = require './source/module/shell.coffee'
+  m = $$.require 'shell'
   shell = new m()
+
+  {cmd} = $$.argv
+  if !cmd
+    return $.info 'cmd', $$.fn.wrapList shell.validCmd
 
   yield shell.execute cmd
 

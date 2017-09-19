@@ -8,7 +8,14 @@ co = Promise.coroutine
 
 class Open
 
-  constructor: -> null
+  constructor: ->
+
+    @validTarget = [
+      'github'
+      'npm'
+      'onedrive'
+      'wechat'
+    ]
 
   ###
 

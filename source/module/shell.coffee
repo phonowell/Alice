@@ -8,7 +8,12 @@ co = Promise.coroutine
 
 class Shell
 
-  constructor: -> null
+  constructor: ->
+
+    @validCmd = [
+      'flushdns', 'dns'
+      'resetlaunchpad', 'lanunchpad'
+    ]
 
   ###
 

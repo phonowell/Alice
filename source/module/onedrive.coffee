@@ -17,10 +17,16 @@ class OneDrive
       when 'windows' then 'E:/OneDrive'
       else throw new Error 'invalid os'
 
+    @validTarget = [
+      'one', 'onedrive'
+      'game'
+    ]
+
   ###
 
     backup()
     backupGameSave()
+    execute(target)
 
   ###
 
@@ -30,7 +36,7 @@ class OneDrive
   backupGameSave: co ->
 
     if $$.os != 'windows'
-      throw new Error 'invalid os'
+      throw new Error "invalid os <#{$$.os}>"
 
     listSave = [
       '~/AppData/Roaming/DarkSoulsIII'
@@ -48,6 +54,18 @@ class OneDrive
       filename = "#{path.basename pathSave}.zip"
 
       yield $$.zip source, target, filename
+
+  execute: co (target) ->
+
+    switch target.toLowerCase()
+
+      when 'one', 'onedrive'
+        yield @backup()
+
+      when 'game'
+        yield @backupGameSave()
+
+      else throw new Error "invalid target <#{target}>"
 
 # return
 module.exports = (arg...) -> new OneDrive arg...
