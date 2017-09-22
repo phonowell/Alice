@@ -15,6 +15,7 @@ $$.require = (name) ->
 ###
 
   backup([target])
+  jpeg(action)
   josh()
   lint()
   list([target])
@@ -36,6 +37,20 @@ $$.task 'backup', co ->
     return $.info 'target', $$.fn.wrapList od.validTarget
 
   yield od.execute target
+
+$$.task 'jpeg', co ->
+
+  m = $$.require 'jpeg'
+  jpeg = new m()
+
+  {action} = $$.argv
+  if !action
+    return $.info 'action', $$.fn.wrapList jpeg.validAction
+
+  unless action in jpeg.validAction
+    throw new Error "invalid action <#{action}>"
+
+  yield jpeg[action]()
 
 $$.task 'josh', co ->
 
@@ -110,6 +125,40 @@ $$.task 'upgrade', co ->
   yield $$.shell [
     'git fetch'
     'git pull'
+    'npm update'
   ]
 
-#$$.task 'z', co ->
+$$.task 'z', co ->
+
+  path = require 'path'
+  sharp = require 'sharp'
+
+  yield $$.walk '~/OneDrive/图片', (item) ->
+
+    if !item.stats.isFile()
+      return
+
+    source = item.path
+    extname = path.extname source
+
+    unless extname in ['.jpg', '.jpeg']
+      return
+
+    $.i source
+
+  return
+
+  target = '~/Downloads/test.jpg'
+  #$.i yield $$.isExisted source
+
+  img = sharp yield $$.read source
+
+  #meta = yield img.metadata()
+
+  data = yield img
+  .resize 800, 800
+  .max()
+  .jpeg quality: 100
+  .toBuffer()
+
+  yield $$.write target, data
