@@ -70,6 +70,7 @@ class Jpeg
 
     @validAction = [
       'auto'
+      'clean'
       'format'
       'rename'
       'renameJpeg'
@@ -84,6 +85,7 @@ class Jpeg
   ###
 
     auto()
+    clean()
     format()
     rename()
     renameJpeg()
@@ -92,10 +94,19 @@ class Jpeg
   ###
 
   auto: co ->
+    yield @clean()
     yield @format()
     yield @renameJpeg()
     yield @rename()
     yield @resize()
+
+  clean: co ->
+
+    listSource = yield getList @base, ({basename}) ->
+      basename == '.DS_Store'
+
+    if !listSource.length then return
+    yield $$.remove listSource
 
   format: co ->
 
