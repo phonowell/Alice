@@ -128,37 +128,4 @@ $$.task 'upgrade', co ->
     'npm update'
   ]
 
-$$.task 'z', co ->
-
-  path = require 'path'
-  sharp = require 'sharp'
-
-  yield $$.walk '~/OneDrive/图片', (item) ->
-
-    if !item.stats.isFile()
-      return
-
-    source = item.path
-    extname = path.extname source
-
-    unless extname in ['.jpg', '.jpeg']
-      return
-
-    $.i source
-
-  return
-
-  target = '~/Downloads/test.jpg'
-  #$.i yield $$.isExisted source
-
-  img = sharp yield $$.read source
-
-  #meta = yield img.metadata()
-
-  data = yield img
-  .resize 800, 800
-  .max()
-  .jpeg quality: 100
-  .toBuffer()
-
-  yield $$.write target, data
+#$$.task 'z', co ->
