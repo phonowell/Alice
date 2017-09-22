@@ -21,6 +21,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "fire-keeper": "0.0.72",
+    "nanoid": "^0.2.1",
     "sharp": "^0.18.4"
   }
 }

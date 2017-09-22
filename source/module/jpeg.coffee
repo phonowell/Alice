@@ -5,6 +5,7 @@ $$ = require 'fire-keeper'
 co = Promise.coroutine
 
 path = require 'path'
+generate = require 'nanoid/generate'
 sharp = require 'sharp'
 
 # function
@@ -13,6 +14,8 @@ sharp = require 'sharp'
 
   getBuffer(image)
   getImage(source)
+  getList(base, check)
+  getRandomBasename()
   getSource(item)
 
 ###
@@ -34,16 +37,30 @@ getImage = co (source) ->
   # return
   img
 
-getSource = (item) ->
+getList = co (base, check) ->
 
-  if !item.stats.isFile()
-    return {}
+  list = []
 
-  source = item.path
-  extname = path.extname source
+  yield $$.walk base, (item) ->
+
+    source = getSource item
+    if !source then return
+
+    if check
+      extname = path.extname source
+      basename = path.basename source, extname
+      unless check {source, extname, basename} then return
+
+    list.push source
 
   # return
-  {source, extname}
+  list
+
+getRandomBasename = -> generate '1234567890abcdefghijklmnopqrstuvwxyz', 16
+
+getSource = (item) ->
+  if !item.stats.isFile() then return null
+  item.path
 
 # class
 
@@ -55,6 +72,7 @@ class Jpeg
       'auto'
       'format'
       'rename'
+      'renameJpeg'
       'resize'
     ]
 
@@ -68,27 +86,21 @@ class Jpeg
     auto()
     format()
     rename()
+    renameJpeg()
     resize()
 
   ###
 
   auto: co ->
     yield @format()
+    yield @renameJpeg()
     yield @rename()
     yield @resize()
 
   format: co ->
 
-    listSource = []
-
-    yield $$.walk @base, (item) ->
-
-      {source, extname} = getSource item
-      if !source then return
-      unless extname in ['.bmp', '.png', '.webp']
-        return
-
-      listSource.push source
+    listSource = yield getList @base, ({extname}) ->
+      extname in ['.bmp', '.png', '.webp']
 
     for source in listSource
 
@@ -102,15 +114,23 @@ class Jpeg
 
   rename: co ->
 
-    listSource = []
+    listSource = yield getList "#{@base}/杂图"
 
-    yield $$.walk @base, (item) ->
+    for source in listSource
 
-      {source, extname} = getSource item
-      if !source then return
-      if extname != '.jpeg' then return
+      extname = path.extname source
+      basename = path.basename source, extname
 
-      listSource.push source
+      if basename.length == 16
+        continue
+
+      basename = getRandomBasename()
+      yield $$.rename source, {basename}
+
+  renameJpeg: co ->
+
+    listSource = yield getList @base, ({extname}) ->
+      extname == '.jpeg'
 
     for source in listSource
 
@@ -119,15 +139,8 @@ class Jpeg
 
   resize: co ->
 
-    listSource = []
-
-    yield $$.walk @base, (item) ->
-
-      {source, extname} = getSource item
-      if !source then return
-      if extname != '.jpg' then return
-
-      listSource.push source
+    listSource = yield getList @base, ({extname}) ->
+      extname == '.jpg'
 
     for source in listSource
 
