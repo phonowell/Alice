@@ -15,7 +15,7 @@ $$.require = (name) ->
 ###
 
   backup([target])
-  jpeg(action)
+  jpeg([action])
   josh()
   lint()
   list([target])
@@ -44,10 +44,10 @@ $$.task 'jpeg', co ->
   jpeg = new m()
 
   {action} = $$.argv
-  if !action
-    return $.info 'action', $$.fn.wrapList jpeg.validAction
+  action or= 'auto'
 
   unless action in jpeg.validAction
+    $.info 'action', $$.fn.wrapList jpeg.validAction
     throw new Error "invalid action <#{action}>"
 
   yield jpeg[action]()

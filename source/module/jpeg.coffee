@@ -17,6 +17,7 @@ sharp = require 'sharp'
   getList(base, check)
   getRandomBasename()
   getSource(item)
+  moveImage(ext)
 
 ###
 
@@ -62,6 +63,16 @@ getSource = (item) ->
   if !item.stats.isFile() then return null
   item.path
 
+moveImage = co (source, target, ext) ->
+
+  listSource = yield getList source, ({extname}) ->
+    extname == ".#{ext}"
+
+  if !listSource.length then return
+
+  yield $$.copy listSource, "#{target}/#{ext}"
+  yield $$.remove listSource
+
 # class
 
 class Jpeg
@@ -72,14 +83,26 @@ class Jpeg
       'auto'
       'clean'
       'format'
+      'move'
       'rename'
       'renameJpeg'
       'resize'
     ]
 
-    @base = switch $$.os
-      when 'macos' then '~/OneDrive/图片'
-      when 'windows' then 'E:/OneDrive/图片'
+    [@base, @download] = switch $$.os
+
+      when 'macos'
+        [
+          '~/OneDrive/图片'
+          '~/Downloads'
+        ]
+
+      when 'windows'
+        [
+          'E:/OneDrive/图片'
+          'F:/'
+        ]
+
       else throw new Error "invalid os <#{$$.os}>"
 
   ###
@@ -87,6 +110,7 @@ class Jpeg
     auto()
     clean()
     format()
+    move()
     rename()
     renameJpeg()
     resize()
@@ -94,6 +118,7 @@ class Jpeg
   ###
 
   auto: co ->
+    yield @move()
     yield @clean()
     yield @format()
     yield @renameJpeg()
@@ -123,9 +148,17 @@ class Jpeg
       yield $$.rename source,
         extname: '.jpg'
 
+  move: co ->
+
+    source = @download
+    target = "#{@base}/小黄图"
+
+    yield moveImage source, target, 'gif'
+    yield moveImage source, target, 'webm'
+
   rename: co ->
 
-    listSource = yield getList "#{@base}/杂图"
+    listSource = yield getList "#{@base}/小黄图"
 
     for source in listSource
 
