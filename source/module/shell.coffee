@@ -13,6 +13,7 @@ class Shell
     @validCmd = [
       'flushdns', 'dns'
       'resetlaunchpad', 'lanunchpad'
+      'ssh-add'
     ]
 
   ###
@@ -27,11 +28,24 @@ class Shell
 
       when 'flushdns', 'dns'
         macos: 'sudo killall mDNSResponder'
-        windows: null
 
       when 'resetlaunchpad', 'launchpad'
-        macos: 'defaults write com.apple.dock ResetLaunchPad -bool true && killall Dock'
-        windows: null
+        macos: [
+          'defaults write com.apple.dock ResetLaunchPad -bool true'
+          'killall Dock'
+        ]
+
+      when 'ssh-add'
+        macos: [
+          'ssh-add -D'
+          'cd ~/OneDrive/密钥/Anitama'
+          'ssh-add anitama'
+          'ssh-add anitama_cn'
+          'ssh-add anitama_l'
+          'ssh-add cspg'
+          'ssh-add deploy'
+          'ssh-add -l'
+        ]
 
       else throw new Error 'invalid cmd'
 

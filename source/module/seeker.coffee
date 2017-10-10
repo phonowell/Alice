@@ -19,10 +19,11 @@ class Seeker
 
     diff(title, list, [cacheSize])
     download(list, [lifetime])
+    generate(title, list)
     getFilename(url)
     getList(option)
+    open()
     seek(name)
-    show(list)
     task(name)
 
   ###
@@ -67,6 +68,18 @@ class Seeker
 
     # return
     res
+
+  generate: (map) ->
+
+    html = []
+
+    for title, list of map when list.length
+      html.push "<h1>#{title}</h1>"
+      for a in list
+        html.push "<a href='#{a.url}' target='_blank'>#{a.title}</a>"
+
+    # return
+    html.join '<br>'
 
   getFilename: (url) ->
 
@@ -127,11 +140,25 @@ class Seeker
     # return
     yield @diff option.title, list, option.cacheSize
 
+  open: co (html) ->
+
+    if !html.length
+      return $.info 'seeker', 'got no result(s)'
+
+    target = "#{@base}/seeker/result.html"
+
+    method = switch $$.os
+      when 'linux', 'macos' then 'open'
+      when 'windows' then 'start'
+      else throw new Error "invalid os <#{$$.os}>"
+
+    yield $$.write target, html
+    yield $$.shell "#{method} #{target}"
+
   seek: co (name) ->
 
-    if name then return yield @task name
-
-    taskList = [
+    listTask = if name then [name]
+    else [
       'AcFun'
       'AlloyTeam'
       'AppInn'
@@ -142,19 +169,13 @@ class Seeker
       'Zxx'
     ]
 
-    for name in taskList
-      yield @task name
+    map = {}
+    for name in listTask
+      {title, list} = yield @task name
+      map[title] = list
 
-  show: (title, list) ->
-
-    if !list.length then return
-
-    @show.divider or= colors.gray _.trim _.repeat('- ', 16)
-
-    $.i colors.blue title
-    $.i @show.divider
-    $.i ("#{colors.magenta a.title}\n#{colors.gray a.url}" for a in list).join '\n\n'
-    $.i @show.divider
+    html = @generate map
+    yield @open html
 
   task: co (name) ->
 
@@ -220,7 +241,9 @@ class Seeker
     list = yield @getList option
     $.info.resume 'seeker.task'
 
-    @show option.title, list
+    # return
+    title = option.title
+    {title, list}
 
 # return
 module.exports = (arg...) -> new Seeker arg...
