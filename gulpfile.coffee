@@ -19,7 +19,6 @@ $$.require = (name) ->
   josh()
   lint()
   list([target])
-  open([target])
   seek([target])
   sfacg(url)
   shell([cmd])
@@ -78,17 +77,6 @@ $$.task 'list', ->
     return $.info 'target', $$.fn.wrapList list.validTarget
 
   list.list target
-
-$$.task 'open', co ->
-
-  m = $$.require 'open'
-  open = new m()
-
-  {target} = $$.argv
-  if !target
-    return $.info 'target', $$.fn.wrapList open.validTarget
-
-  yield open.open target
 
 $$.task 'seek', co ->
 
