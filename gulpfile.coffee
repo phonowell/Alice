@@ -22,6 +22,7 @@ $$.require = (name) ->
   seek([target])
   sfacg(url)
   shell([cmd])
+  ssserver(host)
   upgrade()
 
 ###
@@ -97,7 +98,7 @@ $$.task 'sfacg', co ->
 
   yield sf.get url
 
-$$.task 'shell', co  ->
+$$.task 'shell', co ->
 
   m = $$.require 'shell'
   shell = new m()
@@ -108,6 +109,17 @@ $$.task 'shell', co  ->
 
   yield shell.execute cmd
 
+$$.task 'sssserver', co ->
+
+  m = $$.require 'ssserver'
+  ss = new m()
+
+  {host} = $$.argv
+  if !host
+    throw new Error 'empty host'
+
+  yield ss.execute host
+
 $$.task 'upgrade', co ->
 
   yield $$.shell [
@@ -115,5 +127,7 @@ $$.task 'upgrade', co ->
     'git pull'
     'npm update'
   ]
+
+#$$.task 'y', ->
 
 #$$.task 'z', co ->
