@@ -19,6 +19,7 @@ $$.require = (name) ->
   josh()
   lint()
   list([target])
+  reboot(host)
   seek([target])
   sfacg(url)
   shell([cmd])
@@ -78,6 +79,24 @@ $$.task 'list', ->
     return $.info 'target', $$.fn.wrapList list.validTarget
 
   list.list target
+
+$$.task 'reboot', co ->
+
+  m = $$.require 'reboot'
+  reboot = new m()
+
+  {host} = $$.argv
+
+  if !host
+    $.info 'host', $$.fn.wrapList reboot.validHost
+    return
+
+  unless host in reboot.validHost
+    $.info 'error', "invalid host <#{host}>"
+    $.info 'host', $$.fn.wrapList reboot.validHost
+    return
+
+  yield reboot.execute host
 
 $$.task 'seek', co ->
 
