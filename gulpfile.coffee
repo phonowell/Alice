@@ -15,6 +15,7 @@ $$.require = (name) ->
 ###
 
   backup([target])
+  daily()
   jpeg([action])
   josh()
   lint()
@@ -38,6 +39,17 @@ $$.task 'backup', co ->
     return $.info 'target', $$.fn.wrapList od.validTarget
 
   yield od.execute target
+
+$$.task 'daily', co ->
+
+  lines = [
+    'brew update'
+    'brew upgrade'
+    'gulp shell --cmd launchpad'
+    'gulp jpeg'
+  ]
+
+  yield $$.shell lines
 
 $$.task 'jpeg', co ->
 
