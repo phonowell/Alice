@@ -163,7 +163,7 @@ class Seeker
       'AlloyTeam'
       'AppInn'
       'iPlaySoft'
-      'Ryf'
+      #'Ryf'
       'waitSun'
       'williamLong'
       'Zxx'
@@ -238,8 +238,12 @@ class Seeker
       else throw new Error "invalid task name <#{name}>"
 
     $.info.pause 'seeker.task'
-    list = yield @getList option
+    list = try yield @getList option catch err then err
     $.info.resume 'seeker.task'
+
+    if _.isError list
+      $.info $.info 'error', "#{option.title}: #{list}"
+      list = []
 
     # return
     title = option.title
