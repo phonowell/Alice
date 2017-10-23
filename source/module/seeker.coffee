@@ -221,7 +221,7 @@ class Seeker
           'https://www.waitsun.com/'
           'https://www.waitsun.com/page/2'
         ]
-        selector: '.masonry h1 > a'
+        selector: 'ul.posts-list h2.post-title > a'
 
       when 'williamlong'
         title: '月光博客'
