@@ -1,2 +1,1 @@
-# Project Alice
-Alice.
+# Alice
