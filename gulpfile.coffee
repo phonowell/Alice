@@ -7,6 +7,8 @@ path = require 'path'
 
 # function
 
+exclude = $$.fn.excludeInclude
+
 $$.require = (name) ->
   require "./source/module/#{name}.coffee"
 
@@ -25,7 +27,6 @@ $$.require = (name) ->
   sfacg(url)
   shell([cmd])
   ssserver(host)
-  upgrade()
 
 ###
 
@@ -42,11 +43,32 @@ $$.task 'backup', co ->
 
 $$.task 'daily', co ->
 
+  listProject = [
+    'alice'
+    'bottle-fairies'
+    'chika'
+    'doremi'
+    'fire-keeper'
+    'gurumin'
+    'kikyo'
+    # 'kokoro' exclude this, do remember
+    'potato'
+    'sayori'
+    # 'tamako' exclude this, do remember
+  ]
+
+  for item in listProject
+    yield $$.shell [
+      "cd ~/Project/#{item}"
+      'gulp update'
+    ]
+
   lines = [
     'brew update'
     'brew upgrade'
     'gulp shell --cmd launchpad'
     'gulp jpeg'
+    'gulp backup --target onedrive'
   ]
 
   yield $$.shell lines
@@ -150,15 +172,3 @@ $$.task 'sssserver', co ->
     throw new Error 'empty host'
 
   yield ss.execute host
-
-$$.task 'upgrade', co ->
-
-  yield $$.shell [
-    'git fetch'
-    'git pull'
-    'npm update'
-  ]
-
-#$$.task 'y', ->
-
-#$$.task 'z', co ->
