@@ -10,49 +10,95 @@ class Reboot
 
   constructor: ->
 
-    @validHost = [
+    @validTarget = [
+      'api'
       'dev.anitama.net'
     ]
 
   ###
 
-    execute(host)
-    getPassword()
+    execute(name)
+    getPassword(name)
+    getServer(name)
 
   ###
 
-  execute: co (@host) ->
+  execute: co (name) ->
 
-    password = yield @getPassword()
+    # check shell.sh
 
-    # connect
+    source = "./source/shell/reboot/#{name}.sh"
+    unless yield $$.isExisted source
+      throw new Error "'#{name}.sh' not existed"
 
-    server =
-      host: @host
-      port: 22
-      username: 'root'
-      privateKey: password[0]
-      passphrase: password[1]
+    # server list
 
-    yield $$.ssh.connect server
+    listServer = switch name
 
-    yield $$.ssh.upload "./source/shell/reboot/#{@host}.sh"
-    , '/mimiko'
-    , 'reboot.sh'
+      when 'api'
+        [
+          yield @getServer 'api-1'
+          yield @getServer 'api-2'
+        ]
 
-    yield $$.ssh.shell 'sh /mimiko/reboot.sh',
-      ignoreError: true
+      when 'dev.anitama.net'
+        [
+          yield @getServer 'dev.anitama.net'
+        ]
 
-    yield $$.ssh.disconnect()
+    # connect & execute
 
-  getPassword: co ->
+    for server in listServer
 
-    base = "~/OneDrive/密钥/Anitama/#{@host}"
+      yield $$.ssh.connect server
+
+      yield $$.ssh.upload source
+      , '/mimiko'
+      , 'reboot.sh'
+
+      yield $$.ssh.shell 'sh /mimiko/reboot.sh',
+        ignoreError: true
+
+      yield $$.ssh.disconnect()
+
+  getPassword: co (name) ->
+
+    base = switch name
+      when 'api' then 'www.anitama.cn'
+      when 'dev.anitama.net' then 'dev.anitama.net'
+
+    base = "~/OneDrive/密钥/Anitama/#{base}"
 
     [
       yield $$.read "#{base}/privateKey.txt"
       yield $$.read "#{base}/passphrase.txt"
     ]
+
+  getServer: co (name) ->
+
+    switch name
+
+      when 'api-1'
+
+        host = '121.40.226.20'
+        password = yield @getPassword 'api'
+
+      when 'api-2'
+
+        host = '120.26.81.37'
+        password = yield @getPassword 'api'
+
+      when 'dev.anitama.net'
+
+        host = 'dev.anitama.net'
+        password = yield @getPassword 'dev.anitama.net'
+        
+    # return
+    host: host
+    passphrase: password[1]
+    port: 22
+    privateKey: password[0]
+    username: 'root'
 
 # return
 module.exports = (arg...) -> new Reboot arg...

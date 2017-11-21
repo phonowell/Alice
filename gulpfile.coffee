@@ -43,25 +43,25 @@ $$.task 'backup', co ->
 
 $$.task 'daily', co ->
 
-  listProject = [
-    'alice'
-    'bottle-fairies'
-    'chika'
-    'doremi'
-    'fire-keeper'
-    'gurumin'
-    'kikyo'
-    # 'kokoro' exclude this, do remember
-    'potato'
-    'sayori'
-    # 'tamako' exclude this, do remember
-  ]
+  # listProject = [
+  #   'alice'
+  #   'bottle-fairies'
+  #   'chika'
+  #   'doremi'
+  #   'fire-keeper'
+  #   'gurumin'
+  #   'kikyo'
+  #   # 'kokoro' exclude this, do remember
+  #   'potato'
+  #   'sayori'
+  #   # 'tamako' exclude this, do remember
+  # ]
 
-  for item in listProject
-    yield $$.shell [
-      "cd ~/Project/#{item}"
-      'gulp update'
-    ]
+  # for item in listProject
+  #   yield $$.shell [
+  #     "cd ~/Project/#{item}"
+  #     'gulp update'
+  #   ]
 
   lines = [
     'brew update'
@@ -119,18 +119,18 @@ $$.task 'reboot', co ->
   m = $$.require 'reboot'
   reboot = new m()
 
-  {host} = $$.argv
+  {target} = $$.argv
 
-  if !host
-    $.info 'host', $$.fn.wrapList reboot.validHost
+  if !target
+    $.info 'target', $$.fn.wrapList reboot.validTarget
     return
 
-  unless host in reboot.validHost
-    $.info 'error', "invalid host <#{host}>"
-    $.info 'host', $$.fn.wrapList reboot.validHost
+  unless target in reboot.validTarget
+    $.info 'error', "invalid target <#{target}>"
+    $.info 'target', $$.fn.wrapList reboot.validTarget
     return
 
-  yield reboot.execute host
+  yield reboot.execute target
 
 $$.task 'seek', co ->
 
@@ -172,3 +172,25 @@ $$.task 'sssserver', co ->
     throw new Error 'empty host'
 
   yield ss.execute host
+
+$$.task 'z', co  ->
+
+  listProject = [
+    'alice'
+    'bottle-fairies'
+    'chika'
+    'doremi'
+    'fire-keeper'
+    'gurumin'
+    'kikyo'
+    'kokoro'
+    'potato'
+    'sayori'
+    #'tamako'
+  ]
+
+  for project in listProject
+    yield $$.shell [
+      "cd ~/Project/#{project}"
+      'gulp update'
+    ]

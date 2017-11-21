@@ -24,5 +24,6 @@ service mysql restart
 service anitama-app restart
 
 # nodejs
+pm2 kill
 cd /doremi/
 npm start
