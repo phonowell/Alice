@@ -18,7 +18,6 @@ class Reboot
   ###
 
     execute(name)
-    getPassword(name)
     getServer(name)
 
   ###
@@ -61,44 +60,29 @@ class Reboot
 
       yield $$.ssh.disconnect()
 
-  getPassword: co (name) ->
-
-    base = switch name
-      when 'api' then 'www.anitama.cn'
-      when 'dev.anitama.net' then 'dev.anitama.net'
-
-    base = "~/OneDrive/密钥/Anitama/#{base}"
-
-    [
-      yield $$.read "#{base}/privateKey.txt"
-      yield $$.read "#{base}/passphrase.txt"
-    ]
-
   getServer: co (name) ->
+
+    base = '~/OneDrive/密钥/Anitama/token'
 
     switch name
 
       when 'api-1'
 
-        host = '121.40.226.20'
-        password = yield @getPassword 'api'
+        token = yield $$.read "#{base}/www.json"
+        token.host = '121.40.226.20'
 
       when 'api-2'
 
-        host = '120.26.81.37'
-        password = yield @getPassword 'api'
+        token = yield $$.read "#{base}/www.json"
+        token.host = '120.26.81.37'
 
       when 'dev.anitama.net'
 
-        host = 'dev.anitama.net'
-        password = yield @getPassword 'dev.anitama.net'
+        token = yield $$.read "#{base}/dev.json"
+        token.host = 'dev.anitama.net'
         
     # return
-    host: host
-    passphrase: password[1]
-    port: 22
-    privateKey: password[0]
-    username: 'root'
+    token
 
 # return
 module.exports = (arg...) -> new Reboot arg...

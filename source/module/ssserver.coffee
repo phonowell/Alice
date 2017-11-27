@@ -25,7 +25,7 @@ class SSServer
     privateKey = yield $$.read "#{@base}/privateKey.txt"
     passphrase = yield $$.read "#{@base}/passphrase.txt"
 
-    # genernate
+    # generate
 
     data =
       server: '0.0.0.0'
