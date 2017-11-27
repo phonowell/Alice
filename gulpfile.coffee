@@ -98,6 +98,8 @@ $$.task 'lint', co ->
 
   yield $$.task('kokoro')()
 
+  yield $$.lint './danmaku.md'
+
   yield $$.lint [
     './gulpfile.coffee'
     './source/**/*.coffee'
