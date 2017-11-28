@@ -78,14 +78,14 @@ $$.task 'jpeg', co ->
   m = $$.require 'jpeg'
   jpeg = new m()
 
-  {action} = $$.argv
-  action or= 'auto'
+  {target} = $$.argv
+  target or= 'auto'
 
-  unless action in jpeg.validAction
-    $.info 'action', $$.fn.wrapList jpeg.validAction
-    throw new Error "invalid action <#{action}>"
+  unless target in jpeg.validTarget
+    $.info 'target', $$.fn.wrapList jpeg.validTarget
+    throw new Error "invalid target <#{target}>"
 
-  yield jpeg[action]()
+  yield jpeg[target]()
 
 $$.task 'josh', co ->
 
@@ -175,24 +175,4 @@ $$.task 'sssserver', co ->
 
   yield ss.execute host
 
-$$.task 'z', co  ->
-
-  listProject = [
-    'alice'
-    'bottle-fairies'
-    'chika'
-    'doremi'
-    'fire-keeper'
-    'gurumin'
-    'kikyo'
-    'kokoro'
-    'potato'
-    'sayori'
-    #'tamako'
-  ]
-
-  for project in listProject
-    yield $$.shell [
-      "cd ~/Project/#{project}"
-      'gulp update'
-    ]
+# $$.task 'z', co  ->

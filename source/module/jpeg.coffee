@@ -6,72 +6,48 @@ co = Promise.coroutine
 
 path = require 'path'
 generate = require 'nanoid/generate'
-sharp = require 'sharp'
+GS = '1234567890abcdefghijklmnopqrstuvwxyz'
+jimp = require 'jimp'
 
 # function
 
 ###
 
-  getBuffer(image)
+  getBasename(source)
   getImage(source)
-  getList(base, check)
   getRandomBasename()
-  getSource(item)
-  moveImage(ext)
+  getScale(width, height, [maxWidth], [maxHeight])
+  isBasenameValid(filename)
 
 ###
 
-getBuffer = (image) ->
-  image
-  .resize 1920, 1080
-  .max()
-  .jpeg
-    quality: 100
-  .toBuffer()
+getBasename = (source) ->
+  extname = path.extname source
+  path.basename source, extname
 
 getImage = co (source) ->
+  yield jimp.read source
 
-  $.info.pause 'getImage'
-  img = sharp yield $$.read source
-  $.info.resume 'getImage'
+getRandomBasename = ->
+  [
+    generate GS, 8
+    'x'
+    generate GS, 8
+  ].join '-'
 
-  # return
-  img
+getScale = (
+  width, height
+  maxWidth = 1920, maxHeight = 1080
+) ->
+  _.min [
+    maxWidth / width
+    maxHeight / height
+  ]
 
-getList = co (base, check) ->
-
-  list = []
-
-  yield $$.walk base, (item) ->
-
-    source = getSource item
-    if !source then return
-
-    if check
-      extname = path.extname source
-      basename = path.basename source, extname
-      unless check {source, extname, basename} then return
-
-    list.push source
-
-  # return
-  list
-
-getRandomBasename = -> generate '1234567890abcdefghijklmnopqrstuvwxyz', 16
-
-getSource = (item) ->
-  if !item.stats.isFile() then return null
-  item.path
-
-moveImage = co (source, target, ext) ->
-
-  listSource = yield getList source, ({extname}) ->
-    extname == ".#{ext}"
-
-  if !listSource.length then return
-
-  yield $$.copy listSource, "#{target}/#{ext}"
-  yield $$.remove listSource
+isBasenameValid = (filename) ->
+  if filename.length != 19 then return false
+  if filename.search('-x-') != 8 then return false
+  true
 
 # class
 
@@ -79,10 +55,10 @@ class Jpeg
 
   constructor: ->
 
-    @validAction = [
+    @validTarget = [
       'auto'
       'clean'
-      'format'
+      'convert'
       'move'
       'rename'
       'renameJpeg'
@@ -105,67 +81,64 @@ class Jpeg
 
       else throw new Error "invalid os <#{$$.os}>"
 
-  ###
-
-    auto()
-    clean()
-    format()
-    move()
-    rename()
-    renameJpeg()
-    resize()
-
-  ###
-
   auto: co ->
     yield @move()
     yield @clean()
-    yield @format()
+    yield @convert()
     yield @renameJpeg()
     yield @rename()
     yield @resize()
 
   clean: co ->
 
-    listSource = yield getList @base, ({basename}) ->
-      basename == '.DS_Store'
+    $.info 'step', 'clean'
 
+    listSource = yield $$.source "#{@base}/**/.DS_Store"
     if !listSource.length then return
     yield $$.remove listSource
 
-  format: co ->
+  convert: co ->
 
-    listSource = yield getList @base, ({extname}) ->
-      extname in ['.bmp', '.png', '.webp']
+    $.info 'step', 'convert'
+
+    listSource = yield $$.source [
+      "#{@base}/**/*.bmp"
+      "#{@base}/**/*.png"
+      "#{@base}/**/*.webp"
+    ]
 
     for source in listSource
 
+      target = source.replace /\.(?:bmp|png|webp)/, '.jpg'
+
       img = yield getImage source
+      img.write target
 
-      data = yield getBuffer img
-      yield $$.write source, data
-
-      yield $$.rename source,
-        extname: '.jpg'
+      yield $$.remove source
 
   move: co ->
 
-    source = @download
-    target = "#{@base}/小黄图"
+    $.info 'step', 'move'
 
-    yield moveImage source, target, 'gif'
-    yield moveImage source, target, 'webm'
+    for ext in ['gif', 'webm']
+
+      listSource = yield $$.source "#{@download}/*.#{ext}"
+      if !listSource.length then continue
+      yield $$.move listSource, "#{@base}/小黄图/#{ext}"
 
   rename: co ->
 
-    listSource = yield getList "#{@base}/小黄图"
+    $.info 'step', 'rename'
+
+    listSource = yield $$.source [
+      "#{@base}/**/*.*"
+      "!#{@base}/*.*"
+    ]
 
     for source in listSource
 
-      extname = path.extname source
-      basename = path.basename source, extname
-
-      if basename.length == 16
+      basename = getBasename source
+      if isBasenameValid basename
         continue
 
       basename = getRandomBasename()
@@ -173,33 +146,38 @@ class Jpeg
 
   renameJpeg: co ->
 
-    listSource = yield getList @base, ({extname}) ->
-      extname == '.jpeg'
+    $.info 'step', 'renameJpeg'
+
+    listSource = yield $$.source "#{@base}/**/*.jpeg"
 
     for source in listSource
-
-      yield $$.rename source,
-        extname: '.jpg'
+      yield $$.rename source, extname: '.jpg'
 
   resize: co ->
 
-    listSource = yield getList @base, ({extname}) ->
-      extname == '.jpg'
+    $.info 'step', 'resize'
+
+    listSource = yield $$.source "#{@base}/**/*.jpg"
 
     for source in listSource
+
+      basename = getBasename source
+      if isBasenameValid basename
+        continue
 
       img = yield getImage source
 
       # check size
 
-      {width, height} = yield img.metadata()
+      {width, height} = img.bitmap
       if width <= 1920 and height <= 1080
         continue
 
       # resize
+      img.scale getScale width, height
 
-      data = yield getBuffer img
-      yield $$.write source, data
+      # save
+      img.write source
 
 # return
 module.exports = (arg...) -> new Jpeg arg...
