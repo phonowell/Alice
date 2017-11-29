@@ -86,8 +86,8 @@ class Jpeg
     yield @clean()
     yield @convert()
     yield @renameJpeg()
-    yield @rename()
     yield @resize()
+    yield @rename()
 
   clean: co ->
 
