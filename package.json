@@ -21,6 +21,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "fire-keeper": "0.0.82",
+    "iconv-lite": "^0.4.19",
     "jimp": "^0.2.28",
     "nanoid": "^1.0.1"
   }

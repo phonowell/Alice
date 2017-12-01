@@ -17,9 +17,10 @@ $$.require = (name) ->
 ###
 
   backup([target])
+  convert()
   daily()
-  jpeg([action])
   josh()
+  jpeg([action])
   lint()
   list([target])
   reboot(host)
@@ -40,6 +41,23 @@ $$.task 'backup', co ->
     return $.info 'target', $$.fn.wrapList od.validTarget
 
   yield od.execute target
+
+$$.task 'convert', co ->
+
+  iconv = require 'iconv-lite'
+
+  listSource = yield $$.source '~/Download/*.txt'
+
+  for source in listSource
+
+    text = yield $$.read source
+    if ~text.search /[的一是了我不人在他有这个上们来到时，。]/
+      continue
+
+    buffer = fs.readFileSync source
+    text = iconv.decode buffer, 'gbk'
+
+    yield $$.write source, text
 
 $$.task 'daily', co ->
 
@@ -73,6 +91,13 @@ $$.task 'daily', co ->
 
   yield $$.shell lines
 
+$$.task 'josh', co ->
+
+  m = $$.require 'josh'
+  josh = new m()
+
+  yield josh.download()
+
 $$.task 'jpeg', co ->
 
   m = $$.require 'jpeg'
@@ -86,13 +111,6 @@ $$.task 'jpeg', co ->
     throw new Error "invalid target <#{target}>"
 
   yield jpeg[target]()
-
-$$.task 'josh', co ->
-
-  m = $$.require 'josh'
-  josh = new m()
-
-  yield josh.download()
 
 $$.task 'lint', co ->
 
@@ -174,5 +192,3 @@ $$.task 'sssserver', co ->
     throw new Error 'empty host'
 
   yield ss.execute host
-
-# $$.task 'z', co  ->
