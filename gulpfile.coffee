@@ -16,6 +16,7 @@ $$.require = (name) ->
 
 ###
 
+  alice()
   backup([target])
   convert()
   daily()
@@ -30,6 +31,13 @@ $$.require = (name) ->
   ssserver(host)
 
 ###
+
+$$.task 'alice', co ->
+
+  m = $$.require 'alice'
+  alice = new m()
+
+  yield alice.start()
 
 $$.task 'backup', co ->
 
