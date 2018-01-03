@@ -1,8 +1,7 @@
 # require
 
 $$ = require 'fire-keeper'
-{$, _, Promise} = $$.library
-co = Promise.coroutine
+{$, _} = $$.library
 
 path = require 'path'
 
@@ -34,9 +33,9 @@ class Sfacg
 
   ###
 
-  checkIsValid: co (url) ->
+  checkIsValid: (url) ->
 
-    html = yield $.get url
+    html = await $.get url
     dom = cheerio.load html
 
     $operation = dom '#BasicOperation'
@@ -45,16 +44,16 @@ class Sfacg
 
     true
 
-  download: co (list) ->
+  download: (list) ->
 
     for a in list
 
       filename = path.basename a.source
 
-      if yield $$.isExisted "#{@base}/#{filename}" then continue
+      if await $$.isExisted "#{@base}/#{filename}" then continue
 
       $.info.pause 'sfacg.download'
-      yield $$.shell "#{@open} #{a.source}"
+      await $$.shell "#{@open} #{a.source}"
       $.info.resume 'sfacg.download'
 
       $.info 'sfacg', "downloaded '#{a.source}'"
@@ -74,32 +73,32 @@ class Sfacg
 
     ($.trim href, '/' for href in list)
 
-  get: co (url) ->
+  get: (url) ->
 
     urlList = @formatUrl url
 
     $.info 'sfacg', urlList[0]
 
-    isValid = yield @checkIsValid urlList[0]
+    isValid = await @checkIsValid urlList[0]
     if !isValid
       $.info 'sfacg', 'passed invalid url'
       return
 
-    resourceList = yield @getResourceList urlList[1]
+    resourceList = await @getResourceList urlList[1]
     if !resourceList.length then return
 
-    yield @download resourceList
+    await @download resourceList
 
     time = 5e3 + (resourceList.length - 1) * 1e3
     $.info 'sfacg', "should wait '#{time} ms' for downloading"
-    yield $$.delay time
+    await $$.delay time
 
-    yield @rename resourceList
-    yield @zip resourceList
+    await @rename resourceList
+    await @zip resourceList
 
-  getResourceList: co (url) ->
+  getResourceList: (url) ->
 
-    html = yield $.get url
+    html = await $.get url
     dom = cheerio.load html
 
     res = []
@@ -127,17 +126,17 @@ class Sfacg
     # return
     res
 
-  rename: co (list) ->
+  rename: (list) ->
 
     for a in list
 
       filename = path.basename a.source
 
-      unless yield $$.isExisted "#{@base}/#{filename}" then continue
+      unless await $$.isExisted "#{@base}/#{filename}" then continue
 
-      yield $$.rename "#{@base}/#{filename}", "#{a.title}.txt"
+      await $$.rename "#{@base}/#{filename}", "#{a.title}.txt"
 
-  zip: co (list) ->
+  zip: (list) ->
 
     title = list[0].title.replace /.*【/g, ''
     .replace /】.*/, ''
@@ -145,8 +144,8 @@ class Sfacg
 
     fileList = ("#{@base}/#{a.title}.txt" for a in list)
 
-    yield $$.zip fileList, "#{@base}/", "#{title}.zip"
-    yield $$.remove fileList
+    await $$.zip fileList, "#{@base}/", "#{title}.zip"
+    await $$.remove fileList
 
 # return
 module.exports = (arg...) -> new Sfacg arg...

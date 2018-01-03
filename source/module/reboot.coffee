@@ -1,8 +1,7 @@
 # require
 
 $$ = require 'fire-keeper'
-{$, _, Promise} = $$.library
-co = Promise.coroutine
+{$, _} = $$.library
 
 # class
 
@@ -22,12 +21,12 @@ class Reboot
 
   ###
 
-  execute: co (name) ->
+  execute: (name) ->
 
     # check shell.sh
 
     source = "./source/shell/reboot/#{name}.sh"
-    unless yield $$.isExisted source
+    unless await $$.isExisted source
       throw new Error "'#{name}.sh' not existed"
 
     # server list
@@ -36,31 +35,31 @@ class Reboot
 
       when 'api'
         [
-          yield @getServer 'api-1'
-          yield @getServer 'api-2'
+          await @getServer 'api-1'
+          await @getServer 'api-2'
         ]
 
       when 'dev.anitama.net'
         [
-          yield @getServer 'dev.anitama.net'
+          await @getServer 'dev.anitama.net'
         ]
 
     # connect & execute
 
     for server in listServer
 
-      yield $$.ssh.connect server
+      await $$.ssh.connect server
 
-      yield $$.ssh.upload source
+      await $$.ssh.upload source
       , '/mimiko'
       , 'reboot.sh'
 
-      yield $$.ssh.shell 'sh /mimiko/reboot.sh',
+      await $$.ssh.shell 'sh /mimiko/reboot.sh',
         ignoreError: true
 
-      yield $$.ssh.disconnect()
+      await $$.ssh.disconnect()
 
-  getServer: co (name) ->
+  getServer: (name) ->
 
     base = '~/OneDrive/密钥/Anitama/token'
 
@@ -68,17 +67,17 @@ class Reboot
 
       when 'api-1'
 
-        token = yield $$.read "#{base}/www.json"
+        token = await $$.read "#{base}/www.json"
         token.host = '121.40.226.20'
 
       when 'api-2'
 
-        token = yield $$.read "#{base}/www.json"
+        token = await $$.read "#{base}/www.json"
         token.host = '120.26.81.37'
 
       when 'dev.anitama.net'
 
-        token = yield $$.read "#{base}/dev.json"
+        token = await $$.read "#{base}/dev.json"
         token.host = 'dev.anitama.net'
         
     # return

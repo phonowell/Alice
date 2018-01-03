@@ -1,8 +1,7 @@
 # require
 
 $$ = require 'fire-keeper'
-{$, _, Promise} = $$.library
-co = Promise.coroutine
+{$, _} = $$.library
 
 # class
 
@@ -16,9 +15,9 @@ class Alice
 
   ###
 
-  start: co ->
+  start: ->
 
-    yield $$.say [
+    await $$.say [
       'Ashen one, could you hear me still?'
       'Oh...good hunter.'
     ]

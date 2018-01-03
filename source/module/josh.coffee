@@ -1,8 +1,7 @@
 # require
 
 $$ = require 'fire-keeper'
-{$, _, Promise} = $$.library
-co = Promise.coroutine
+{$, _} = $$.library
 
 path = require 'path'
 
@@ -22,9 +21,9 @@ class Josh
 
   ###
 
-  download: co ->
+  download: ->
 
-    resourceList = yield @getResourceList()
+    resourceList = await @getResourceList()
 
     base = switch $$.os
       when 'macos' then '~/Downloads'
@@ -38,23 +37,23 @@ class Josh
       for url in list
 
         filename = path.basename url
-        if yield $$.isExisted "#{base}/midi/#{title}/#{filename}"
+        if await $$.isExisted "#{base}/midi/#{title}/#{filename}"
           continue
 
-        yield $$.remove "#{base}/#{filename}"
+        await $$.remove "#{base}/#{filename}"
 
-        yield $$.shell "#{open} #{url}"
+        await $$.shell "#{open} #{url}"
 
-        yield $$.delay 5e3
+        await $$.delay 5e3
 
-        yield $$.copy "#{base}/#{filename}"
+        await $$.copy "#{base}/#{filename}"
         , "#{base}/midi/#{title}"
 
-        yield $$.remove "#{base}/#{filename}"
+        await $$.remove "#{base}/#{filename}"
 
     $.info 'josh', 'task finished'
 
-  downloadPage: co ->
+  downloadPage: ->
 
     tagList = 'abcdefghijklmnopqrstuvwxyz'.toUpperCase().split ''
     tagList.unshift '0-9'
@@ -64,27 +63,27 @@ class Josh
       target = './temp/josh/page'
       filename = "#{tag.toLowerCase()}.html"
 
-      if yield $$.isExisted "#{target}/#{filename}" then continue
+      if await $$.isExisted "#{target}/#{filename}" then continue
 
       url = "http://josh.agarrado.net/music/anime/index.php?startswith=#{tag}"
 
-      yield $$.download url, target, filename
+      await $$.download url, target, filename
 
     $.info 'josh', 'all pages downloaded'
 
-  getResourceList: co ->
+  getResourceList: ->
 
     # try to get list from disk
 
     source = './temp/josh/resource.json'
 
-    if yield $$.isExisted source
-      return yield $$.read source
+    if await $$.isExisted source
+      return await $$.read source
 
     # if there has got no resource list
     # get list from net
 
-    yield @downloadPage()
+    await @downloadPage()
 
     list = {}
 
@@ -93,7 +92,7 @@ class Josh
 
     for tag in tagList
 
-      html = yield $$.read "./temp/josh/page/#{tag}.html"
+      html = await $$.read "./temp/josh/page/#{tag}.html"
 
       dom = cheerio.load html
       dom('a').each ->
@@ -125,12 +124,12 @@ class Josh
     content = content.replace /\s{2,}/g, ' '
     .replace /\\\w/g, ''
 
-    yield $$.write source, content
+    await $$.write source, content
 
     $.info 'josh', 'got resource list'
 
     # return
-    yield $$.read source
+    await $$.read source
 
 # return
 module.exports = (arg...) -> new Josh arg...

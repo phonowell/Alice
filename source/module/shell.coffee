@@ -1,8 +1,7 @@
 # require
 
 $$ = require 'fire-keeper'
-{$, _, Promise} = $$.library
-co = Promise.coroutine
+{$, _} = $$.library
 
 # class
 
@@ -22,7 +21,7 @@ class Shell
 
   ###
 
-  execute: co (cmd) ->
+  execute: (cmd) ->
 
     lines = switch cmd.toLowerCase()
 
@@ -52,7 +51,7 @@ class Shell
     unless lines = lines[$$.os]
       return $.info 'os', "invalid os <#{$$.os}>"
 
-    yield $$.shell lines
+    await $$.shell lines
 
 # return
 module.exports = (arg...) -> new Shell arg...

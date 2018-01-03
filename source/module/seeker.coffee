@@ -1,8 +1,7 @@
 # require
 
 $$ = require 'fire-keeper'
-{$, _, Promise} = $$.library
-co = Promise.coroutine
+{$, _} = $$.library
 
 cheerio = require 'cheerio'
 colors = require 'colors/safe'
@@ -28,13 +27,13 @@ class Seeker
 
   ###
 
-  diff: co (title, list, cacheSize = 50) ->
+  diff: (title, list, cacheSize = 50) ->
 
     source = "#{@base}/seeker/list/#{title}.json"
     list = _.uniqBy list, 'url'
     list = _.sortBy list, 'time'
 
-    sourceList = yield $$.read source
+    sourceList = await $$.read source
     sourceList or= []
 
     res = _.differenceBy list, sourceList, 'url'
@@ -44,23 +43,23 @@ class Seeker
     list = _.sortBy list, 'time'
     list = _.reverse list
     if list.length > cacheSize then list = list[0...cacheSize]
-    yield $$.write source, list
+    await $$.write source, list
 
     return res
 
-  download: co (list, lifetime = 3e5) ->
+  download: (list, lifetime = 3e5) ->
 
     res = false
 
     for url in list
 
       filename = @getFilename url
-      stat = yield $$.stat "#{@base}/seeker/page/#{filename}"
+      stat = await $$.stat "#{@base}/seeker/page/#{filename}"
 
       if stat and _.now() - stat.ctime.getTime() < lifetime
         continue
 
-      yield $$.download url, "#{@base}/seeker/page",
+      await $$.download url, "#{@base}/seeker/page",
         filename: filename
         timeout: 1e4
 
@@ -90,7 +89,7 @@ class Seeker
 
     "#{url}.html"
 
-  getList: co (option) ->
+  getList: (option) ->
 
     {selector, url} = option
 
@@ -99,7 +98,7 @@ class Seeker
       when 'string' then [url]
       else throw new Error 'invalid argument type'
 
-    unless yield @download urlList, option.lifetime
+    unless await @download urlList, option.lifetime
       return []
 
     list = []
@@ -108,7 +107,7 @@ class Seeker
 
       filename = @getFilename url
 
-      cont = yield $$.read "#{@base}/seeker/page/#{filename}"
+      cont = await $$.read "#{@base}/seeker/page/#{filename}"
       dom = cheerio.load cont.toString()
 
       dom(selector).each ->
@@ -138,9 +137,9 @@ class Seeker
         list.push {time, title, url}
 
     # return
-    yield @diff option.title, list, option.cacheSize
+    await @diff option.title, list, option.cacheSize
 
-  open: co (html) ->
+  open: (html) ->
 
     if !html.length
       return $.info 'seeker', 'got no result(s)'
@@ -152,10 +151,10 @@ class Seeker
       when 'windows' then 'start'
       else throw new Error "invalid os <#{$$.os}>"
 
-    yield $$.write target, html
-    yield $$.shell "#{method} #{target}"
+    await $$.write target, html
+    await $$.shell "#{method} #{target}"
 
-  seek: co (name) ->
+  seek: (name) ->
 
     listTask = if name then [name]
     else [
@@ -163,7 +162,7 @@ class Seeker
       'AlloyTeam'
       'AppInn'
       'iPlaySoft'
-      #'Ryf'
+      # 'Ryf'
       'waitSun'
       'williamLong'
       'Zxx'
@@ -171,22 +170,22 @@ class Seeker
 
     map = {}
     for name in listTask
-      {title, list} = yield @task name
+      {title, list} = await @task name
       map[title] = list
 
     html = @generate map
-    yield @open html
+    await @open html
 
-  task: co (name) ->
+  task: (name) ->
 
     option = switch name.toLowerCase()
 
       when 'acfun'
         title: 'AcFun文章区'
         url: [
-          'http://www.acfun.cn/v/list110/index.htm'
+          'http://www.acfun.cn/v/list110/index_1.htm'
           'http://www.acfun.cn/v/list110/index_2.htm'
-          'http://www.acfun.cn/v/list164/index.htm'
+          'http://www.acfun.cn/v/list164/index_1.htm'
           'http://www.acfun.cn/v/list164/index_2.htm'
         ]
         selector: '#block-content-article a.title'
@@ -238,7 +237,7 @@ class Seeker
       else throw new Error "invalid task name <#{name}>"
 
     $.info.pause 'seeker.task'
-    list = try yield @getList option catch err then err
+    list = try await @getList option catch err then err
     $.info.resume 'seeker.task'
 
     if _.isError list

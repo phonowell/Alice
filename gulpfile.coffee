@@ -1,6 +1,5 @@
 $$ = require 'fire-keeper'
-{$, _, Promise} = $$.library
-co = Promise.coroutine
+{$, _} = $$.library
 
 fs = require 'fs'
 path = require 'path'
@@ -29,17 +28,19 @@ $$.require = (name) ->
   sfacg(url)
   shell([cmd])
   ssserver(host)
+  upgrade()
+  wnacg()
 
 ###
 
-$$.task 'alice', co ->
+$$.task 'alice', ->
 
   m = $$.require 'alice'
   alice = new m()
 
-  yield alice.start()
+  await alice.start()
 
-$$.task 'backup', co ->
+$$.task 'backup', ->
 
   m = $$.require 'onedrive'
   od = new m()
@@ -48,65 +49,47 @@ $$.task 'backup', co ->
   if !target
     return $.info 'target', $$.fn.wrapList od.validTarget
 
-  yield od.execute target
+  await od.execute target
 
-$$.task 'convert', co ->
+$$.task 'convert', ->
 
   iconv = require 'iconv-lite'
 
-  listSource = yield $$.source '~/Download/*.txt'
+  listSource = await $$.source '~/Download/*.txt'
 
   for source in listSource
 
-    text = yield $$.read source
+    text = await $$.read source
     if ~text.search /[的一是了我不人在他有这个上们来到时，。]/
       continue
 
     buffer = fs.readFileSync source
     text = iconv.decode buffer, 'gbk'
 
-    yield $$.write source, text
+    await $$.write source, text
 
-$$.task 'daily', co ->
-
-  # listProject = [
-  #   'alice'
-  #   'bottle-fairies'
-  #   'chika'
-  #   'doremi'
-  #   'fire-keeper'
-  #   'gurumin'
-  #   'kikyo'
-  #   # 'kokoro' exclude this, do remember
-  #   'potato'
-  #   'sayori'
-  #   # 'tamako' exclude this, do remember
-  # ]
-
-  # for item in listProject
-  #   yield $$.shell [
-  #     "cd ~/Project/#{item}"
-  #     'gulp update'
-  #   ]
+$$.task 'daily', ->
 
   lines = [
-    'brew update'
-    'brew upgrade'
+    'brew update -v'
+    'brew upgrade -v'
     'gulp shell --cmd launchpad'
     'gulp jpeg'
     'gulp backup --target onedrive'
   ]
 
-  yield $$.shell lines
+  await $$.shell lines
 
-$$.task 'josh', co ->
+  await $$.say 'Mission Completed'
+
+$$.task 'josh', ->
 
   m = $$.require 'josh'
   josh = new m()
 
-  yield josh.download()
+  await josh.download()
 
-$$.task 'jpeg', co ->
+$$.task 'jpeg', ->
 
   m = $$.require 'jpeg'
   jpeg = new m()
@@ -118,15 +101,15 @@ $$.task 'jpeg', co ->
     $.info 'target', $$.fn.wrapList jpeg.validTarget
     throw new Error "invalid target <#{target}>"
 
-  yield jpeg[target]()
+  await jpeg[target]()
 
-$$.task 'lint', co ->
+$$.task 'lint', ->
 
-  yield $$.task('kokoro')()
+  await $$.task('kokoro')()
 
-  yield $$.lint './danmaku.md'
+  await $$.lint './danmaku.md'
 
-  yield $$.lint [
+  await $$.lint [
     './gulpfile.coffee'
     './source/**/*.coffee'
   ]
@@ -142,7 +125,7 @@ $$.task 'list', ->
 
   list.list target
 
-$$.task 'reboot', co ->
+$$.task 'reboot', ->
 
   m = $$.require 'reboot'
   reboot = new m()
@@ -158,18 +141,18 @@ $$.task 'reboot', co ->
     $.info 'target', $$.fn.wrapList reboot.validTarget
     return
 
-  yield reboot.execute target
+  await reboot.execute target
 
-$$.task 'seek', co ->
+$$.task 'seek', ->
 
   m = $$.require 'seeker'
   seeker = new m()
 
   {target} = $$.argv
 
-  yield seeker.seek target
+  await seeker.seek target
 
-$$.task 'sfacg', co ->
+$$.task 'sfacg', ->
 
   m = $$.require 'sfacg'
   sf = new m()
@@ -177,9 +160,9 @@ $$.task 'sfacg', co ->
   {url} = $$.argv
   if !url then throw new Error 'invalid url'
 
-  yield sf.get url
+  await sf.get url
 
-$$.task 'shell', co ->
+$$.task 'shell', ->
 
   m = $$.require 'shell'
   shell = new m()
@@ -188,9 +171,9 @@ $$.task 'shell', co ->
   if !cmd
     return $.info 'cmd', $$.fn.wrapList shell.validCmd
 
-  yield shell.execute cmd
+  await shell.execute cmd
 
-$$.task 'sssserver', co ->
+$$.task 'sssserver', ->
 
   m = $$.require 'ssserver'
   ss = new m()
@@ -199,4 +182,18 @@ $$.task 'sssserver', co ->
   if !host
     throw new Error 'empty host'
 
-  yield ss.execute host
+  await ss.execute host
+
+$$.task 'upgrade', ->
+
+  await $$.shell [
+    'git fetch'
+    'gulp update'
+  ]
+
+$$.task 'wnacg', ->
+
+  m = $$.require 'wnacg'
+  wnacg = new m()
+
+  await wnacg.execute()

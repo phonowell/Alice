@@ -1,8 +1,7 @@
 # require
 
 $$ = require 'fire-keeper'
-{$, _, Promise} = $$.library
-co = Promise.coroutine
+{$, _} = $$.library
 
 path = require 'path'
 generate = require 'nanoid/generate'
@@ -15,9 +14,11 @@ jimp = require 'jimp'
 
   getBasename(source)
   getImage(source)
+  getPageName(filename)
   getRandomBasename()
   getScale(width, height, [maxWidth], [maxHeight])
   isBasenameValid(filename)
+  isPageNameValid(filename)
 
 ###
 
@@ -25,8 +26,18 @@ getBasename = (source) ->
   extname = path.extname source
   path.basename source, extname
 
-getImage = co (source) ->
-  yield jimp.read source
+getImage = (source) ->
+  await jimp.read source
+
+getPageName = (filename) ->
+
+  filename = filename
+  .replace /.*_/, ''
+  .replace /\D/g, ''
+  page = parseInt filename
+
+  unless page >= 0 then return null
+  _.padStart page, 3, '0'
 
 getRandomBasename = ->
   [
@@ -45,9 +56,18 @@ getScale = (
   ]
 
 isBasenameValid = (filename) ->
-  if filename.length != 19 then return false
-  if filename.search('-x-') != 8 then return false
-  true
+
+  if filename.length != 19
+    return false
+
+  filename.search(/-x-/) == 8
+
+isPageNameValid = (filename) ->
+
+  if filename.length != 3
+    return false
+
+  !!~filename.search /\d{3}/
 
 # class
 
@@ -81,27 +101,27 @@ class Jpeg
 
       else throw new Error "invalid os <#{$$.os}>"
 
-  auto: co ->
-    yield @move()
-    yield @clean()
-    yield @convert()
-    yield @renameJpeg()
-    yield @resize()
-    yield @rename()
+  auto: ->
+    await @move()
+    await @clean()
+    await @convert()
+    await @renameJpeg()
+    await @resize()
+    await @rename()
 
-  clean: co ->
+  clean: ->
 
     $.info 'step', 'clean'
 
-    listSource = yield $$.source "#{@base}/**/.DS_Store"
+    listSource = await $$.source "#{@base}/**/.DS_Store"
     if !listSource.length then return
-    yield $$.remove listSource
+    await $$.remove listSource
 
-  convert: co ->
+  convert: ->
 
     $.info 'step', 'convert'
 
-    listSource = yield $$.source [
+    listSource = await $$.source [
       "#{@base}/**/*.bmp"
       "#{@base}/**/*.png"
       "#{@base}/**/*.webp"
@@ -111,73 +131,100 @@ class Jpeg
 
       target = source.replace /\.(?:bmp|png|webp)/, '.jpg'
 
-      img = yield getImage source
+      img = await getImage source
       img.write target
 
-      yield $$.remove source
+      await $$.remove source
 
-  move: co ->
+  move: ->
 
     $.info 'step', 'move'
 
     for ext in ['gif', 'webm']
 
-      listSource = yield $$.source "#{@download}/*.#{ext}"
+      listSource = await $$.source "#{@download}/*.#{ext}"
       if !listSource.length then continue
-      yield $$.move listSource, "#{@base}/小黄图/#{ext}"
+      await $$.move listSource, "#{@base}/小黄图/#{ext}"
 
-  rename: co ->
+  rename: ->
 
     $.info 'step', 'rename'
 
-    listSource = yield $$.source [
-      "#{@base}/**/*.*"
-      "!#{@base}/*.*"
-    ]
+    list = []
 
-    for source in listSource
+    list.push
+      source: await $$.source [
+        "#{@base}/**/*.*"
+        "!#{@base}/本子/**/*.*/"
+        "!#{@base}/*.*"
+      ]
+      valid: isBasenameValid
+      getName: getRandomBasename
 
-      basename = getBasename source
-      if isBasenameValid basename
-        continue
+    list.push
+      source: await $$.source "#{@base}/本子/**/*.*"
+      valid: isPageNameValid
+      getName: getPageName
 
-      basename = getRandomBasename()
-      yield $$.rename source, {basename}
+    for item in list
+      
+      for source in item.source
 
-  renameJpeg: co ->
+        basename = getBasename source
+        if item.valid basename
+          continue
+
+        basename = item.getName basename
+        if basename?
+          await $$.rename source, {basename}
+        else await $$.remove source
+
+  renameJpeg: ->
 
     $.info 'step', 'renameJpeg'
 
-    listSource = yield $$.source "#{@base}/**/*.jpeg"
+    listSource = await $$.source "#{@base}/**/*.jpeg"
 
     for source in listSource
-      yield $$.rename source, extname: '.jpg'
+      await $$.rename source, extname: '.jpg'
 
-  resize: co ->
+  resize: ->
 
     $.info 'step', 'resize'
 
-    listSource = yield $$.source "#{@base}/**/*.jpg"
+    list = []
 
-    for source in listSource
+    list.push
+      source: await $$.source [
+        "#{@base}/**/*.jpg"
+        "!#{@base}/本子/**/*.*"
+      ]
+      valid: isBasenameValid
 
-      basename = getBasename source
-      if isBasenameValid basename
-        continue
+    list.push
+      source: await $$.source "#{@base}/本子/**/*.jpg"
+      valid: isPageNameValid
 
-      img = yield getImage source
+    for item in list
 
-      # check size
+      for source in item.source
 
-      {width, height} = img.bitmap
-      if width <= 1920 and height <= 1080
-        continue
+        basename = getBasename source
+        if item.valid basename
+          continue
 
-      # resize
-      img.scale getScale width, height
+        img = await getImage source
 
-      # save
-      img.write source
+        # check size
+
+        {width, height} = img.bitmap
+        if width <= 1920 and height <= 1080
+          continue
+
+        $.i source
+
+        img.scale getScale width, height
+        img.write source
 
 # return
 module.exports = (arg...) -> new Jpeg arg...

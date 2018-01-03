@@ -1,8 +1,7 @@
 # require
 
 $$ = require 'fire-keeper'
-{$, _, Promise} = $$.library
-co = Promise.coroutine
+{$, _} = $$.library
 
 path = require 'path'
 
@@ -30,10 +29,10 @@ class OneDrive
 
   ###
 
-  backup: co ->
-    yield $$.zip "#{@base}/**/*.*", "#{@base}/..", 'OneDrive.zip'
+  backup: ->
+    await $$.zip "#{@base}/**/*.*", "#{@base}/..", 'OneDrive.zip'
 
-  backupGameSave: co ->
+  backupGameSave: ->
 
     if $$.os != 'windows'
       throw new Error "invalid os <#{$$.os}>"
@@ -46,24 +45,24 @@ class OneDrive
 
     for pathSave in listSave
 
-      unless yield $$.isExisted pathSave
+      unless await $$.isExisted pathSave
         continue
 
       source = "#{pathSave}/**/*.*"
       target = "#{@base}/存档"
       filename = "#{path.basename pathSave}.zip"
 
-      yield $$.zip source, target, filename
+      await $$.zip source, target, filename
 
-  execute: co (target) ->
+  execute: (target) ->
 
     switch target.toLowerCase()
 
       when 'one', 'onedrive'
-        yield @backup()
+        await @backup()
 
       when 'game'
-        yield @backupGameSave()
+        await @backupGameSave()
 
       else throw new Error "invalid target <#{target}>"
 

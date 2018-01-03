@@ -1,8 +1,7 @@
 # require
 
 $$ = require 'fire-keeper'
-{$, _, Promise} = $$.library
-co = Promise.coroutine
+{$, _} = $$.library
 
 # class
 
@@ -19,11 +18,11 @@ class SSServer
 
   ###
 
-  execute: co ->
+  execute: ->
 
-    password = yield $$.read "#{@base}/password.txt"
-    privateKey = yield $$.read "#{@base}/privateKey.txt"
-    passphrase = yield $$.read "#{@base}/passphrase.txt"
+    password = await $$.read "#{@base}/password.txt"
+    privateKey = await $$.read "#{@base}/privateKey.txt"
+    passphrase = await $$.read "#{@base}/passphrase.txt"
 
     # generate
 
@@ -35,7 +34,7 @@ class SSServer
       method: 'rc4-md5'
       fast_open: true
 
-    yield $$.write @source, data
+    await $$.write @source, data
 
     # connect
 
@@ -46,17 +45,17 @@ class SSServer
       privateKey: privateKey
       passphrase: passphrase
 
-    yield $$.ssh.connect server
+    await $$.ssh.connect server
 
-    yield $$.ssh.upload @source, '/etc', 'shadowsocks.json'
-    yield $$.remove @source
+    await $$.ssh.upload @source, '/etc', 'shadowsocks.json'
+    await $$.remove @source
 
-    yield $$.ssh.shell [
+    await $$.ssh.shell [
       'ssserver -c /etc/shadowsocks.json -d stop'
       'ssserver -c /etc/shadowsocks.json -d start'
     ], ignoreError: true
 
-    yield $$.ssh.disconnect()
+    await $$.ssh.disconnect()
 
 # return
 module.exports = (arg...) -> new SSServer arg...
