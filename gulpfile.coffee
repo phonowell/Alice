@@ -197,3 +197,31 @@ $$.task 'wnacg', ->
   wnacg = new m()
 
   await wnacg.execute()
+
+$$.task 'z', ->
+
+  base = '../tamako'
+
+  listSource = await $$.source [
+    "#{base}/gulpfile.coffee"
+    "#{base}/source/**/*.coffee"
+    "#{base}/test/**/*.coffee"
+  ]
+
+  for source in listSource
+
+    cont = $.parseString await $$.read source
+
+    res = cont
+    .replace /await/g, 'await'
+    .replace /\sco\s->/g, ' ->'
+    .replace /\sco\s=>/g, ' =>'
+    .replace /\sco\s\(/g, ' ('
+    .replace /,\sPromise}/g, '}'
+    .replace /co\s=\sPromise\.coroutine/g, ''
+    .replace /\n{3,}/g, '\n\n'
+
+    if res == cont
+      continue
+
+    await $$.write source, res
