@@ -15,21 +15,22 @@ $$.require = (name) ->
 
 ###
 
-  alice()
-  backup([target])
-  convert()
-  daily()
-  josh()
-  jpeg([action])
-  lint()
-  list([target])
-  reboot(host)
-  seek([target])
-  sfacg(url)
-  shell([cmd])
-  ssserver(host)
-  upgrade()
-  wnacg()
+alice()
+backup([target])
+convert()
+daily()
+josh()
+jpeg([action])
+lint()
+list([target])
+reboot(host)
+seek([target])
+sfacg(url)
+shell([cmd])
+ssserver(host)
+upgrade()
+upgrade()
+wnacg()
 
 ###
 
@@ -197,6 +198,16 @@ $$.task 'wnacg', ->
   wnacg = new m()
 
   await wnacg.execute()
+
+$$.task 'upgrade', ->
+
+  await $$.shell [
+    'git stash'
+    'git stash clear'
+    'git pull'
+    'npm update'
+    'gulp prune'
+  ]
 
 $$.task 'z', ->
 
