@@ -23,12 +23,10 @@ josh()
 jpeg([action])
 lint()
 list([target])
-reboot(host)
 seek([target])
 sfacg(url)
 shell([cmd])
 ssserver(host)
-upgrade()
 upgrade()
 wnacg()
 
@@ -125,24 +123,6 @@ $$.task 'list', ->
     return $.info 'target', $$.fn.wrapList list.validTarget
 
   list.list target
-
-$$.task 'reboot', ->
-
-  m = $$.require 'reboot'
-  reboot = new m()
-
-  {target} = $$.argv
-
-  if !target
-    $.info 'target', $$.fn.wrapList reboot.validTarget
-    return
-
-  unless target in reboot.validTarget
-    $.info 'error', "invalid target <#{target}>"
-    $.info 'target', $$.fn.wrapList reboot.validTarget
-    return
-
-  await reboot.execute target
 
 $$.task 'seek', ->
 
