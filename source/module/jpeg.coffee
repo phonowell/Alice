@@ -140,7 +140,7 @@ class Jpeg
 
     $.info 'step', 'move'
 
-    for ext in ['gif', 'webm']
+    for ext in ['gif', 'mp4', 'webm']
 
       listSource = await $$.source "#{@download}/*.#{ext}"
       if !listSource.length then continue
