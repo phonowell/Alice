@@ -69,13 +69,27 @@ $$.task 'convert', ->
 
 $$.task 'daily', ->
 
-  lines = [
-    'brew update -v'
-    'brew upgrade -v'
-    'gulp shell --cmd launchpad'
-    'gulp jpeg'
-    'gulp backup --target onedrive'
-  ]
+  lines = switch $$.os
+
+    when 'macos'
+
+      [
+        'brew update -v'
+        'brew upgrade -v'
+        'gulp shell --cmd launchpad'
+        'gulp jpeg'
+        'gulp backup --target onedrive'
+      ]
+
+    when 'windows'
+
+      [
+        'gulp backup --target game'
+        'gulp jpeg'
+        'gulp backup --target onedrive'
+      ]
+
+    else throw new Error "invalid os <#{$$.os}>"
 
   await $$.shell lines
 
@@ -191,7 +205,7 @@ $$.task 'upgrade', ->
 
 $$.task 'z', ->
 
-  base = '../tamako'
+  base = '../doremi'
 
   listSource = await $$.source [
     "#{base}/gulpfile.coffee"
@@ -204,7 +218,7 @@ $$.task 'z', ->
     cont = $.parseString await $$.read source
 
     res = cont
-    .replace /await/g, 'await'
+    .replace /yield/g, 'await'
     .replace /\sco\s->/g, ' ->'
     .replace /\sco\s=>/g, ' =>'
     .replace /\sco\s\(/g, ' ('
