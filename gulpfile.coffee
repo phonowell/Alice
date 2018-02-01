@@ -207,6 +207,26 @@ $$.task 'z', ->
 
   base = '../doremi'
 
+  # stylus
+
+  listSource = await $$.source [
+    "#{base}/source/**/*.styl"
+  ]
+
+  for source in listSource
+
+    cont = $.parseString await $$.read source
+
+    res = cont
+    .replace /\n{3,}/g, '\n\n'
+
+    if res == cont
+      continue
+
+    await $$.write source, res
+
+  # coffee
+
   listSource = await $$.source [
     "#{base}/gulpfile.coffee"
     "#{base}/source/**/*.coffee"
