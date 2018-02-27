@@ -11,7 +11,7 @@ class Alice
 
   ###
 
-    start()
+  start()
 
   ###
 

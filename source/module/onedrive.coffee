@@ -23,9 +23,9 @@ class OneDrive
 
   ###
 
-    backup()
-    backupGameSave()
-    execute(target)
+  backup()
+  backupGameSave()
+  execute(target)
 
   ###
 

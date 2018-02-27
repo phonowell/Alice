@@ -23,13 +23,13 @@ class Sfacg
 
   ###
 
-    checkIsValid(url)
-    download(list)
-    formatUrl(url)
-    get(url)
-    getResourceList(url)
-    rename(list)
-    zip(list)
+  checkIsValid(url)
+  download(list)
+  formatUrl(url)
+  get(url)
+  getResourceList(url)
+  rename(list)
+  zip(list)
 
   ###
 

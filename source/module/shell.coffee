@@ -17,7 +17,7 @@ class Shell
 
   ###
 
-    execute(cmd)
+  execute(cmd)
 
   ###
 

@@ -16,9 +16,9 @@ class Wnacg
 
   ###
 
-    download(list)
-    execute()
-    search(reg)
+  download(list)
+  execute()
+  search(reg)
 
   ###
 

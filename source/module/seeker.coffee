@@ -16,14 +16,14 @@ class Seeker
 
   ###
 
-    diff(title, list, [cacheSize])
-    download(list, [lifetime])
-    generate(title, list)
-    getFilename(url)
-    getList(option)
-    open()
-    seek(name)
-    task(name)
+  diff(title, list, [cacheSize])
+  download(list, [lifetime])
+  generate(title, list)
+  getFilename(url)
+  getList(option)
+  open()
+  seek(name)
+  task(name)
 
   ###
 

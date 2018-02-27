@@ -12,13 +12,13 @@ jimp = require 'jimp'
 
 ###
 
-  getBasename(source)
-  getImage(source)
-  getPageName(filename)
-  getRandomBasename()
-  getScale(width, height, [maxWidth], [maxHeight])
-  isBasenameValid(filename)
-  isPageNameValid(filename)
+getBasename(source)
+getImage(source)
+getPageName(filename)
+getRandomBasename()
+getScale(width, height, [maxWidth], [maxHeight])
+isBasenameValid(filename)
+isPageNameValid(filename)
 
 ###
 
@@ -96,7 +96,7 @@ class Jpeg
       when 'windows'
         [
           'E:/OneDrive/图片'
-          'F:/'
+          'F:'
         ]
 
       else throw new Error "invalid os <#{$$.os}>"
