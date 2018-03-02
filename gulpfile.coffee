@@ -203,9 +203,22 @@ $$.task 'upgrade', ->
     'gulp prune'
   ]
 
+$$.task 'y', ->
+
+  listKey = [
+    # 'asar'
+    'coffeescript'
+    # 'electron'
+    'gulp'
+    'nodemon'
+  ]
+  for key in listKey
+    await $$.shell "npm r -g #{key}; npm i -g --production #{key}"
+  await $$.say 'mission completed'
+
 $$.task 'z', ->
 
-  base = '../doremi'
+  base = '../gurumin'
 
   # stylus
 
@@ -219,6 +232,8 @@ $$.task 'z', ->
 
     res = cont
     .replace /\n{3,}/g, '\n\n'
+
+    res = _.trim res
 
     if res == cont
       continue
@@ -245,6 +260,8 @@ $$.task 'z', ->
     .replace /,\sPromise}/g, '}'
     .replace /co\s=\sPromise\.coroutine/g, ''
     .replace /\n{3,}/g, '\n\n'
+
+    res = _.trim res
 
     if res == cont
       continue
