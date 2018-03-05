@@ -9,7 +9,6 @@ class QqEmitter extends EventEmitter
 cheerio = require 'cheerio'
 {Chromeless} = require 'chromeless'
 chrome = null
-colors = require 'colors/safe'
 
 # class
 
@@ -27,25 +26,22 @@ class Qq
 
   $(selector)
   addWatch(type, name)
-  checkNotify()
   delay(time)
-  end()
   enter(type, name)
   enterNav(name)
   error(msg)
-  getMessageInfo($el)
+  getDataMessage($el)
+  getDataRoom($el)
+  getListNotify()
+  getListSession()
   getOwnNickname()
-  getRoomInfo($el)
-  getSession()
   isIndoor()
   leave()
   login()
   removeWatch(type, name)
   say(listMsg)
-  sleep()
   speak(msg)
   start()
-  wake()
   watch()
 
   ###
@@ -61,16 +57,13 @@ class Qq
   timerWatch: null
 
   $: (selector) ->
-
-    html = await chrome.html()
-
+    await @delay()
+    try html = await chrome.html()
+    catch err
+      # $.i err
+      html = ''
     dom = cheerio.load html
-    
-    # return
-    [
-      dom selector
-      dom
-    ]
+    dom selector
 
   addWatch: (type, name) ->
 
@@ -78,48 +71,42 @@ class Qq
     if i != -1 then return
 
     @listWatch.push {type, name}
-
-  checkNotify: ->
-    [$item] = await @$ '#current_chat_list > li.notify'
-    if !$item.length then return false
-    data = @getRoomInfo $item.eq 0
-    @emitter.emit 'notify', data
-    data # return
+    @emitter.emit 'add-watch', {type, name}
 
   delay: (time = 500) ->
-
     token = 'alice.delay'
-
     $.info.pause token
     await $$.delay time
     $.info.resume token
-
-  end: -> await chrome.end()
 
   enter: (type, name) ->
 
     if await @isIndoor()
       await @leave()
 
-    @session = await @getSession()
+    listSession = await @getListSession()
 
     unless type in @listRoomType
       return @error "invalid room type '#{type}'"
 
-    data = _.find @session, {type, name}
+    data = _.find listSession, {type, name}
     if !data
+      $.i listSession
+      $.info 'listSession'
       return @error "invalid room name '#{name}'"
+    {id} = data
 
-    await chrome.click "##{data.id}"
+    await chrome.click "##{id}"
     .html()
 
     await @delay()
 
     unless await @isIndoor()
+      await @delay()
       return await @enter type, name
 
     @statusRoom = data
-    @listHistory[data.id] or= []
+    @listHistory[id] or= {}
 
     @emitter.emit 'enter', {type, name}
 
@@ -136,16 +123,12 @@ class Qq
 
   error: (msg) -> @emitter.emit 'error', msg
 
-  getMessageInfo: ($el) ->
+  getDataMessage: ($el) ->
     name = _.trim $el.children('p.chat_nick').text()
     content = _.trim $el.children('p.chat_content').text()
-    {name, content}
+    {name, content} # return
 
-  getOwnNickname: ->
-    [$nickname] = await @$ '#mainTopAll span.user_nick'
-    _.trim $nickname.text()
-
-  getRoomInfo: ($el) ->
+  getDataRoom: ($el) ->
 
     id = $el.attr 'id'
 
@@ -158,64 +141,42 @@ class Qq
     else $nick.text()
     name = _.trim name
 
-    # return
-    {id, type, name}
+    {id, type, name} # return
 
-  getSession: ->
+  getListNotify: ->
 
     data = []
-    getRoomInfo = @getRoomInfo
 
-    [$child, dom] = await @$ '#current_chat_list > li'
-    $child.each ->
-      $el = dom @
-      data.push getRoomInfo $el
+    $child = await @$ '#current_chat_list > li.notify'
+    $child.each (i) =>
+      data.push @getDataRoom $child.eq i
 
-    data = _.sortBy data, 'name'
-    data # return
+    data
+
+  getListSession: ->
+
+    data = []
+
+    $child = await @$ '#current_chat_list > li'
+    $child.each (i) =>
+      data.push @getDataRoom $child.eq i
+
+    data
+
+  getOwnNickname: ->
+    $nickname = await @$ '#mainTopAll span.user_nick'
+    _.trim $nickname.text()
 
   isIndoor: ->
-    [$target] = await @$ '#panel-5'
+    $target = await @$ '#panel-5'
     if !$target.length then return false
     $target.css('display') == 'block'
-
-  say: (listMsg, isBreak = false) ->
-
-    listMsg = switch $.type listMsg
-      when 'array' then _.clone listMsg
-      when 'number', 'string' then [listMsg]
-      else throw new Error 'invalid type'
-
-    if !isBreak
-      return await @speak listMsg.join '\r\n'
-
-    for msg in listMsg
-      await @speak msg
-
-  sleep: ->
-    clearInterval @timerWatch
-    @emitter.emit 'sleep'
-
-  speak: (msg) ->
-
-    unless await @isIndoor() then return
-
-    selector = '#chat_textarea'
-    await chrome.focus selector
-    .type msg, selector
-    .press 13
-
-    await @delay()
-    @emitter.emit 'say',
-      content: msg
-      name: @nickname
 
   leave: ->
 
     unless await @isIndoor() then return
 
-    name = @roomName
-    type = @roomType
+    {type, name} = @statusRoom
 
     selector = '#panelRightButton-5'
     await chrome.click selector
@@ -226,7 +187,7 @@ class Qq
 
   login: ->
 
-    $.info 'alice', 'Alice is waiting for login'
+    chrome = new Chromeless()
 
     userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3)
     AppleWebKit/537.36 (KHTML, like Gecko)
@@ -244,14 +205,13 @@ class Qq
     .wait selector, timeout
     .html()
 
-    selector = 'ul#current_chat_list > li.list_item'
+    $.info 'alice', 'Alice is waiting for login'
+
+    selector = '#current_chat_list > li.list_item'
     await chrome.wait selector, timeout
     .html()
 
     @nickname = await @getOwnNickname()
-
-    # await @enterNav 'session'
-
     @emitter.emit 'login'
 
   removeWatch: (type, name) ->
@@ -260,49 +220,72 @@ class Qq
     if i == -1 then return
 
     @listWatch.splice i, 1
+    @emitter.emit 'remove-watch', {type, name}
 
-  start: ->
-    await @delay 0
-    chrome = new Chromeless()
+  say: (listMsg, isBreak = false) ->
 
-  wake: ->
-    clearInterval @timerWatch
-    @timerWatch = setInterval =>
-      @watch()
-    , 200
-    @emitter.emit 'wake'
+    listMsg = switch $.type listMsg
+      when 'array' then _.clone listMsg
+      when 'number', 'string' then [listMsg]
+      else throw new Error 'invalid type'
+
+    if !isBreak
+      return await @speak listMsg.join '\r\n'
+
+    for msg in listMsg
+      await @speak msg
+
+  speak: (msg) ->
+
+    unless await @isIndoor() then return
+
+    selector = '#chat_textarea'
+    await chrome.focus selector
+    .type msg, selector
+    .press 13
+
+    await @delay()
+    @emitter.emit 'say',
+      content: msg
+      name: @nickname
 
   watch: ->
 
-    data = await @checkNotify()
-    if !data then return
+    listNotify = await @getListNotify()
+    if !listNotify.length
+      await @delay 200
+      return await @watch()
 
-    {id, type, name} = data
-    await @enter type, name
+    for dataRoom in listNotify
 
-    return
+      {id, type, name} = dataRoom
+      unless _.find @listWatch, {type, name} then continue
 
-    # [$child, dom] = await @$ '.chat_content_group.buddy'
+      await @enter type, name
 
-    # listChat = []
+      listMessage = []
+      $child = await @$ '#panelBody-5 .chat_content_group.buddy'
+      $child.each (i) =>
+        listMessage.push @getDataMessage $child.eq i
 
-    # $child.each ->
-    #   $el = dom @
-    #   listChat.push
-    #     name: _.trim $el.children('p.chat_nick').text()
-    #     content: _.trim $el.children('p.chat_content').text()
+      listMessage.reverse()
+      index = _.findIndex listMessage, @listHistory[id]
+      @listHistory[id] = listMessage[0]
+      listMessage = do ->
+        if index == -1
+          return listMessage
+        listMessage[0...index]
+      listMessage.reverse()
 
-    # listChat.reverse()
-    # index = _.findIndex listChat, @history[@roomName]
-    # @history[@roomName] = listChat[0]
-    # listChat = do ->
-    #   if index == -1
-    #     return listChat
-    #   listChat[0...index]
-    # listChat.reverse()
+      if !listMessage.length
+        await @leave()
+        continue
 
-    # for item in listChat
-    #   @emitter.emit 'hear', item
+      @emitter.emit 'hear', listMessage
+
+    # loop
+    await @delay()
+    await @watch()
 
 # return
 module.exports = (arg...) -> new Qq arg...

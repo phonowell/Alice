@@ -19,7 +19,6 @@ class Alice
   bind()
   debug()
   execute(listCmd)
-  home()
   roll(string)
   start()
 
@@ -31,33 +30,40 @@ class Alice
 
     ###
 
+    add-watch
     enter
     error
     hear
     leave
     login
+    remove-watch
     say
 
     ###
 
-    emitter.on 'enter', (data) ->
+    emitter.on 'add-watch', (data) ->
       $.info 'alice', "Alice is watching <#{data.type}: #{data.name}>"
-      await Qq.say 'Alice entered room.'
 
-    emitter.on 'error', (data) =>
-      await @home()
-      await Qq.say "Error: #{data}"
+    emitter.on 'enter', (data) ->
+      $.info 'alice', "Alice entered <#{data.type}: #{data.name}>"
+
+    emitter.on 'error', (data) ->
+      $.info 'alice', colors.red "Error: #{data}"
+
+    emitter.on 'hear', (data) ->
+      for msg in data
+        $.info "#{colors.blue msg.name}#{colors.gray ':'} #{msg.content}"
 
     emitter.on 'leave', (data) ->
-      $.info 'alice', "Alice stopped watching <#{data.type}: #{data.name}>"
+      $.info 'alice', "Alice left <#{data.type}: #{data.name}>"
     
     emitter.on 'login', -> $.info 'alice', 'Alice was ready'
 
+    emitter.on 'remove-watch', ->
+      $.info "Alice stopped watching <#{data.type}: #{data.name}>"
+
     emitter.on 'say', (data) ->
       $.info "#{colors.magenta data.name}#{colors.gray ':'} #{data.content}"
-
-    emitter.on 'hear', (data) ->
-      $.info "#{colors.blue data.name}#{colors.gray ':'} #{data.content}"
 
   debug: ->
 
@@ -84,8 +90,9 @@ class Alice
           name: @nickname
 
     Qq.nickname = 'Alice'
-    Qq.roomName = 'Alice Room'
-    Qq.roomType = 'discuss'
+    Qq.statusRoom =
+      type: 'discuss'
+      name: 'Alice Room'
 
   execute: (listCmd, name) ->
 
@@ -115,7 +122,6 @@ class Alice
           listMsg = [
             '-ask xxx: get information about xxx'
             '-help: show help information'
-            '-leave: leave room'
             '-move: type name: move to <type:name>'
             '-repeat [xxx]: repeat xxx'
             '-roll [dice] [description]: roll(dice should between 1d1 and 20d100)'
@@ -123,8 +129,6 @@ class Alice
             '-test: run test'
           ]
           await Qq.say listMsg
-
-        when 'leave' then await @home()
 
         when 'move'
 
@@ -143,7 +147,7 @@ class Alice
           if !msg.length then return
           await Qq.say msg
 
-        when 'roll'
+        when 'roll', 'r'
 
           string = listCmd[1] or '1d100'
           if !string?.length then return
@@ -182,23 +186,7 @@ class Alice
           if !msg.length then return
           await Qq.say msg.split('').join '★'
 
-        when 'test'
-
-          listMsg = [
-            '1. A robot may not harm a human being,
-            or,
-            through inaction,
-            allow a human being to come to harm.'
-            '2. A robot must obey the orders given to it by human beings,
-            except where such orders would conflict with the First Law.'
-            '3. A robot must protect its own existence,
-            as long as such protection does not conflict with the First or Second Law.'
-          ]
-          await Qq.say listMsg
-
-  home: ->
-    await Qq.leave()
-    await Qq.enter 'friend', '某御'
+        when 'test' then await Qq.say 'Alice test.'
   
   roll: (string) ->
 
@@ -232,32 +220,42 @@ class Alice
 
     if !@isDebug
 
-      await Qq.start()
       await Qq.login()
-      
-      await @home()
-
-      # await Qq.enter 'discuss', 'Alice Test Team'
-      # await Qq.enter 'friend', '某御'
-      # await Qq.enter 'group', 'Guru! Project Group'
 
     Qq.emitter.on 'hear', (data) =>
 
-      {content, name} = data
+      for msg in data
 
-      if content[0] != '-' then return
+        {content, name} = msg
+        if content[0] != '-' then continue
 
-      listCmd = _.trim content[1...]
-      .replace /\s+/g, ' '
-      .split ' '
+        listCmd = _.trim content[1...]
+        .replace /\s+/g, ' '
+        .split ' '
 
-      await @execute listCmd, name
+        await @execute listCmd, name
+        
+      await Qq.leave()
+
+    if !@isDebug
+
+      listRoom = [
+        ['discuss', 'Alice Test Team']
+        ['friend', 'Brick Eyre']
+        ['friend', '某御']
+        ['group', 'Guru! Project Group']
+      ]
+      for room in listRoom
+        Qq.addWatch room...
+
+      await Qq.watch()
 
     if @isDebug
 
-      Qq.emitter.emit 'hear',
+      Qq.emitter.emit 'hear', [
         name: 'mimiko'
         content: '- star 1d6'
+      ]
 
 # return
 module.exports = (arg...) -> new Alice arg...
