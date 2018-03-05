@@ -19,6 +19,8 @@ class Alice
   bind()
   debug()
   execute(listCmd)
+  home()
+  roll(string)
   start()
 
   ###
@@ -27,19 +29,35 @@ class Alice
 
     {emitter} = Qq
 
+    ###
+
+    enter
+    error
+    hear
+    leave
+    login
+    say
+
+    ###
+
     emitter.on 'enter', (data) ->
-      $.info 'alice', "Alice entered <#{data.type}: #{data.name}>"
+      $.info 'alice', "Alice is watching <#{data.type}: #{data.name}>"
+      await Qq.say 'Alice entered room.'
+
+    emitter.on 'error', (data) =>
+      await @home()
+      await Qq.say "Error: #{data}"
 
     emitter.on 'leave', (data) ->
-      $.info 'alice', "Alice left <#{data.type}: #{data.name}>"
+      $.info 'alice', "Alice stopped watching <#{data.type}: #{data.name}>"
     
     emitter.on 'login', -> $.info 'alice', 'Alice was ready'
 
     emitter.on 'say', (data) ->
-      $.info 'alice', colors.blue "#{data.name}: #{data.content}"
+      $.info "#{colors.magenta data.name}#{colors.gray ':'} #{data.content}"
 
     emitter.on 'hear', (data) ->
-      $.info 'alice', colors.grey "#{data.name}: #{data.content}"
+      $.info "#{colors.blue data.name}#{colors.gray ':'} #{data.content}"
 
   debug: ->
 
@@ -92,18 +110,32 @@ class Alice
 
           await Qq.say msg
 
-        when 'help'
+        when 'help', 'h'
 
-          listMsg = []
-          listMsg.push '-ask xxx: get information about xxx'
-          listMsg.push '-help: show help information'
-          listMsg.push '-meth: leave chatroom'
-          listMsg.push '-repeat xxx: repeat xxx'
-          listMsg.push '-roll xdx: throw a dice(from 1d1 to 100d100)'
-          listMsg.push '-test: run test'
+          listMsg = [
+            '-ask xxx: get information about xxx'
+            '-help: show help information'
+            '-leave: leave room'
+            '-move: type name: move to <type:name>'
+            '-repeat [xxx]: repeat xxx'
+            '-roll [dice] [description]: roll(dice should between 1d1 and 20d100)'
+            '-star xxx: show x★x★x'
+            '-test: run test'
+          ]
           await Qq.say listMsg
 
-        when 'meth' then await Qq.leave()
+        when 'leave' then await @home()
+
+        when 'move'
+
+          if Qq.roomName != '某御' then return
+
+          type = listCmd[1]
+          roomName = listCmd[2...].join ' '
+          unless type and roomName then return
+
+          await Qq.leave()
+          await Qq.enter type, roomName
 
         when 'repeat'
 
@@ -113,29 +145,42 @@ class Alice
 
         when 'roll'
 
-          dice = listCmd[1] or '1d100'
-          if !dice?.length then return
-          unless ~dice.search /\d+d\d+/ then return
+          string = listCmd[1] or '1d100'
+          if !string?.length then return
 
-          listDice = dice.split 'd'
-          for a, i in listDice
-            listDice[i] = parseInt a
+          stringValid = string
+          .replace /[\+\-\*\/\(\)\dd]/g, ''
+          if stringValid.length then return
 
-          unless (1 <= listDice[0] <= 100) then return
-          unless (1 <= listDice[1] <= 100) then return
+          listDice = string.match /\d+d\d+/g
+          if !listDice.length then return
 
-          res = 0
-          listMsg = []
-          for i in [0...listDice[0]]
-            num = 1 + _.random listDice[1] - 1
-            res += num
-            listMsg.push num
+          for dice in listDice
+            unless res = @roll dice then return
+            string = string.replace dice, res[1]
 
-          msg = "#{name} threw #{dice}: "
-          msg += if listMsg.length == 1
-            "#{res}"
-          else "#{listMsg.join ' + '} = #{res}"
-          await Qq.say msg
+          string = string
+          .replace /([\+\-\*\\])/g, ' $1 '
+          .replace /\s+/g, ' '
+
+          stringResult = unless ~string.search /[\+\-\*\\\(\)]/
+            string
+          else "#{string} = #{eval string}"
+
+          stringDesc = listCmd[2...].join ' '
+          if !stringDesc.length
+            stringDesc = "To #{name}:"
+          
+          await Qq.say [
+            stringDesc
+            stringResult
+          ]
+
+        when 'star'
+
+          msg = _.trim listCmd[1...].join ' '
+          if !msg.length then return
+          await Qq.say msg.split('').join '★'
 
         when 'test'
 
@@ -151,6 +196,34 @@ class Alice
           ]
           await Qq.say listMsg
 
+  home: ->
+    await Qq.leave()
+    await Qq.enter 'friend', '某御'
+  
+  roll: (string) ->
+
+    listCmd = string.split 'd'
+    for a, i in listCmd
+      listCmd[i] = parseInt a
+
+    unless (1 <= listCmd[0] <= 20) then return null
+    unless (1 <= listCmd[1] <= 100) then return null
+
+    res = 0
+    listText = []
+    for i in [0...listCmd[0]]
+      num = 1 + _.random listCmd[1] - 1
+      res += num
+      listText.push num
+
+    # return
+    [
+      res
+      if listText.length == 1
+        "#{res}"
+      else "(#{listText.join '+'})"
+    ]
+  
   start: ->
 
     # @debug()
@@ -161,9 +234,12 @@ class Alice
 
       await Qq.start()
       await Qq.login()
+      
+      await @home()
 
       # await Qq.enter 'discuss', 'Alice Test Team'
-      await Qq.enter 'group', 'Guru! Project Group'
+      # await Qq.enter 'friend', '某御'
+      # await Qq.enter 'group', 'Guru! Project Group'
 
     Qq.emitter.on 'hear', (data) =>
 
@@ -181,7 +257,7 @@ class Alice
 
       Qq.emitter.emit 'hear',
         name: 'mimiko'
-        content: '- roll 1d6'
+        content: '- star 1d6'
 
 # return
 module.exports = (arg...) -> new Alice arg...
