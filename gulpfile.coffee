@@ -35,14 +35,14 @@ wnacg()
 $$.task 'alice', ->
 
   m = $$.require 'alice'
-  alice = new m()
+  alice = m()
 
   await alice.start()
 
 $$.task 'backup', ->
 
   m = $$.require 'onedrive'
-  od = new m()
+  od = m()
 
   {target} = $$.argv
   if !target
@@ -98,14 +98,14 @@ $$.task 'daily', ->
 $$.task 'josh', ->
 
   m = $$.require 'josh'
-  josh = new m()
+  josh = m()
 
   await josh.download()
 
 $$.task 'jpeg', ->
 
   m = $$.require 'jpeg'
-  jpeg = new m()
+  jpeg = m()
 
   {target} = $$.argv
   target or= 'auto'
@@ -130,7 +130,7 @@ $$.task 'lint', ->
 $$.task 'list', ->
 
   m = $$.require 'list'
-  list = new m()
+  list = m()
 
   {target} = $$.argv
   if !target
@@ -141,7 +141,7 @@ $$.task 'list', ->
 $$.task 'seek', ->
 
   m = $$.require 'seeker'
-  seeker = new m()
+  seeker = m()
 
   {target} = $$.argv
 
@@ -150,7 +150,7 @@ $$.task 'seek', ->
 $$.task 'sfacg', ->
 
   m = $$.require 'sfacg'
-  sf = new m()
+  sf = m()
 
   {url} = $$.argv
   if !url then throw new Error 'invalid url'
@@ -160,7 +160,7 @@ $$.task 'sfacg', ->
 $$.task 'shell', ->
 
   m = $$.require 'shell'
-  shell = new m()
+  shell = m()
 
   {cmd} = $$.argv
   if !cmd
@@ -171,7 +171,7 @@ $$.task 'shell', ->
 $$.task 'sssserver', ->
 
   m = $$.require 'ssserver'
-  ss = new m()
+  ss = m()
 
   {host} = $$.argv
   if !host
@@ -189,7 +189,7 @@ $$.task 'upgrade', ->
 $$.task 'wnacg', ->
 
   m = $$.require 'wnacg'
-  wnacg = new m()
+  wnacg = m()
 
   await wnacg.execute()
 

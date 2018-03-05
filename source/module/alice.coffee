@@ -3,13 +3,10 @@
 $$ = require 'fire-keeper'
 {$, _} = $$.library
 
-EventEmitter = require 'events'
-class AliceEmitter extends EventEmitter
-
-cheerio = require 'cheerio'
-{Chromeless} = require 'chromeless'
-chrome = new Chromeless()
 colors = require 'colors/safe'
+
+m = require "#{process.cwd()}/source/module/qq.coffee"
+Qq = m()
 
 # class
 
@@ -18,271 +15,173 @@ class Alice
   constructor: -> null
 
   ###
-
-  $(selector)
-  alice
+  
   bind()
-  delay(time)
-  end()
-  enter(type, name)
-  enterNav(name)
-  enterTab(type)
-  getOwnNickname()
-  getSession()
-  leave()
-  login()
-  say(listMsg)
-  speak(msg)
+  debug()
+  execute(listCmd)
   start()
-  watch()
 
   ###
 
-  $: (selector) ->
-
-    html = await chrome.html()
-
-    dom = cheerio.load html
-    
-    # return
-    [
-      dom selector
-      dom
-    ]
-
-  alice: new AliceEmitter()
-
   bind: ->
 
-    @alice.on 'enter', (data) ->
+    {emitter} = Qq
+
+    emitter.on 'enter', (data) ->
       $.info 'alice', "Alice entered <#{data.type}: #{data.name}>"
 
-    @alice.on 'leave', (data) ->
-      $.info 'alice', "Alice left <#{data.ype}: #{data.name}>"
+    emitter.on 'leave', (data) ->
+      $.info 'alice', "Alice left <#{data.type}: #{data.name}>"
     
-    @alice.on 'login', -> $.info 'alice', 'Alice was ready'
+    emitter.on 'login', -> $.info 'alice', 'Alice was ready'
 
-    @alice.on 'say', (data) ->
+    emitter.on 'say', (data) ->
       $.info 'alice', colors.blue "#{data.name}: #{data.content}"
 
-    @alice.on 'hear', (data) ->
+    emitter.on 'hear', (data) ->
       $.info 'alice', colors.grey "#{data.name}: #{data.content}"
 
-  delay: (time = 1e3) ->
+  debug: ->
 
-    token = 'alice.delay'
+    @isDebug = true
 
-    $.info.pause token
-    await $$.delay time
-    $.info.resume token
+    Qq.say = (listMsg, isBreak = false) ->
 
-  end: -> await chrome.end()
+      listMsg = switch $.type listMsg
+          when 'array' then _.clone listMsg
+          when 'number', 'string' then [listMsg]
+          else throw new Error 'invalid type'
 
-  enter: (type, name) ->
+        if !isBreak
+          return await @speak listMsg.join '\r\n'
 
-    item = _.find @session[type], {name}
-    await @enterNav 'session'
+        for msg in listMsg
+          await @speak msg
 
-    await chrome.click "##{item.id}"
-    .html()
+    Qq.speak = (msg) ->
 
-    await @delay()
-    @roomName = name
-    @roomType = type
-    @watch true
-    @alice.emit 'enter', {name, type}
+        await @delay()
+        @emitter.emit 'say',
+          content: msg
+          name: @nickname
 
-  enterNav: (name) ->
+    Qq.nickname = 'Alice'
+    Qq.roomName = 'Alice Room'
+    Qq.roomType = 'discuss'
 
-    res = await chrome.exists "##{name}.selected"
-    if res then return
+  execute: (listCmd, name) ->
 
-    await chrome.click "##{name}"
-    .html()
+    switch listCmd[0]
 
-    await @delay()
-    await @enterNav name
+        when 'ask'
 
-  enterTab: (type) ->
+          question = listCmd[1]
+          if !question?.length then return
 
-    res = await chrome.exists "#memberTab > li[param=\"#{type}\"].active"
-    if res then return
+          msg = switch question
 
-    await chrome.click "#memberTab > li[param=\"#{type}\"]"
-    .html()
+            when 'name', 'nickname', 'nick'
+              "Alice nickname is '#{Qq.nickname}'."
 
-    await @delay()
-    await @enterTab type
+            when 'room', 'chatroom'
+              "Room name is '#{Qq.roomName}'."
 
-  getOwnNickname: ->
+            when 'time'
+              "Current time is
+              #{new Date().toLocaleString()}."
 
-    [$nickname] = await @$ '#mainTopAll span.user_nick'
-    _.trim $nickname.text()
+          await Qq.say msg
 
-  getSession: ->
+        when 'help'
 
-    await @enterNav 'session'
+          listMsg = []
+          listMsg.push '-ask xxx: get information about xxx'
+          listMsg.push '-help: show help information'
+          listMsg.push '-meth: leave chatroom'
+          listMsg.push '-repeat xxx: repeat xxx'
+          listMsg.push '-roll xdx: throw a dice(from 1d1 to 100d100)'
+          listMsg.push '-test: run test'
+          await Qq.say listMsg
 
-    listKey = [
-      'discuss'
-      'friend'
-      'group'
-    ]
+        when 'meth' then await Qq.leave()
 
-    data = {}
-    for key in listKey
-      data[key] = []
+        when 'repeat'
 
-    [$child, dom] = await @$ '#current_chat_list > li'
+          msg = _.trim listCmd[1...].join ' '
+          if !msg.length then return
+          await Qq.say msg
 
-    $child.each ->
+        when 'roll'
 
-      $el = dom @
+          dice = listCmd[1] or '1d100'
+          if !dice?.length then return
+          unless ~dice.search /\d+d\d+/ then return
 
-      type = $el.attr '_type'
-      unless type in listKey then return
+          listDice = dice.split 'd'
+          for a, i in listDice
+            listDice[i] = parseInt a
 
-      data[type].push
-        id: $el.attr 'id'
-        name: _.trim $el.find('p.member_nick').text()
+          unless (1 <= listDice[0] <= 100) then return
+          unless (1 <= listDice[1] <= 100) then return
 
-    # sort
-    for key in listKey
-      data[key] = _.sortBy data[key], 'name'
+          res = 0
+          listMsg = []
+          for i in [0...listDice[0]]
+            num = 1 + _.random listDice[1] - 1
+            res += num
+            listMsg.push num
 
-    data # return
-
-  say: (listMsg) ->
-
-    listMsg = switch $.type listMsg
-      when 'array' then _.clone listMsg
-      when 'number', 'string' then [listMsg]
-      else throw new Error 'invalid type'
-
-    for msg in listMsg
-      await @speak msg
-
-  speak: (msg) ->
-
-    selector = '#chat_textarea'
-
-    await chrome.focus selector
-    .type msg, selector
-    .press 13
-
-    await @delay()
-    @alice.emit 'say',
-      content: msg
-      name: @nickname
-
-  start: ->
-
-    @bind()
-    await @login()
-
-    @nickname = await @getOwnNickname()
-    @session = await @getSession()
-
-    # await @enter 'discuss', 'Alice Test Team'
-    await @enter 'group', 'Guru! Project Group'
-
-    @alice.on 'hear', (data) =>
-
-      switch data.content
+          msg = "#{name} threw #{dice}: "
+          msg += if listMsg.length == 1
+            "#{res}"
+          else "#{listMsg.join ' + '} = #{res}"
+          await Qq.say msg
 
         when 'test'
 
-          listMsg = []
-          listMsg.push 'Alice test.'
-          listMsg.push "Nickname is '#{@nickname}'."
-          listMsg.push "Room name is '#{@roomName}'"
-          listMsg.push "Room type is '#{@roomType}'"
-          listMsg.push "Current time is #{new Date().toLocaleString()}"
-          res = 1 + _.random 5
-          listMsg.push "Throw 1d6: #{res}."
-          res = 1 + _.random 19
-          listMsg.push "Throw 20 + 1d20: 20 + #{res} = #{20 + res}."
-          listMsg.push 'Test done.'
-          await @say listMsg
+          listMsg = [
+            '1. A robot may not harm a human being,
+            or,
+            through inaction,
+            allow a human being to come to harm.'
+            '2. A robot must obey the orders given to it by human beings,
+            except where such orders would conflict with the First Law.'
+            '3. A robot must protect its own existence,
+            as long as such protection does not conflict with the First or Second Law.'
+          ]
+          await Qq.say listMsg
 
-        else
+  start: ->
 
-          await @say "repeat #{data.content}"
+    # @debug()
 
-  leave: ->
+    @bind()
 
-    @watch false
+    if !@isDebug
 
-    selector = '#panelRightButton-5'
+      await Qq.start()
+      await Qq.login()
 
-    await chrome.click selector
-    .html()
+      # await Qq.enter 'discuss', 'Alice Test Team'
+      await Qq.enter 'group', 'Guru! Project Group'
 
-    await @delay()
-    @alice.emit 'leave',
-      name: @roomName
-      type: @roomType
+    Qq.emitter.on 'hear', (data) =>
 
-  login: ->
+      {content, name} = data
 
-    $.info 'alice', 'Alice is waiting for login'
+      if content[0] != '-' then return
 
-    userAgent = 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_13_3)
-    AppleWebKit/537.36 (KHTML, like Gecko)
-    Chrome/64.0.3282.186 Safari/537.36'
+      listCmd = _.trim content[1...]
+      .replace /\s+/g, ' '
+      .split ' '
 
-    timeout = 5 * 60 * 1e3
+      await @execute listCmd, name
 
-    await chrome.setUserAgent userAgent
-    .setViewport
-      width: 1280
-      height: 800
+    if @isDebug
 
-    selector = 'iframe'
-    await chrome.goto 'http://web2.qq.com/'
-    .wait selector, timeout
-    .html()
-
-    selector = 'ul#current_chat_list > li.list_item'
-    await chrome.wait selector, timeout
-    .html()
-
-    @alice.emit 'login'
-
-  watch: (action = true) ->
-    
-    if !action
-      clearInterval @timerWatch
-      return
-
-    @history or= {}
-    @history[@roomName] or= {}
-    
-    @timerWatch = setInterval =>
-
-      [$child, dom] = await @$ '.chat_content_group.buddy'
-
-      listChat = []
-
-      $child.each ->
-        $el = dom @
-        listChat.push
-          name: _.trim $el.children('p.chat_nick').text()
-          content: _.trim $el.children('p.chat_content').text()
-
-      listChat.reverse()
-      index = _.findIndex listChat, @history[@roomName]
-      @history[@roomName] = listChat[0]
-      listChat = do ->
-        if index == -1
-          return listChat
-        listChat[0...index]
-      listChat.reverse()
-
-      for item in listChat
-        @alice.emit 'hear', item
-
-    , 1e3
+      Qq.emitter.emit 'hear',
+        name: 'mimiko'
+        content: '- roll 1d6'
 
 # return
 module.exports = (arg...) -> new Alice arg...
