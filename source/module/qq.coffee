@@ -64,6 +64,9 @@ class Qq
 
   addWatch: (type, name) ->
 
+    unless type in @listRoomType then return
+    if !name?.length then return
+
     i = _.findIndex @listWatch, {type, name}
     if i != -1 then return
 
@@ -219,6 +222,9 @@ class Qq
 
   removeWatch: (type, name) ->
 
+    unless type in @listRoomType then return
+    if !name?.length then return
+
     i = _.findIndex @listWatch, {type, name}
     if i == -1 then return
 
@@ -243,10 +249,12 @@ class Qq
 
     unless await @isIndoor() then return
 
+    msg = msg
+    .replace /[\<\>]/g, ''
+
     selector = '#chat_textarea'
     await chrome.type msg, selector
-    .focus selector
-    .press 13
+    .click '#send_chat_btn'
 
     @emitter.emit 'say',
       content: msg

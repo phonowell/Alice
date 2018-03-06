@@ -15,6 +15,8 @@ class Alice
   constructor: -> null
 
   ###
+
+  version
   
   ask(question)
   bind()
@@ -24,6 +26,8 @@ class Alice
   start()
 
   ###
+
+  version: '0.0.1'
 
   ask: (question) ->
 
@@ -35,7 +39,7 @@ class Alice
         "Alice's master is 'Mimiko'."
 
       when 'name', 'nickname', 'nick'
-        "Alice nickname is '#{Qq.nickname}'."
+        "Alice's name is '#{Qq.nickname}'."
 
       when 'room', 'chatroom'
         "Room name is '#{Qq.roomName}'."
@@ -44,8 +48,22 @@ class Alice
         "Current time is
         #{new Date().toLocaleString()}."
 
+      when 'version', 'copyright'
+        [
+          "Alice, v#{@version}."
+          'Copyright © 2018 Mimiko. All Rights Reserved.'
+        ]
+
+      when 'watch list', 'watch'
+        listMsg = [
+          "Alice's watch list:"
+        ]
+        for room in Qq.listWatch
+          listMsg.push "#{room.name}, #{room.type}"
+        listMsg
+
       else
-        "Alice has got no information about '#{question}'"
+        "Alice has got no information about '#{question}'."
 
     await Qq.say answer
 
@@ -64,8 +82,8 @@ class Alice
 
     ###
 
-    emitter.on 'add-watch', (data) ->
-      $.info 'alice', "Alice is watching <#{data.type}: #{data.name}>"
+    emitter.on 'add-watch', (room) ->
+      $.info 'alice', "Alice is watching '#{room.name}, #{room.type}'"
 
     emitter.on 'error', (data) ->
       $.info 'alice', colors.red "Error: #{data}"
@@ -73,16 +91,18 @@ class Alice
     emitter.on 'hear', (data) ->
       room = Qq.statusRoom
       for msg in data
-        $.info "<#{room.type}: #{room.name}> #{colors.blue msg.name}#{colors.gray ':'} #{msg.content}"
+        prefix = "#{msg.name}@#{room.name}"
+        $.info "#{colors.blue prefix}#{colors.gray ':'} #{msg.content}"
     
     emitter.on 'login', -> $.info 'alice', 'Alice was ready'
 
-    emitter.on 'remove-watch', ->
-      $.info "Alice stopped watching <#{data.type}: #{data.name}>"
+    emitter.on 'remove-watch', (room) ->
+      $.info "Alice stopped watching '#{room.name}, #{room.type}'"
 
-    emitter.on 'say', (data) ->
+    emitter.on 'say', (msg) ->
       room = Qq.statusRoom
-      $.info "<#{room.type}: #{room.name}> #{colors.magenta data.name}#{colors.gray ':'} #{data.content}"
+      prefix = "#{msg.name}@#{room.name}"
+      $.info "#{colors.magenta prefix}#{colors.gray ':'} #{msg.content}"
 
   debug: ->
 
@@ -128,11 +148,12 @@ class Alice
             '-roll [dice] [description]: roll(dice should between 1d1 and 20d100)'
             '-star xxx: show x★x★x'
             '-test: run test'
+            '-unwatch type name: stop watching name, type'
+            '-watch type name: start to watch name, type'
           ]
           await Qq.say listMsg
 
         when 'repeat'
-
           msg = _.trim listCmd[1...].join ' '
           if !msg.length then return
           await Qq.say msg
@@ -171,12 +192,21 @@ class Alice
           ]
 
         when 'star'
-
           msg = _.trim listCmd[1...].join ' '
           if !msg.length then return
           await Qq.say msg.split('').join '★'
 
         when 'test' then await Qq.say 'Alice test.'
+
+        when 'unwatch'
+          type = listCmd[1]
+          name = listCmd[2...].join ' '
+          Qq.removeWatch type, name
+
+        when 'watch'
+          type = listCmd[1]
+          name = listCmd[2...].join ' '
+          Qq.addWatch type, name
   
   roll: (string) ->
 
