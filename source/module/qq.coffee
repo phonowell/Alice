@@ -27,10 +27,11 @@ class Qq
   $(selector)
   addWatch(type, name)
   delay(time)
-  enter(type, name)
+  enter(room)
   error(msg)
   getDataMessage($el)
   getDataRoom($el)
+  getHtml()
   getListMessage(id)
   getListNotify()
   getListSession()
@@ -57,10 +58,7 @@ class Qq
   timerWatch: null
 
   $: (selector) ->
-    try html = await chrome.html()
-    catch err
-      await @delay
-      html = await chrome.html()
+    html = await @getHtml()
     dom = cheerio.load html
     dom selector
 
@@ -73,16 +71,17 @@ class Qq
     @emitter.emit 'add-watch', {type, name}
 
   delay: (time = 200) ->
-    token = 'alice.delay'
-    $.info.pause token
-    await $$.delay time
-    $.info.resume token
+    new Promise (resolve) ->
+      setTimeout ->
+        resolve()
+      , time
 
-  enter: (type, name) ->
+  enter: (room) ->
 
     if await @isIndoor()
       await @leave()
 
+    {id, type, name} = room
     listSession = await @getListSession()
 
     unless type in @listRoomType
@@ -90,26 +89,21 @@ class Qq
 
     data = _.find listSession, {type, name}
     if !data
-      $.i listSession
-      $.info 'listSession'
       return @error "invalid room name '#{name}'"
     {id} = data
 
     await chrome.click "##{id}"
-    .html()
-
-    await @delay()
 
     unless await @isIndoor()
       await @delay()
-      return await @enter type, name
+      return await @enter {id, type, name}
 
     @statusRoom = data
     @listHistory[id] or=
-      content: 'Blank message.'
-      name: 'Alice'
+      content: ''
+      name: ''
 
-    @emitter.emit 'enter', {type, name}
+    @emitter.emit 'enter', {id, type, name}
 
   error: (msg) -> @emitter.emit 'error', msg
 
@@ -132,6 +126,13 @@ class Qq
     name = _.trim name
 
     {id, type, name} # return
+
+  getHtml: ->
+    try html = await chrome.html()
+    catch err
+      await @delay()
+      html = await @getHtml()
+    html
 
   getListMessage: (id) ->
 
@@ -182,15 +183,9 @@ class Qq
     $target.css('display') == 'block'
 
   leave: ->
-
     unless await @isIndoor() then return
-
     {type, name} = @statusRoom
-
-    selector = '#panelRightButton-5'
-    await chrome.click selector
-    .html()
-
+    await chrome.click '#panelRightButton-5'
     @emitter.emit 'leave', {type, name}
 
   login: ->
@@ -249,8 +244,8 @@ class Qq
     unless await @isIndoor() then return
 
     selector = '#chat_textarea'
-    await chrome.focus selector
-    .type msg, selector
+    await chrome.type msg, selector
+    .focus selector
     .press 13
 
     @emitter.emit 'say',
@@ -270,7 +265,7 @@ class Qq
       {id, type, name} = dataRoom
       unless _.find @listWatch, {type, name} then continue
 
-      await @enter type, name
+      await @enter {id, type, name}
 
       listMessage = await @getListMessage id
       if !listMessage.length

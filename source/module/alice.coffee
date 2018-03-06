@@ -81,7 +81,8 @@ class Alice
       $.info "Alice stopped watching <#{data.type}: #{data.name}>"
 
     emitter.on 'say', (data) ->
-      $.info "#{colors.magenta data.name}#{colors.gray ':'} #{data.content}"
+      room = Qq.statusRoom
+      $.info "<#{room.type}: #{room.name}> #{colors.magenta data.name}#{colors.gray ':'} #{data.content}"
 
   debug: ->
 
