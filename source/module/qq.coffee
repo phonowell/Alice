@@ -25,7 +25,7 @@ class Qq
   timerWatch
 
   $(selector)
-  addWatch(type, name)
+  addWatch(room)
   delay(time)
   enter(room)
   error(msg)
@@ -39,7 +39,7 @@ class Qq
   isIndoor()
   leave()
   login()
-  removeWatch(type, name)
+  removeWatch(room)
   say(listMsg)
   speak(msg)
   start()
@@ -62,16 +62,18 @@ class Qq
     dom = cheerio.load html
     dom selector
 
-  addWatch: (type, name) ->
+  addWatch: (room) ->
+
+    {type, name} = room
 
     unless type in @listRoomType then return
     if !name?.length then return
 
-    i = _.findIndex @listWatch, {type, name}
+    i = _.findIndex @listWatch, room
     if i != -1 then return
 
     @listWatch.push {type, name}
-    @emitter.emit 'add-watch', {type, name}
+    @emitter.emit 'add-watch', room
 
   delay: (time = 200) ->
     new Promise (resolve) ->
@@ -220,16 +222,18 @@ class Qq
     @nickname = await @getOwnNickname()
     @emitter.emit 'login'
 
-  removeWatch: (type, name) ->
+  removeWatch: (room) ->
+
+    {type, name} = room
 
     unless type in @listRoomType then return
     if !name?.length then return
 
-    i = _.findIndex @listWatch, {type, name}
+    i = _.findIndex @listWatch, room
     if i == -1 then return
 
     @listWatch.splice i, 1
-    @emitter.emit 'remove-watch', {type, name}
+    @emitter.emit 'remove-watch', room
 
   say: (listMsg, isBreak = false) ->
 

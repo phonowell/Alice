@@ -18,10 +18,11 @@ class Alice
 
   version
   
-  ask(question)
+  ask(question, nickname)
   bind()
   debug()
-  execute(listCmd)
+  execute(listCmd, nickname)
+  isAdmin(name)
   roll(string)
   start()
 
@@ -29,7 +30,7 @@ class Alice
 
   version: '0.0.1'
 
-  ask: (question) ->
+  ask: (question, nickname) ->
 
     if !question?.length then return
 
@@ -54,7 +55,11 @@ class Alice
           'Copyright © 2018 Mimiko. All Rights Reserved.'
         ]
 
-      when 'watch list', 'watch'
+      when 'watch' then do =>
+        
+        unless @isAdmin nickname
+          return 'Permission denied.'
+        
         listMsg = [
           "Alice's watch list:"
         ]
@@ -85,6 +90,11 @@ class Alice
     emitter.on 'add-watch', (room) ->
       $.info 'alice', "Alice is watching '#{room.name}, #{room.type}'"
 
+      source = './data/alice/watch.json'
+      data = await $$.read source
+      unless _.isEqual Qq.listWatch, data
+        await $$.write source, Qq.listWatch
+
     emitter.on 'error', (data) ->
       $.info 'alice', colors.red "Error: #{data}"
 
@@ -98,6 +108,11 @@ class Alice
 
     emitter.on 'remove-watch', (room) ->
       $.info "Alice stopped watching '#{room.name}, #{room.type}'"
+      
+      source = './data/alice/watch.json'
+      data = await $$.read source
+      unless _.isEqual Qq.listWatch, data
+        await $$.write source, Qq.listWatch
 
     emitter.on 'say', (msg) ->
       room = Qq.statusRoom
@@ -133,11 +148,13 @@ class Alice
       type: 'discuss'
       name: 'Alice Room'
 
-  execute: (listCmd, name) ->
+  execute: (listCmd, nickname) ->
 
     switch listCmd[0]
 
-        when 'ask' then await @ask listCmd[1...].join ' '
+        when 'ask'
+          question = listCmd[1...].join ' '
+          await @ask question, nickname
 
         when 'help', 'h'
 
@@ -168,11 +185,11 @@ class Alice
           if stringValid.length then return
 
           listDice = string.match /\d+d\d+/g
-          if !listDice.length then return
-
-          for dice in listDice
-            unless res = @roll dice then return
-            string = string.replace dice, res[1]
+          if listDice?.length
+            for dice in listDice
+              unless res = @roll dice then return
+              string = string.replace dice, res[1]
+          if ~string.search 'd' then return
 
           string = string
           .replace /([\+\-\*\\])/g, ' $1 '
@@ -180,11 +197,14 @@ class Alice
 
           stringResult = unless ~string.search /[\+\-\*\\\(\)]/
             string
-          else "#{string} = #{eval string}"
+          else
+            res = try eval string
+            catch err then 'NaN'
+            "#{string} = #{res}"
 
           stringDesc = listCmd[2...].join ' '
           if !stringDesc.length
-            stringDesc = "To #{name}:"
+            stringDesc = "To #{nickname}:"
           
           await Qq.say [
             stringDesc
@@ -199,14 +219,20 @@ class Alice
         when 'test' then await Qq.say 'Alice test.'
 
         when 'unwatch'
+          unless @isAdmin nickname then return
           type = listCmd[1]
           name = listCmd[2...].join ' '
-          Qq.removeWatch type, name
+          Qq.removeWatch {type, name}
 
         when 'watch'
+          unless @isAdmin nickname then return
           type = listCmd[1]
           name = listCmd[2...].join ' '
-          Qq.addWatch type, name
+          Qq.addWatch {type, name}
+
+  isAdmin: (name) ->
+    {type} = Qq.statusRoom
+    _.isEqual {type, name}, Qq.listWatch[0]
   
   roll: (string) ->
 
@@ -259,14 +285,14 @@ class Alice
 
     if !@isDebug
 
-      listRoom = [
-        ['discuss', 'Alice Test Team']
-        ['friend', 'Brick Eyre']
-        ['friend', '某御']
-        ['group', 'Guru! Project Group']
-      ]
-      for room in listRoom
-        Qq.addWatch room...
+      listWatch = await $$.read './data/alice/watch.json'
+      unless listWatch?.length
+        listWatch = []
+        listWatch.push
+          type: 'friend'
+          name: '某御'
+      for room in listWatch
+        Qq.addWatch room
 
       await Qq.watch()
 
@@ -274,7 +300,7 @@ class Alice
 
       Qq.emitter.emit 'hear', [
         name: 'mimiko'
-        content: '- star 1d6'
+        content: '- r d'
       ]
 
 # return
