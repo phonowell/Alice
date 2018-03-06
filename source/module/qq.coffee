@@ -28,10 +28,10 @@ class Qq
   addWatch(type, name)
   delay(time)
   enter(type, name)
-  enterNav(name)
   error(msg)
   getDataMessage($el)
   getDataRoom($el)
+  getListMessage(id)
   getListNotify()
   getListSession()
   getOwnNickname()
@@ -57,11 +57,10 @@ class Qq
   timerWatch: null
 
   $: (selector) ->
-    await @delay()
     try html = await chrome.html()
     catch err
-      # $.i err
-      html = ''
+      await @delay
+      html = await chrome.html()
     dom = cheerio.load html
     dom selector
 
@@ -73,7 +72,7 @@ class Qq
     @listWatch.push {type, name}
     @emitter.emit 'add-watch', {type, name}
 
-  delay: (time = 500) ->
+  delay: (time = 200) ->
     token = 'alice.delay'
     $.info.pause token
     await $$.delay time
@@ -106,20 +105,11 @@ class Qq
       return await @enter type, name
 
     @statusRoom = data
-    @listHistory[id] or= {}
+    @listHistory[id] or=
+      content: 'Blank message.'
+      name: 'Alice'
 
     @emitter.emit 'enter', {type, name}
-
-  enterNav: (name) ->
-
-    res = await chrome.exists "##{name}.selected"
-    if res then return
-
-    await chrome.click "##{name}"
-    .html()
-
-    await @delay()
-    await @enterNav name
 
   error: (msg) -> @emitter.emit 'error', msg
 
@@ -142,6 +132,25 @@ class Qq
     name = _.trim name
 
     {id, type, name} # return
+
+  getListMessage: (id) ->
+
+    listMessage = []
+
+    $child = await @$ '#panelBody-5 .chat_content_group.buddy'
+    $child.each (i) =>
+      listMessage.push @getDataMessage $child.eq i
+
+    listMessage.reverse()
+    index = _.findIndex listMessage, @listHistory[id]
+    @listHistory[id] = listMessage[0]
+    listMessage = do ->
+      if index == -1
+        return listMessage
+      listMessage[0...index]
+    listMessage.reverse()
+
+    listMessage
 
   getListNotify: ->
 
@@ -182,7 +191,6 @@ class Qq
     await chrome.click selector
     .html()
 
-    await @delay()
     @emitter.emit 'leave', {type, name}
 
   login: ->
@@ -227,7 +235,8 @@ class Qq
     listMsg = switch $.type listMsg
       when 'array' then _.clone listMsg
       when 'number', 'string' then [listMsg]
-      else throw new Error 'invalid type'
+      else []
+    if !listMsg.length then return
 
     if !isBreak
       return await @speak listMsg.join '\r\n'
@@ -244,16 +253,16 @@ class Qq
     .type msg, selector
     .press 13
 
-    await @delay()
     @emitter.emit 'say',
       content: msg
       name: @nickname
 
   watch: ->
 
+    await @delay()
+
     listNotify = await @getListNotify()
     if !listNotify.length
-      await @delay 200
       return await @watch()
 
     for dataRoom in listNotify
@@ -263,20 +272,7 @@ class Qq
 
       await @enter type, name
 
-      listMessage = []
-      $child = await @$ '#panelBody-5 .chat_content_group.buddy'
-      $child.each (i) =>
-        listMessage.push @getDataMessage $child.eq i
-
-      listMessage.reverse()
-      index = _.findIndex listMessage, @listHistory[id]
-      @listHistory[id] = listMessage[0]
-      listMessage = do ->
-        if index == -1
-          return listMessage
-        listMessage[0...index]
-      listMessage.reverse()
-
+      listMessage = await @getListMessage id
       if !listMessage.length
         await @leave()
         continue
@@ -284,7 +280,6 @@ class Qq
       @emitter.emit 'hear', listMessage
 
     # loop
-    await @delay()
     await @watch()
 
 # return

@@ -16,6 +16,7 @@ class Alice
 
   ###
   
+  ask(question)
   bind()
   debug()
   execute(listCmd)
@@ -24,6 +25,30 @@ class Alice
 
   ###
 
+  ask: (question) ->
+
+    if !question?.length then return
+
+    answer = switch question
+
+      when 'master'
+        "Alice's master is 'Mimiko'."
+
+      when 'name', 'nickname', 'nick'
+        "Alice nickname is '#{Qq.nickname}'."
+
+      when 'room', 'chatroom'
+        "Room name is '#{Qq.roomName}'."
+
+      when 'time'
+        "Current time is
+        #{new Date().toLocaleString()}."
+
+      else
+        "Alice has got no information about '#{question}'"
+
+    await Qq.say answer
+
   bind: ->
 
     {emitter} = Qq
@@ -31,10 +56,8 @@ class Alice
     ###
 
     add-watch
-    enter
     error
     hear
-    leave
     login
     remove-watch
     say
@@ -44,18 +67,13 @@ class Alice
     emitter.on 'add-watch', (data) ->
       $.info 'alice', "Alice is watching <#{data.type}: #{data.name}>"
 
-    emitter.on 'enter', (data) ->
-      $.info 'alice', "Alice entered <#{data.type}: #{data.name}>"
-
     emitter.on 'error', (data) ->
       $.info 'alice', colors.red "Error: #{data}"
 
     emitter.on 'hear', (data) ->
+      room = Qq.statusRoom
       for msg in data
-        $.info "#{colors.blue msg.name}#{colors.gray ':'} #{msg.content}"
-
-    emitter.on 'leave', (data) ->
-      $.info 'alice', "Alice left <#{data.type}: #{data.name}>"
+        $.info "<#{room.type}: #{room.name}> #{colors.blue msg.name}#{colors.gray ':'} #{msg.content}"
     
     emitter.on 'login', -> $.info 'alice', 'Alice was ready'
 
@@ -98,48 +116,19 @@ class Alice
 
     switch listCmd[0]
 
-        when 'ask'
-
-          question = listCmd[1]
-          if !question?.length then return
-
-          msg = switch question
-
-            when 'name', 'nickname', 'nick'
-              "Alice nickname is '#{Qq.nickname}'."
-
-            when 'room', 'chatroom'
-              "Room name is '#{Qq.roomName}'."
-
-            when 'time'
-              "Current time is
-              #{new Date().toLocaleString()}."
-
-          await Qq.say msg
+        when 'ask' then await @ask listCmd[1...].join ' '
 
         when 'help', 'h'
 
           listMsg = [
             '-ask xxx: get information about xxx'
             '-help: show help information'
-            '-move: type name: move to <type:name>'
             '-repeat [xxx]: repeat xxx'
             '-roll [dice] [description]: roll(dice should between 1d1 and 20d100)'
             '-star xxx: show x★x★x'
             '-test: run test'
           ]
           await Qq.say listMsg
-
-        when 'move'
-
-          if Qq.roomName != '某御' then return
-
-          type = listCmd[1]
-          roomName = listCmd[2...].join ' '
-          unless type and roomName then return
-
-          await Qq.leave()
-          await Qq.enter type, roomName
 
         when 'repeat'
 
