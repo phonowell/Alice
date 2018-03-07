@@ -11,6 +11,17 @@ exclude = $$.fn.excludeInclude
 $$.require = (name) ->
   require "./source/module/#{name}.coffee"
 
+$.do = (fn) ->
+
+  unless $.isAsyncFunction fn
+    throw new Error 'xxx'
+
+  fn.then (res) -> [null, res]
+  .catch (err) -> [err]
+
+$.isAsyncFunction = (fn) ->
+  Object::toString.call(fn) == '[object AsyncFunction]'
+
 # task
 
 ###
@@ -267,3 +278,15 @@ $$.task 'z', ->
       continue
 
     await $$.write source, res
+
+$$.task 'x', ->
+
+  fn = (n) ->
+    # await $$.delay()
+    if n != 1 then throw new Error "invalid number #{n}"
+    true
+
+  [err, res] = await $.do fn 1
+  if err then throw err
+
+  $.i res
