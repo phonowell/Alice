@@ -30,9 +30,9 @@ class OneDrive
   ###
 
   backup: ->
-    await $$.zip "#{@base}/**/*.*", "#{@base}/..",
-      filename: 'OneDrive.zip'
-      silent: true
+    await $$.zip "#{@base}/**/*.*"
+    , "#{@base}/.."
+    , 'OneDrive.zip'
 
   backupGameSave: ->
 

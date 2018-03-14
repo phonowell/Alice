@@ -28,6 +28,7 @@ $.isAsyncFunction = (fn) ->
 
 alice()
 backup([target])
+check(target)
 convert()
 daily()
 josh()
@@ -60,6 +61,66 @@ $$.task 'backup', ->
     return $.info 'target', $$.fn.wrapList od.validTarget
 
   await od.execute target
+
+$$.task 'check', ->
+
+  {target} = $$.argv
+  if !target
+    throw new Error 'empty target'
+
+  if target == 'all'
+    listSource = await $$.source [
+      '../*'
+      '!../alice'
+    ]
+    for source in listSource
+      target = path.basename source
+      await $$.shell [
+        "gulp check --target #{target}"
+      ]
+    await $$.say 'mission completed'
+    return
+
+  base = "../#{target}"
+  unless await $$.isExisted base
+    throw new Error "invalid target <#{target}>"
+  if target == 'alice'
+    throw new Error "invalid target <#{target}>"
+
+  # function
+  check = (listSource, callback) ->
+
+    listSource = await $$.source listSource
+
+    for source in listSource
+      cont = $.parseString await $$.read source
+      res = _.trim callback cont
+      if res == cont then continue
+      await $$.write source, res
+
+  # execute
+
+  # pug & stylus
+  await check [
+    "#{base}/source/**/*.pug"
+    "#{base}/source/**/*.styl"
+  ], (cont) -> cont.replace /\n{3,}/g, '\n\n'
+
+  # coffee
+  await check [
+    "#{base}/gulpfile.coffee"
+    "#{base}/source/**/*.coffee"
+    "#{base}/task/**/*.coffee"
+    "#{base}/test/**/*.coffee"
+  ], (cont) ->
+    cont
+    .replace /yield/g, 'await'
+    .replace /\sco\s->/g, ' ->'
+    .replace /\sco\s=>/g, ' =>'
+    .replace /\sco\s\(/g, ' ('
+    .replace /,\sPromise}/g, '}'
+    .replace /co\s=\sPromise\.coroutine/g, ''
+    .replace /\n{3,}/g, '\n\n'
 
 $$.task 'convert', ->
 
@@ -216,68 +277,15 @@ $$.task 'upgrade', ->
 
 $$.task 'y', ->
 
-  listKey = [
-    # 'asar'
-    'coffeescript'
-    # 'electron'
-    'gulp'
-    'nodemon'
-  ]
-  for key in listKey
-    await $$.shell "npm r -g #{key}; npm i -g --production #{key}"
+  listSource = await $$.source '../*'
+  for source in listSource
+    target = path.basename source
+    await $$.shell [
+      "cd ../#{target}"
+      'gulp update'
+    ]
+
   await $$.say 'mission completed'
-
-$$.task 'z', ->
-
-  base = '../gurumin'
-
-  # stylus
-
-  listSource = await $$.source [
-    "#{base}/source/**/*.styl"
-  ]
-
-  for source in listSource
-
-    cont = $.parseString await $$.read source
-
-    res = cont
-    .replace /\n{3,}/g, '\n\n'
-
-    res = _.trim res
-
-    if res == cont
-      continue
-
-    await $$.write source, res
-
-  # coffee
-
-  listSource = await $$.source [
-    "#{base}/gulpfile.coffee"
-    "#{base}/source/**/*.coffee"
-    "#{base}/test/**/*.coffee"
-  ]
-
-  for source in listSource
-
-    cont = $.parseString await $$.read source
-
-    res = cont
-    .replace /yield/g, 'await'
-    .replace /\sco\s->/g, ' ->'
-    .replace /\sco\s=>/g, ' =>'
-    .replace /\sco\s\(/g, ' ('
-    .replace /,\sPromise}/g, '}'
-    .replace /co\s=\sPromise\.coroutine/g, ''
-    .replace /\n{3,}/g, '\n\n'
-
-    res = _.trim res
-
-    if res == cont
-      continue
-
-    await $$.write source, res
 
 $$.task 'x', ->
 
