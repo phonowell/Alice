@@ -93,10 +93,8 @@ $$.task 'check', ->
     listSource = await $$.source listSource
 
     for source in listSource
-      cont = $.parseString await $$.read source
-      res = _.trim callback cont
-      if res == cont then continue
-      await $$.write source, res
+      await $$.replace source, (cont) ->
+        _.trim callback cont
 
   # execute
 
@@ -275,26 +273,41 @@ $$.task 'upgrade', ->
     'gulp prune'
   ]
 
-$$.task 'y', ->
-
-  listSource = await $$.source '../*'
-  for source in listSource
-    target = path.basename source
-    await $$.shell [
-      "cd ../#{target}"
-      'gulp update'
-    ]
-
-  await $$.say 'mission completed'
-
 $$.task 'x', ->
 
-  fn = (n) ->
-    # await $$.delay()
-    if n != 1 then throw new Error "invalid number #{n}"
-    true
+  listSource = await $$.source './node_modules/*'
+  listRemove = []
 
-  [err, res] = await $.do fn 1
-  if err then throw err
+  for source in listSource
 
-  $.i res
+    try fs.statSync source
+    catch err then listRemove.push source
+
+  await $$.remove listRemove
+
+$$.task 'y', ->
+
+  cmd = [
+    'brew install ffmpeg'
+    '--with-fdk-aac'
+    '--with-freetype'
+    '--with-fontconfig'
+    '--with-libass'
+    '--with-libvorbis'
+    '--with-libvpx'
+    '--with-opus'
+    '--with-x265'
+  ].join ' '
+
+  await $$.shell cmd
+  await $$.say 'mission completed'
+
+$$.task 'z', ->
+
+  m = $$.require 'video'
+  video = m()
+
+  # await video.execute()
+
+  await video.format '~/Downloads/video/input/*.mov'
+  , '~/Downloads/video/output'
