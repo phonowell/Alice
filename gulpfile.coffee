@@ -285,6 +285,33 @@ $$.task 'x', ->
 
   await $$.remove listRemove
 
-# $$.task 'y', ->
+$$.task 'z', ->
 
-# $$.task 'z', ->
+  cheerio = require 'cheerio'
+
+  getTitle = (id) ->
+
+    try html = await $.get "http://www.8wenku.com/book/#{id}"
+    catch err then return null
+
+    dom = cheerio.load html
+
+    title = _.trim dom('title').text()
+
+    if ~title.search /404/ then return null
+    title = title.split(',')[0]
+    .replace /小说/, ''
+
+    title # return
+
+  listTitle = []
+
+  for id in [0...6e3]
+    $.i id
+    unless title = await getTitle id then continue
+    $.i title
+    listTitle.push [id, title]
+    
+    $.info.pause '8wenku'
+    await $$.write 'F:/8wenku.json', listTitle
+    $.info.resume '8wenku'
