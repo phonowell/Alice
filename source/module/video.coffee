@@ -107,9 +107,9 @@ class Video
         # check video information
         data = await @getData video
         {codec, width, height} = data.video
-        # if codec == 'h264' and width <= 848 and height <= 480
-        #   $.info 'video', "cancelled '#{src}'"
-        #   return resolve()
+        if codec == 'h264' and width <= 848 and height <= 480
+          $.info 'video', "cancelled '#{src}'"
+          return resolve()
 
         @setParam video, data, option
 

@@ -285,29 +285,6 @@ $$.task 'x', ->
 
   await $$.remove listRemove
 
-$$.task 'y', ->
+# $$.task 'y', ->
 
-  cmd = [
-    'brew install ffmpeg'
-    '--with-fdk-aac'
-    '--with-freetype'
-    '--with-fontconfig'
-    '--with-libass'
-    '--with-libvorbis'
-    '--with-libvpx'
-    '--with-opus'
-    '--with-x265'
-  ].join ' '
-
-  await $$.shell cmd
-  await $$.say 'mission completed'
-
-$$.task 'z', ->
-
-  m = $$.require 'video'
-  video = m()
-
-  # await video.execute()
-
-  await video.format '~/Downloads/video/input/*.mov'
-  , '~/Downloads/video/output'
+# $$.task 'z', ->
