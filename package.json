@@ -23,7 +23,7 @@
     "chromeless": "^1.5.1",
     "fire-keeper": "^0.0.103",
     "fluent-ffmpeg": "^2.1.2",
-    "iconv-lite": "^0.4.19",
+    "iconv-lite": "^0.4.21",
     "jimp": "^0.2.28",
     "nanoid": "^1.0.2",
     "progress": "^2.0.0"

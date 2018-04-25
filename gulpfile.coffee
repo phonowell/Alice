@@ -287,31 +287,18 @@ $$.task 'x', ->
 
 $$.task 'z', ->
 
-  cheerio = require 'cheerio'
+  jimp = require 'jimp'
 
-  getTitle = (id) ->
+  await $$.remove '~/Downloads/channel-new'
 
-    try html = await $.get "http://www.8wenku.com/book/#{id}"
-    catch err then return null
+  listSource = await $$.source '~/Downloads/channel/*.png'
 
-    dom = cheerio.load html
+  for source in listSource
 
-    title = _.trim dom('title').text()
+    target = source.toLowerCase()
+    .replace /\s+/g, '-'
+    .replace /downloads\/channel/, 'Downloads/channel-new'
 
-    if ~title.search /404/ then return null
-    title = title.split(',')[0]
-    .replace /小说/, ''
-
-    title # return
-
-  listTitle = []
-
-  for id in [0...6e3]
-    $.i id
-    unless title = await getTitle id then continue
-    $.i title
-    listTitle.push [id, title]
-    
-    $.info.pause '8wenku'
-    await $$.write 'F:/8wenku.json', listTitle
-    $.info.resume '8wenku'
+    img = await jimp.read source
+    img.scale 400 / 739
+    img.write target
