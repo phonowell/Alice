@@ -1,7 +1,7 @@
 # require
 
-$$ = require 'fire-keeper'
-{$, _} = $$.library
+$ = require 'fire-keeper'
+{_} = $.library
 
 path = require 'path'
 ffmpeg = require 'fluent-ffmpeg'
@@ -63,7 +63,7 @@ class Video
   execute: ->
 
     target = '~/Downloads/video/output'
-    await $$.remove target
+    await $.remove target
 
     await @format [
       '~/OneDrive/图片/小黄图/webm/*.webm'
@@ -71,22 +71,22 @@ class Video
     ]
     , target
 
-    await $$.move "#{target}/*.mp4"
+    await $.move "#{target}/*.mp4"
     , '~/OneDrive/图片/小黄图/mp4'
 
-    await $$.remove '~/OneDrive/图片/小黄图/webm'
+    await $.remove '~/OneDrive/图片/小黄图/webm'
 
-    await $$.say 'mission completed'
+    await $.say 'mission completed'
     
   format: (source, target, option = {}) ->
 
     genMsg = @genMsg
 
-    source = await $$.source source
-    target = $$.fn.normalizePath target
+    source = await $.source source
+    target = $.fn.normalizePath target
 
     $.info.pause 'Video.mkdir'
-    await $$.mkdir target
+    await $.mkdir target
     $.info.resume 'Video.mkdir'
 
     if $.type(option) == 'string'

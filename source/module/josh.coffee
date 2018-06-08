@@ -1,7 +1,7 @@
 # require
 
-$$ = require 'fire-keeper'
-{$, _} = $$.library
+$ = require 'fire-keeper'
+{_} = $.library
 
 path = require 'path'
 
@@ -25,11 +25,11 @@ class Josh
 
     resourceList = await @getResourceList()
 
-    base = switch $$.os
+    base = switch $.os
       when 'macos' then '~/Downloads'
       when 'windows' then 'F:'
 
-    open = switch $$.os
+    open = switch $.os
       when 'macos' then 'open'
       when 'windows' then 'start'
 
@@ -37,19 +37,19 @@ class Josh
       for url in list
 
         filename = path.basename url
-        if await $$.isExisted "#{base}/midi/#{title}/#{filename}"
+        if await $.isExisted "#{base}/midi/#{title}/#{filename}"
           continue
 
-        await $$.remove "#{base}/#{filename}"
+        await $.remove "#{base}/#{filename}"
 
-        await $$.shell "#{open} #{url}"
+        await $.shell "#{open} #{url}"
 
-        await $$.delay 5e3
+        await $.delay 5e3
 
-        await $$.copy "#{base}/#{filename}"
+        await $.copy "#{base}/#{filename}"
         , "#{base}/midi/#{title}"
 
-        await $$.remove "#{base}/#{filename}"
+        await $.remove "#{base}/#{filename}"
 
     $.info 'josh', 'task finished'
 
@@ -63,11 +63,11 @@ class Josh
       target = './temp/josh/page'
       filename = "#{tag.toLowerCase()}.html"
 
-      if await $$.isExisted "#{target}/#{filename}" then continue
+      if await $.isExisted "#{target}/#{filename}" then continue
 
       url = "http://josh.agarrado.net/music/anime/index.php?startswith=#{tag}"
 
-      await $$.download url, target, filename
+      await $.download url, target, filename
 
     $.info 'josh', 'all pages downloaded'
 
@@ -77,8 +77,8 @@ class Josh
 
     source = './temp/josh/resource.json'
 
-    if await $$.isExisted source
-      return await $$.read source
+    if await $.isExisted source
+      return await $.read source
 
     # if there has got no resource list
     # get list from net
@@ -92,7 +92,7 @@ class Josh
 
     for tag in tagList
 
-      html = await $$.read "./temp/josh/page/#{tag}.html"
+      html = await $.read "./temp/josh/page/#{tag}.html"
 
       dom = cheerio.load html
       dom('a').each ->
@@ -124,12 +124,12 @@ class Josh
     content = content.replace /\s{2,}/g, ' '
     .replace /\\\w/g, ''
 
-    await $$.write source, content
+    await $.write source, content
 
     $.info 'josh', 'got resource list'
 
     # return
-    await $$.read source
+    await $.read source
 
 # return
 module.exports = (arg...) -> new Josh arg...

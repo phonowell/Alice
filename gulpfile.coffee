@@ -1,14 +1,14 @@
-$$ = require 'fire-keeper'
-{$, _} = $$.library
+$ = require 'fire-keeper'
+{_} = $.library
 
 fs = require 'fs'
 path = require 'path'
 
 # function
 
-exclude = $$.fn.excludeInclude
+exclude = $.fn.excludeInclude
 
-$$.require = (name) ->
+$.require = (name) ->
   require "./source/module/#{name}.coffee"
 
 $.do = (fn) ->
@@ -44,45 +44,45 @@ wnacg()
 
 ###
 
-$$.task 'alice', ->
+$.task 'alice', ->
 
-  m = $$.require 'alice'
+  m = $.require 'alice'
   alice = m()
 
   await alice.start()
 
-$$.task 'backup', ->
+$.task 'backup', ->
 
-  m = $$.require 'onedrive'
+  m = $.require 'onedrive'
   od = m()
 
-  {target} = $$.argv
+  {target} = $.argv
   if !target
-    return $.info 'target', $$.fn.wrapList od.validTarget
+    return $.info 'target', $.fn.wrapList od.validTarget
 
   await od.execute target
 
-$$.task 'check', ->
+$.task 'check', ->
 
-  {target} = $$.argv
+  {target} = $.argv
   if !target
     throw new Error 'empty target'
 
   if target == 'all'
-    listSource = await $$.source [
+    listSource = await $.source [
       '../*'
       '!../alice'
     ]
     for source in listSource
       target = path.basename source
-      await $$.shell [
+      await $.shell [
         "gulp check --target #{target}"
       ]
-    await $$.say 'mission completed'
+    await $.say 'mission completed'
     return
 
   base = "../#{target}"
-  unless await $$.isExisted base
+  unless await $.isExisted base
     throw new Error "invalid target <#{target}>"
   if target == 'alice'
     throw new Error "invalid target <#{target}>"
@@ -90,10 +90,10 @@ $$.task 'check', ->
   # function
   check = (listSource, callback) ->
 
-    listSource = await $$.source listSource
+    listSource = await $.source listSource
 
     for source in listSource
-      await $$.replace source, (cont) ->
+      await $.replace source, (cont) ->
         _.trim callback cont
 
   # execute
@@ -120,26 +120,26 @@ $$.task 'check', ->
     .replace /co\s=\sPromise\.coroutine/g, ''
     .replace /\n{3,}/g, '\n\n'
 
-$$.task 'convert', ->
+$.task 'convert', ->
 
   iconv = require 'iconv-lite'
 
-  listSource = await $$.source '~/Download/*.txt'
+  listSource = await $.source '~/Download/*.txt'
 
   for source in listSource
 
-    text = await $$.read source
+    text = await $.read source
     if ~text.search /[的一是了我不人在他有这个上们来到时，。]/
       continue
 
     buffer = fs.readFileSync source
     text = iconv.decode buffer, 'gbk'
 
-    await $$.write source, text
+    await $.write source, text
 
-$$.task 'daily', ->
+$.task 'daily', ->
 
-  lines = switch $$.os
+  lines = switch $.os
 
     when 'macos'
 
@@ -159,113 +159,113 @@ $$.task 'daily', ->
         'gulp backup --target onedrive'
       ]
 
-    else throw new Error "invalid os <#{$$.os}>"
+    else throw new Error "invalid os <#{$.os}>"
 
-  await $$.shell lines
+  await $.shell lines
 
-  await $$.say 'Mission Completed'
+  await $.say 'Mission Completed'
 
-$$.task 'josh', ->
+$.task 'josh', ->
 
-  m = $$.require 'josh'
+  m = $.require 'josh'
   josh = m()
 
   await josh.download()
 
-$$.task 'jpeg', ->
+$.task 'jpeg', ->
 
-  m = $$.require 'jpeg'
+  m = $.require 'jpeg'
   jpeg = m()
 
-  {target} = $$.argv
+  {target} = $.argv
   target or= 'auto'
 
   unless target in jpeg.validTarget
-    $.info 'target', $$.fn.wrapList jpeg.validTarget
+    $.info 'target', $.fn.wrapList jpeg.validTarget
     throw new Error "invalid target <#{target}>"
 
   await jpeg[target]()
 
-$$.task 'lint', ->
+$.task 'lint', ->
 
-  await $$.task('kokoro')()
+  await $.task('kokoro')()
 
-  await $$.lint './danmaku.md'
+  await $.lint './danmaku.md'
 
-  await $$.lint [
+  await $.lint [
     './gulpfile.coffee'
     './source/**/*.coffee'
   ]
 
-$$.task 'list', ->
+$.task 'list', ->
 
-  m = $$.require 'list'
+  m = $.require 'list'
   list = m()
 
-  {target} = $$.argv
+  {target} = $.argv
   if !target
-    return $.info 'target', $$.fn.wrapList list.validTarget
+    return $.info 'target', $.fn.wrapList list.validTarget
 
   list.list target
 
-$$.task 'seek', ->
+$.task 'seek', ->
 
-  m = $$.require 'seeker'
+  m = $.require 'seeker'
   seeker = m()
 
-  {target} = $$.argv
+  {target} = $.argv
 
   await seeker.seek target
 
-$$.task 'sfacg', ->
+$.task 'sfacg', ->
 
-  m = $$.require 'sfacg'
+  m = $.require 'sfacg'
   sf = m()
 
-  {url} = $$.argv
+  {url} = $.argv
   if !url then throw new Error 'invalid url'
 
   await sf.get url
 
-$$.task 'shell', ->
+$.task 'shell', ->
 
-  m = $$.require 'shell'
+  m = $.require 'shell'
   shell = m()
 
-  {cmd} = $$.argv
+  {cmd} = $.argv
   if !cmd
-    return $.info 'cmd', $$.fn.wrapList shell.validCmd
+    return $.info 'cmd', $.fn.wrapList shell.validCmd
 
   await shell.execute cmd
 
-$$.task 'sssserver', ->
+$.task 'sssserver', ->
 
-  m = $$.require 'ssserver'
+  m = $.require 'ssserver'
   ss = m()
 
-  {host} = $$.argv
+  {host} = $.argv
   if !host
     throw new Error 'empty host'
 
   await ss.execute host
 
-$$.task 'upgrade', ->
+$.task 'upgrade', ->
 
-  await $$.shell [
+  await $.shell [
     'git fetch'
     'gulp update'
   ]
 
-$$.task 'wnacg', ->
+$.task 'wnacg', ->
 
-  m = $$.require 'wnacg'
+  m = $.require 'wnacg'
   wnacg = m()
 
   await wnacg.execute()
 
-$$.task 'upgrade', ->
+$.task 'upgrade', ->
 
-  await $$.shell [
+  await $.shell [
     'git stash'
     'git stash clear'
     'git pull'
@@ -273,32 +273,46 @@ $$.task 'upgrade', ->
     'gulp prune'
   ]
 
-$$.task 'x', ->
+$.task 'x', ->
 
-  listSource = await $$.source './node_modules/*'
-  listRemove = []
+  listSource = await $.source '../*'
+  listCmd = []
 
   for source in listSource
 
-    try fs.statSync source
-    catch err then listRemove.push source
+    pkg = "#{source}/package.json"
+    pkg = await $.read pkg
 
-  await $$.remove listRemove
+    if !pkg then continue
 
-$$.task 'z', ->
+    version = _.get pkg, 'dependencies.fire-keeper'
+    version or= _.get pkg, 'devDependencies.fire-keeper'
+
+    if !version then continue
+
+    listCmd.push "cd #{source}"
+    listCmd.push 'gulp update'
+
+  # return $.i listCmd
+  await $.shell listCmd
+  await $.say 'mission completed'
+
+$.task 'z', ->
 
   jimp = require 'jimp'
 
-  await $$.remove '~/Downloads/channel-new'
+  await $.remove '~/Downloads/channel-new'
 
-  listSource = await $$.source '~/Downloads/channel/*.png'
+  listSource = await $.source '~/Downloads/channel/*.png'
 
   for source in listSource
 
     target = source.toLowerCase()
-    .replace /\s+/g, '-'
+    # .replace /\s+/g, '-'
     .replace /downloads\/channel/, 'Downloads/channel-new'
+    .replace /\.png/, '.jpg'
 
     img = await jimp.read source
-    img.scale 400 / 739
+    # img.scale 128 / 154
+    img.rotate 90
     img.write target

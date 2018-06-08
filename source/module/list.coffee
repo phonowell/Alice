@@ -1,7 +1,7 @@
 # require
 
-$$ = require 'fire-keeper'
-{$, _} = $$.library
+$ = require 'fire-keeper'
+{_} = $.library
 
 colors = require 'colors/safe'
 

@@ -1,7 +1,7 @@
 # require
 
-$$ = require 'fire-keeper'
-{$, _} = $$.library
+$ = require 'fire-keeper'
+{_} = $.library
 
 path = require 'path'
 
@@ -13,11 +13,11 @@ class Sfacg
 
   constructor: ->
 
-    @base = switch $$.os
+    @base = switch $.os
       when 'macos' then '~/Downloads'
       when 'windows' then 'F:'
 
-    @open = switch $$.os
+    @open = switch $.os
       when 'macos' then 'open'
       when 'windows' then 'start'
 
@@ -50,10 +50,10 @@ class Sfacg
 
       filename = path.basename a.source
 
-      if await $$.isExisted "#{@base}/#{filename}" then continue
+      if await $.isExisted "#{@base}/#{filename}" then continue
 
       $.info.pause 'sfacg.download'
-      await $$.shell "#{@open} #{a.source}"
+      await $.shell "#{@open} #{a.source}"
       $.info.resume 'sfacg.download'
 
       $.info 'sfacg', "downloaded '#{a.source}'"
@@ -91,7 +91,7 @@ class Sfacg
 
     time = 5e3 + (resourceList.length - 1) * 1e3
     $.info 'sfacg', "should wait '#{time} ms' for downloading"
-    await $$.delay time
+    await $.delay time
 
     await @rename resourceList
     await @zip resourceList
@@ -132,9 +132,9 @@ class Sfacg
 
       filename = path.basename a.source
 
-      unless await $$.isExisted "#{@base}/#{filename}" then continue
+      unless await $.isExisted "#{@base}/#{filename}" then continue
 
-      await $$.rename "#{@base}/#{filename}", "#{a.title}.txt"
+      await $.rename "#{@base}/#{filename}", "#{a.title}.txt"
 
   zip: (list) ->
 
@@ -144,8 +144,8 @@ class Sfacg
 
     fileList = ("#{@base}/#{a.title}.txt" for a in list)
 
-    await $$.zip fileList, "#{@base}/", "#{title}.zip"
-    await $$.remove fileList
+    await $.zip fileList, "#{@base}/", "#{title}.zip"
+    await $.remove fileList
 
 # return
 module.exports = (arg...) -> new Sfacg arg...

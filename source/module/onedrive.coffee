@@ -1,7 +1,7 @@
 # require
 
-$$ = require 'fire-keeper'
-{$, _} = $$.library
+$ = require 'fire-keeper'
+{_} = $.library
 
 path = require 'path'
 
@@ -11,7 +11,7 @@ class OneDrive
 
   constructor: ->
 
-    @base = switch $$.os
+    @base = switch $.os
       when 'macos' then '~/OneDrive'
       when 'windows' then 'E:/OneDrive'
       else throw new Error 'invalid os'
@@ -30,14 +30,14 @@ class OneDrive
   ###
 
   backup: ->
-    await $$.zip "#{@base}/**/*.*"
+    await $.zip "#{@base}/**/*.*"
     , "#{@base}/.."
     , 'OneDrive.zip'
 
   backupGameSave: ->
 
-    if $$.os != 'windows'
-      throw new Error "invalid os <#{$$.os}>"
+    if $.os != 'windows'
+      throw new Error "invalid os <#{$.os}>"
 
     listSave = [
       '~/AppData/Roaming/DarkSoulsIII'
@@ -47,14 +47,14 @@ class OneDrive
 
     for pathSave in listSave
 
-      unless await $$.isExisted pathSave
+      unless await $.isExisted pathSave
         continue
 
       source = "#{pathSave}/**/*.*"
       target = "#{@base}/存档"
       filename = "#{path.basename pathSave}.zip"
 
-      await $$.zip source, target, filename
+      await $.zip source, target, filename
 
   execute: (target) ->
 

@@ -1,7 +1,7 @@
 # require
 
-$$ = require 'fire-keeper'
-{$, _} = $$.library
+$ = require 'fire-keeper'
+{_} = $.library
 
 # class
 
@@ -48,10 +48,10 @@ class Shell
 
       else throw new Error 'invalid cmd'
 
-    unless lines = lines[$$.os]
-      return $.info 'os', "invalid os <#{$$.os}>"
+    unless lines = lines[$.os]
+      return $.info 'os', "invalid os <#{$.os}>"
 
-    await $$.shell lines
+    await $.shell lines
 
 # return
 module.exports = (arg...) -> new Shell arg...

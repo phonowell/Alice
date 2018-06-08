@@ -1,7 +1,7 @@
 # require
 
-$$ = require 'fire-keeper'
-{$, _} = $$.library
+$ = require 'fire-keeper'
+{_} = $.library
 
 cheerio = require 'cheerio'
 colors = require 'colors/safe'
@@ -33,7 +33,7 @@ class Seeker
     list = _.uniqBy list, 'url'
     list = _.sortBy list, 'time'
 
-    sourceList = await $$.read source
+    sourceList = await $.read source
     sourceList or= []
 
     res = _.differenceBy list, sourceList, 'url'
@@ -43,7 +43,7 @@ class Seeker
     list = _.sortBy list, 'time'
     list = _.reverse list
     if list.length > cacheSize then list = list[0...cacheSize]
-    await $$.write source, list
+    await $.write source, list
 
     return res
 
@@ -54,12 +54,12 @@ class Seeker
     for url in list
 
       filename = @getFilename url
-      stat = await $$.stat "#{@base}/seeker/page/#{filename}"
+      stat = await $.stat "#{@base}/seeker/page/#{filename}"
 
       if stat and _.now() - stat.ctime.getTime() < lifetime
         continue
 
-      await $$.download url, "#{@base}/seeker/page",
+      await $.download url, "#{@base}/seeker/page",
         filename: filename
         timeout: 1e4
 
@@ -107,7 +107,7 @@ class Seeker
 
       filename = @getFilename url
 
-      cont = await $$.read "#{@base}/seeker/page/#{filename}"
+      cont = await $.read "#{@base}/seeker/page/#{filename}"
       dom = cheerio.load cont.toString()
 
       dom(selector).each ->
@@ -146,13 +146,13 @@ class Seeker
 
     target = "#{@base}/seeker/result.html"
 
-    method = switch $$.os
+    method = switch $.os
       when 'linux', 'macos' then 'open'
       when 'windows' then 'start'
-      else throw new Error "invalid os <#{$$.os}>"
+      else throw new Error "invalid os <#{$.os}>"
 
-    await $$.write target, html
-    await $$.shell "#{method} #{target}"
+    await $.write target, html
+    await $.shell "#{method} #{target}"
 
   seek: (name) ->
 

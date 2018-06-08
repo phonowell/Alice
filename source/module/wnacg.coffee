@@ -1,7 +1,7 @@
 # require
 
-$$ = require 'fire-keeper'
-{$, _} = $$.library
+$ = require 'fire-keeper'
+{_} = $.library
 
 path = require 'path'
 
@@ -37,7 +37,7 @@ class Wnacg
       url = dom('a.down_btn').eq(0).attr 'href'
       filename = _.trim "#{item.title}.zip"
       
-      await $$.download url
+      await $.download url
       , '~/Downloads/wnacg'
       , filename
 
@@ -50,7 +50,7 @@ class Wnacg
 
   search: (reg) ->
 
-    db = await $$.read './temp/wnacg/db/db.json'
+    db = await $.read './temp/wnacg/db/db.json'
 
     list = []
     for item in db

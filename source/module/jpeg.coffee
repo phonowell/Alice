@@ -1,7 +1,7 @@
 # require
 
-$$ = require 'fire-keeper'
-{$, _} = $$.library
+$ = require 'fire-keeper'
+{_} = $.library
 
 path = require 'path'
 generate = require 'nanoid/generate'
@@ -85,7 +85,7 @@ class Jpeg
       'resize'
     ]
 
-    [@base, @download] = switch $$.os
+    [@base, @download] = switch $.os
 
       when 'macos'
         [
@@ -99,7 +99,7 @@ class Jpeg
           'F:'
         ]
 
-      else throw new Error "invalid os <#{$$.os}>"
+      else throw new Error "invalid os <#{$.os}>"
 
   auto: ->
     await @move()
@@ -113,15 +113,15 @@ class Jpeg
 
     $.info 'step', 'clean'
 
-    listSource = await $$.source "#{@base}/**/.DS_Store"
+    listSource = await $.source "#{@base}/**/.DS_Store"
     if !listSource.length then return
-    await $$.remove listSource
+    await $.remove listSource
 
   convert: ->
 
     $.info 'step', 'convert'
 
-    listSource = await $$.source [
+    listSource = await $.source [
       "#{@base}/**/*.bmp"
       "#{@base}/**/*.png"
       "#{@base}/**/*.webp"
@@ -134,7 +134,7 @@ class Jpeg
       img = await getImage source
       img.write target
 
-      await $$.remove source
+      await $.remove source
 
   move: ->
 
@@ -142,9 +142,9 @@ class Jpeg
 
     for ext in ['gif', 'mp4', 'webm']
 
-      listSource = await $$.source "#{@download}/*.#{ext}"
+      listSource = await $.source "#{@download}/*.#{ext}"
       if !listSource.length then continue
-      await $$.move listSource, "#{@base}/小黄图/#{ext}"
+      await $.move listSource, "#{@base}/小黄图/#{ext}"
 
   rename: ->
 
@@ -153,7 +153,7 @@ class Jpeg
     list = []
 
     list.push
-      source: await $$.source [
+      source: await $.source [
         "#{@base}/**/*.*"
         "!#{@base}/本子/**/*.*/"
         "!#{@base}/*.*"
@@ -162,7 +162,7 @@ class Jpeg
       getName: getRandomBasename
 
     list.push
-      source: await $$.source "#{@base}/本子/**/*.*"
+      source: await $.source "#{@base}/本子/**/*.*"
       valid: isPageNameValid
       getName: getPageName
 
@@ -176,17 +176,17 @@ class Jpeg
 
         basename = item.getName basename
         if basename?
-          await $$.rename source, {basename}
-        else await $$.remove source
+          await $.rename source, {basename}
+        else await $.remove source
 
   renameJpeg: ->
 
     $.info 'step', 'renameJpeg'
 
-    listSource = await $$.source "#{@base}/**/*.jpeg"
+    listSource = await $.source "#{@base}/**/*.jpeg"
 
     for source in listSource
-      await $$.rename source, extname: '.jpg'
+      await $.rename source, extname: '.jpg'
 
   resize: ->
 
@@ -195,14 +195,14 @@ class Jpeg
     list = []
 
     list.push
-      source: await $$.source [
+      source: await $.source [
         "#{@base}/**/*.jpg"
         "!#{@base}/本子/**/*.*"
       ]
       valid: isBasenameValid
 
     list.push
-      source: await $$.source "#{@base}/本子/**/*.jpg"
+      source: await $.source "#{@base}/本子/**/*.jpg"
       valid: isPageNameValid
 
     for item in list
