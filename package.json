@@ -21,7 +21,7 @@
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
     "chromeless": "^1.5.2",
-    "fire-keeper": "0.0.105",
+    "fire-keeper": "0.0.106",
     "fluent-ffmpeg": "^2.1.2",
     "iconv-lite": "^0.4.23",
     "jimp": "^0.2.28",

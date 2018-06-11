@@ -215,7 +215,7 @@ $.task 'seek', ->
 
   {target} = $.argv
 
-  await seeker.seek target
+  await seeker.execute_ target
 
 $.task 'sfacg', ->
 
