@@ -9,10 +9,6 @@ cheerio = require 'cheerio'
 
 class Seeker
 
-  constructor: ->
-
-    @base = './temp'
-
   ###
   base
   map

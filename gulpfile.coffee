@@ -25,13 +25,12 @@ $.isAsyncFunction = (fn) ->
 # task
 
 ###
-
 alice()
 backup([target])
 check(target)
 convert()
 daily()
-jpeg([action])
+image()
 lint()
 list([target])
 seek([target])
@@ -39,7 +38,6 @@ shell([cmd])
 ssserver(host)
 upgrade()
 wnacg()
-
 ###
 
 $.task 'alice', ->
@@ -145,7 +143,7 @@ $.task 'daily', ->
         'brew update -v'
         'brew upgrade -v'
         'gulp shell --cmd launchpad'
-        'gulp jpeg'
+        'gulp image'
         'gulp backup --target onedrive'
       ]
 
@@ -153,7 +151,7 @@ $.task 'daily', ->
 
       [
         'gulp backup --target game'
-        'gulp jpeg'
+        'gulp image'
         'gulp backup --target onedrive'
       ]
 
@@ -163,19 +161,12 @@ $.task 'daily', ->
 
   await $.say 'Mission Completed'
 
-$.task 'jpeg', ->
+$.task 'image', ->
 
-  m = $.require 'jpeg'
-  jpeg = m()
+  m = $.require 'image'
+  image = m()
 
-  {target} = $.argv
-  target or= 'auto'
-
-  unless target in jpeg.validTarget
-    $.info 'target', $.fn.wrapList jpeg.validTarget
-    throw new Error "invalid target <#{target}>"
-
-  await jpeg[target]()
+  await image.execute_()
 
 $.task 'lint', ->
 
@@ -205,7 +196,6 @@ $.task 'seek', ->
   seeker = m()
 
   {target} = $.argv
-
   await seeker.execute_ target
 
 $.task 'shell', ->
