@@ -143,12 +143,8 @@ class Seeker
 
       $.info.resume 'seeker.execute_'
 
-    $.info.pause 'seeker.execute_'
-
     html = @genHtml map
     await @openPage_ html
-
-    $.info.resume 'seeker.execute_'
 
   genHtml: (map) ->
 
@@ -267,8 +263,10 @@ class Seeker
       when 'windows' then 'start'
       else throw new Error "invalid os <#{$.os}>"
 
+    $.info.pause 'seeker.openPage_'
     await $.write target, html
     await $.shell "#{method} #{target}"
+    $.info.resume 'seeker.openPage_'
 
   unique_: (listLink, data) ->
 

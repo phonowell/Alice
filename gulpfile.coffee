@@ -31,12 +31,10 @@ backup([target])
 check(target)
 convert()
 daily()
-josh()
 jpeg([action])
 lint()
 list([target])
 seek([target])
-sfacg(url)
 shell([cmd])
 ssserver(host)
 upgrade()
@@ -165,13 +163,6 @@ $.task 'daily', ->
 
   await $.say 'Mission Completed'
 
-$.task 'josh', ->
-
-  m = $.require 'josh'
-  josh = m()
-
-  await josh.download()
-
 $.task 'jpeg', ->
 
   m = $.require 'jpeg'
@@ -216,16 +207,6 @@ $.task 'seek', ->
   {target} = $.argv
 
   await seeker.execute_ target
-
-$.task 'sfacg', ->
-
-  m = $.require 'sfacg'
-  sf = m()
-
-  {url} = $.argv
-  if !url then throw new Error 'invalid url'
-
-  await sf.get url
 
 $.task 'shell', ->
 
