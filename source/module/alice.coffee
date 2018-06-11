@@ -126,22 +126,22 @@ class Alice
     Qq.say = (listMsg, isBreak = false) ->
 
       listMsg = switch $.type listMsg
-          when 'array' then _.clone listMsg
-          when 'number', 'string' then [listMsg]
-          else throw new Error 'invalid type'
+        when 'array' then _.clone listMsg
+        when 'number', 'string' then [listMsg]
+        else throw new Error 'invalid type'
 
-        if !isBreak
-          return await @speak listMsg.join '\r\n'
+      if !isBreak
+        return await @speak listMsg.join '\r\n'
 
-        for msg in listMsg
-          await @speak msg
+      for msg in listMsg
+        await @speak msg
 
     Qq.speak = (msg) ->
 
-        await @delay()
-        @emitter.emit 'say',
-          content: msg
-          name: @nickname
+      await @delay()
+      @emitter.emit 'say',
+        content: msg
+        name: @nickname
 
     Qq.nickname = 'Alice'
     Qq.statusRoom =
@@ -152,83 +152,83 @@ class Alice
 
     switch listCmd[0]
 
-        when 'ask'
-          question = listCmd[1...].join ' '
-          await @ask question, nickname
+      when 'ask'
+        question = listCmd[1...].join ' '
+        await @ask question, nickname
 
-        when 'help', 'h'
+      when 'help', 'h'
 
-          listMsg = [
-            '-ask xxx: get information about xxx'
-            '-help: show help information'
-            '-repeat [xxx]: repeat xxx'
-            '-roll [dice] [description]: roll(dice should between 1d1 and 20d100)'
-            '-star xxx: show x★x★x'
-            '-test: run test'
-            '-unwatch type name: stop watching name, type'
-            '-watch type name: start to watch name, type'
-          ]
-          await Qq.say listMsg
+        listMsg = [
+          '-ask xxx: get information about xxx'
+          '-help: show help information'
+          '-repeat [xxx]: repeat xxx'
+          '-roll [dice] [description]: roll(dice should between 1d1 and 20d100)'
+          '-star xxx: show x★x★x'
+          '-test: run test'
+          '-unwatch type name: stop watching name, type'
+          '-watch type name: start to watch name, type'
+        ]
+        await Qq.say listMsg
 
-        when 'repeat'
-          msg = _.trim listCmd[1...].join ' '
-          if !msg.length then return
-          await Qq.say msg
+      when 'repeat'
+        msg = _.trim listCmd[1...].join ' '
+        if !msg.length then return
+        await Qq.say msg
 
-        when 'roll', 'r'
+      when 'roll', 'r'
 
-          string = listCmd[1] or '1d100'
-          if !string?.length then return
+        string = listCmd[1] or '1d100'
+        if !string?.length then return
 
-          stringValid = string
-          .replace /[\+\-\*\/\(\)\dd]/g, ''
-          if stringValid.length then return
+        stringValid = string
+        .replace /[\+\-\*\/\(\)\dd]/g, ''
+        if stringValid.length then return
 
-          listDice = string.match /\d+d\d+/g
-          if listDice?.length
-            for dice in listDice
-              unless res = @roll dice then return
-              string = string.replace dice, res[1]
-          if ~string.search 'd' then return
+        listDice = string.match /\d+d\d+/g
+        if listDice?.length
+          for dice in listDice
+            unless res = @roll dice then return
+            string = string.replace dice, res[1]
+        if ~string.search 'd' then return
 
-          string = string
-          .replace /([\+\-\*\\])/g, ' $1 '
-          .replace /\s+/g, ' '
+        string = string
+        .replace /([\+\-\*\\])/g, ' $1 '
+        .replace /\s+/g, ' '
 
-          stringResult = unless ~string.search /[\+\-\*\\\(\)]/
-            string
-          else
-            res = try eval string
-            catch err then 'NaN'
-            "#{string} = #{res}"
+        stringResult = unless ~string.search /[\+\-\*\\\(\)]/
+          string
+        else
+          res = try eval string
+          catch err then 'NaN'
+          "#{string} = #{res}"
 
-          stringDesc = listCmd[2...].join ' '
-          if !stringDesc.length
-            stringDesc = "To #{nickname}:"
-          
-          await Qq.say [
-            stringDesc
-            stringResult
-          ]
+        stringDesc = listCmd[2...].join ' '
+        if !stringDesc.length
+          stringDesc = "To #{nickname}:"
+        
+        await Qq.say [
+          stringDesc
+          stringResult
+        ]
 
-        when 'star'
-          msg = _.trim listCmd[1...].join ' '
-          if !msg.length then return
-          await Qq.say msg.split('').join '★'
+      when 'star'
+        msg = _.trim listCmd[1...].join ' '
+        if !msg.length then return
+        await Qq.say msg.split('').join '★'
 
-        when 'test' then await Qq.say 'Alice test.'
+      when 'test' then await Qq.say 'Alice test.'
 
-        when 'unwatch'
-          unless @isAdmin nickname then return
-          type = listCmd[1]
-          name = listCmd[2...].join ' '
-          Qq.removeWatch {type, name}
+      when 'unwatch'
+        unless @isAdmin nickname then return
+        type = listCmd[1]
+        name = listCmd[2...].join ' '
+        Qq.removeWatch {type, name}
 
-        when 'watch'
-          unless @isAdmin nickname then return
-          type = listCmd[1]
-          name = listCmd[2...].join ' '
-          Qq.addWatch {type, name}
+      when 'watch'
+        unless @isAdmin nickname then return
+        type = listCmd[1]
+        name = listCmd[2...].join ' '
+        Qq.addWatch {type, name}
 
   isAdmin: (name) ->
     {type} = Qq.statusRoom

@@ -28,7 +28,6 @@ $.isAsyncFunction = (fn) ->
 alice()
 backup([target])
 check(target)
-convert()
 daily()
 image()
 lint()
@@ -116,49 +115,27 @@ $.task 'check', ->
     .replace /co\s=\sPromise\.coroutine/g, ''
     .replace /\n{3,}/g, '\n\n'
 
-$.task 'convert', ->
-
-  iconv = require 'iconv-lite'
-
-  listSource = await $.source '~/Download/*.txt'
-
-  for source in listSource
-
-    text = await $.read source
-    if ~text.search /[的一是了我不人在他有这个上们来到时，。]/
-      continue
-
-    buffer = fs.readFileSync source
-    text = iconv.decode buffer, 'gbk'
-
-    await $.write source, text
-
 $.task 'daily', ->
 
-  lines = switch $.os
+  mapLines =
 
-    when 'macos'
+    macos: [
+      'brew update -v'
+      'brew upgrade -v'
+      'gulp shell --cmd launchpad'
+      'gulp image'
+      'gulp backup --target onedrive'
+    ]
 
-      [
-        'brew update -v'
-        'brew upgrade -v'
-        'gulp shell --cmd launchpad'
-        'gulp image'
-        'gulp backup --target onedrive'
-      ]
+    windows: [
+      'gulp backup --target game'
+      'gulp image'
+      'gulp backup --target onedrive'
+    ]
 
-    when 'windows'
-
-      [
-        'gulp backup --target game'
-        'gulp image'
-        'gulp backup --target onedrive'
-      ]
-
-    else throw new Error "invalid os <#{$.os}>"
+  lines = mapLines[$.os] or throw new Error "invalid os '#{$.os}'"
 
   await $.shell lines
-
   await $.say 'Mission Completed'
 
 $.task 'image', ->
@@ -219,13 +196,6 @@ $.task 'sssserver', ->
     throw new Error 'empty host'
 
   await ss.execute host
-
-$.task 'upgrade', ->
-
-  await $.shell [
-    'git fetch'
-    'gulp update'
-  ]
 
 $.task 'wnacg', ->
 
