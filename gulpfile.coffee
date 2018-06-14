@@ -32,6 +32,7 @@ daily()
 image()
 lint()
 list([target])
+sankaku(target)
 seek([target])
 shell([cmd])
 ssserver(host)
@@ -167,6 +168,14 @@ $.task 'list', ->
 
   list.list target
 
+$.task 'sankaku', ->
+
+  m = $.require 'sankaku'
+  sankaku = m()
+
+  {target} = $.argv
+  await sankaku.execute_ target
+
 $.task 'seek', ->
 
   m = $.require 'seeker'
@@ -214,6 +223,28 @@ $.task 'upgrade', ->
     'gulp prune'
   ]
 
+$.task 'y', ->
+
+  listName = [
+    # 'gorgeous_mushroom'
+    # 'ke-ta'
+    # 'letdie1414'
+    # 'mamuru'
+    # 'mercurymaster'
+    'misaki_kurehito'
+    'osuman_toruko'
+    'ryo'
+    'sakimichan'
+    'sawayaka_samehada'
+    'souji_hougu'
+    'veilrain'
+    'yang-do'
+  ]
+
+  listCmd = ("gulp sankaku --target #{target}" for target in listName)
+
+  await $.shell listCmd
+
 $.task 'x', ->
 
   listSource = await $.source '../*'
@@ -257,3 +288,10 @@ $.task 'z', ->
     # img.scale 128 / 154
     img.rotate 90
     img.write target
+
+$.task 'm', ->
+
+  m = $.require 'momo'
+  robot = m()
+
+  await robot.compile_ './ahk/sample.coffee'
