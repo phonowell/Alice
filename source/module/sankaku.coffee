@@ -1,7 +1,7 @@
 # require
 
 $ = require 'fire-keeper'
-{_} = $.library
+{_} = $
 
 cheerio = require 'cheerio'
 puppeteer = require 'puppeteer'
@@ -22,8 +22,10 @@ class Sankaku
 
   ###
   buildMap_()
+  clean_()
   downloadImage_(target, url)
   download_(target)
+  executeList_()
   execute_(target)
   getFilename(url)
   getList_(page)
@@ -41,14 +43,19 @@ class Sankaku
     for key in listPost
       map[key] = null
 
-    await $.write "#{@base}/temp/#{@name}.json", map
+    await $.write_ "#{@base}/_index/#{@name}.json", map
 
     map # return
+
+  clean_: -> await $.remove_ "#{@base}/_index"
 
   downloadImage_: (content, pathDownload) ->
     $.info 'step', 'downloadImage_'
 
     {cookie, filename, source} = content
+
+    isExisted = await $.isExisted_ "#{@base}/#{@name}/#{filename}"
+    if isExisted then return await $.delay_ 2e3
 
     listCookie = []
 
@@ -58,7 +65,7 @@ class Sankaku
 
     stringCookie = listCookie.join '; '
 
-    await $.download source, pathDownload,
+    await $.download_ source, pathDownload,
       filename: filename
       headers:
         cookies: stringCookie
@@ -66,29 +73,78 @@ class Sankaku
   download_: ->
     $.info 'step', 'download_'
 
-    pathIndex = "#{@base}/temp/#{@name}.json"
+    pathIndex = "#{@base}/_index/#{@name}.json"
     pathDownload = "#{@base}/#{@name}"
-    mapIndex = await $.read pathIndex
+    mapIndex = await $.read_ pathIndex
 
     for urlPost, filename of mapIndex
 
-      if filename and $.isExisted "#{pathDownload}/#{filename}"
+      if filename and $.isExisted_ "#{pathDownload}/#{filename}"
         continue
 
       content = await @getSource_ urlPost
+      if !content then continue
       await @downloadImage_ content, pathDownload
 
       mapIndex[urlPost] = content.filename
-      await $.write pathIndex, mapIndex
+      await $.write_ pathIndex, mapIndex
 
       # delay
-      await $.delay 1e3
+      await $.delay_ 1e3
+
+  executeList_: ->
+    $.info 'step', 'executeList_'
+
+    listName = [
+      # 'branch (blackrabbits)'
+      # 'faustsketcher'
+      # 'fay'
+      # 'gorgeous mushroom'
+      # 'haitukun'
+      # 'hakaba'
+      # 'ke-ta'
+      'kobayashi chisato'
+      # 'kou mashiro'
+      'lasterk'
+      # 'letdie1414'
+      # 'mamuru'
+      # 'mercurymaster'
+      # 'misak kurehito'
+      # 'oda non'
+      # 'osiimi'
+      # 'osuma toruko'
+      # 'roropull'
+      # 'ryo'
+      # 'sakimichan'
+      # 'sawayaka samehada'
+      # 'shimakaze'
+      # 'souji hougu'
+      # 'suzune rena'
+      'nakadori (movgnsk)'
+      # 'try'
+      # 'yang-do'
+    ]
+
+    for name in listName
+
+      if name[0] == '!' then continue
+
+      name = name
+      .replace /\s+/g, '_'
+      .replace /\(/g, '%28'
+      .replace /\)/g, '%29'
+      
+      await @execute_ name
 
   execute_: (target) ->
     $.info 'step', 'execute_'
 
     # set name
-    @name = target
+    @query = target
+    @name = @query
+    .replace /_+/g, ' '
+    .replace /\%28/g, ''
+    .replace /\%29/g, ''
 
     # list all post
     await @getMap_()
@@ -97,7 +153,7 @@ class Sankaku
     await @download_()
 
     if @browser then await @browser.close()
-    await $.say "mission '#{target}' completed"
+    await $.say_ "mission '#{target}' completed"
 
   getFilename: (url) ->
     string = url.replace /\?.*/, ''
@@ -106,7 +162,7 @@ class Sankaku
   getList_: (page = 1, listResult = []) ->
     $.info 'step', 'getList_'
 
-    url = "https://chan.sankakucomplex.com/post/index.content?tags=#{@name}&page=#{page}"
+    url = "https://chan.sankakucomplex.com/post/index.content?tags=#{@query}&page=#{page}"
 
     try html = await $.get url
     catch then return listResult
@@ -119,7 +175,7 @@ class Sankaku
       $a.each ->
         listResult.push $$(@).attr 'href'
 
-      await $.delay 1e3
+      await $.delay_ 1e3
       return await @getList_ page + 1, listResult
 
     # return
@@ -128,8 +184,8 @@ class Sankaku
   getMap_: (target) ->
     $.info 'step', 'getMap_'
 
-    pathIndex = "#{@base}/temp/#{@name}.json"
-    mapResult = await $.read pathIndex
+    pathIndex = "#{@base}/_index/#{@name}.json"
+    mapResult = await $.read_ pathIndex
 
     if mapResult then return mapResult
 
@@ -178,6 +234,7 @@ class Sankaku
       await page.goto "https://chan.sankakucomplex.com#{urlPost}"
 
     source = @getSource html
+    if !source then return null
 
     filename = @getFilename source
     source = "https:#{source}"

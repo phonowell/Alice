@@ -1,7 +1,7 @@
 # require
 
 $ = require 'fire-keeper'
-{_} = $.library
+{_} = $
 
 puppeteer = require 'puppeteer'
 

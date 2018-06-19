@@ -1,7 +1,7 @@
 # require
 
 $ = require 'fire-keeper'
-{_} = $.library
+{_} = $
 
 EventEmitter = require 'events'
 class QqEmitter extends EventEmitter

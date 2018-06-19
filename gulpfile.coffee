@@ -1,26 +1,29 @@
 $ = require 'fire-keeper'
-{_} = $.library
+{_} = $
 
 fs = require 'fs'
 path = require 'path'
 
 # function
 
+###
+exclude()
+
+do_(name)
+require(name)
+###
+
 exclude = $.fn.excludeInclude
+
+$.do_ = (name) ->
+  m = $.require name
+  m = m()
+  
+  {target} = $.argv
+  await m.execute_ target
 
 $.require = (name) ->
   require "./source/module/#{name}.coffee"
-
-$.do = (fn) ->
-
-  unless $.isAsyncFunction fn
-    throw new Error 'xxx'
-
-  fn.then (res) -> [null, res]
-  .catch (err) -> [err]
-
-$.isAsyncFunction = (fn) ->
-  Object::toString.call(fn) == '[object AsyncFunction]'
 
 # task
 
@@ -31,13 +34,10 @@ check(target)
 daily()
 image()
 lint()
-list([target])
 sankaku(target)
 seek([target])
 shell([cmd])
-ssserver(host)
 upgrade()
-wnacg()
 ###
 
 $.task 'alice', ->
@@ -47,16 +47,7 @@ $.task 'alice', ->
 
   await alice.start()
 
-$.task 'backup', ->
-
-  m = $.require 'onedrive'
-  od = m()
-
-  {target} = $.argv
-  if !target
-    return $.info 'target', $.fn.wrapList od.validTarget
-
-  await od.execute target
+$.task 'backup', -> await $.do_ 'backup'
 
 $.task 'check', ->
 
@@ -65,43 +56,43 @@ $.task 'check', ->
     throw new Error 'empty target'
 
   if target == 'all'
-    listSource = await $.source [
+    listSource = await $.source_ [
       '../*'
       '!../alice'
     ]
     for source in listSource
       target = path.basename source
-      await $.shell [
+      await $.shell_ [
         "gulp check --target #{target}"
       ]
-    await $.say 'mission completed'
+    await $.say_ 'mission completed'
     return
 
   base = "../#{target}"
-  unless await $.isExisted base
+  unless await $.isExisted_ base
     throw new Error "invalid target <#{target}>"
   if target == 'alice'
     throw new Error "invalid target <#{target}>"
 
   # function
-  check = (listSource, callback) ->
+  check_ = (listSource, callback) ->
 
-    listSource = await $.source listSource
+    listSource = await $.source_ listSource
 
     for source in listSource
-      await $.replace source, (cont) ->
+      await $.replace_ source, (cont) ->
         _.trim callback cont
 
   # execute
 
   # pug & stylus
-  await check [
+  await check_ [
     "#{base}/source/**/*.pug"
     "#{base}/source/**/*.styl"
   ], (cont) -> cont.replace /\n{3,}/g, '\n\n'
 
   # coffee
-  await check [
+  await check_ [
     "#{base}/gulpfile.coffee"
     "#{base}/source/**/*.coffee"
     "#{base}/task/**/*.coffee"
@@ -123,21 +114,21 @@ $.task 'daily', ->
     macos: [
       'brew update -v'
       'brew upgrade -v'
-      'gulp shell --cmd launchpad'
+      'gulp shell --target resetlaunchpad'
       'gulp image'
       'gulp backup --target onedrive'
     ]
 
     windows: [
-      'gulp backup --target game'
+      'gulp backup --target gamesave'
       'gulp image'
       'gulp backup --target onedrive'
     ]
 
   lines = mapLines[$.os] or throw new Error "invalid os '#{$.os}'"
 
-  await $.shell lines
-  await $.say 'Mission Completed'
+  await $.shell_ lines
+  await $.say_ 'Mission Completed'
 
 $.task 'image', ->
 
@@ -150,23 +141,12 @@ $.task 'lint', ->
 
   await $.task('kokoro')()
 
-  await $.lint './danmaku.md'
+  await $.lint_ './danmaku.md'
 
-  await $.lint [
+  await $.lint_ [
     './gulpfile.coffee'
     './source/**/*.coffee'
   ]
-
-$.task 'list', ->
-
-  m = $.require 'list'
-  list = m()
-
-  {target} = $.argv
-  if !target
-    return $.info 'target', $.fn.wrapList list.validTarget
-
-  list.list target
 
 $.task 'sankaku', ->
 
@@ -174,48 +154,18 @@ $.task 'sankaku', ->
   sankaku = m()
 
   {target} = $.argv
+  if !target
+    return await sankaku.executeList_()
+  
   await sankaku.execute_ target
 
-$.task 'seek', ->
+$.task 'seek', -> await $.do_ 'seeker'
 
-  m = $.require 'seeker'
-  seeker = m()
-
-  {target} = $.argv
-  await seeker.execute_ target
-
-$.task 'shell', ->
-
-  m = $.require 'shell'
-  shell = m()
-
-  {cmd} = $.argv
-  if !cmd
-    return $.info 'cmd', $.fn.wrapList shell.validCmd
-
-  await shell.execute cmd
-
-$.task 'sssserver', ->
-
-  m = $.require 'ssserver'
-  ss = m()
-
-  {host} = $.argv
-  if !host
-    throw new Error 'empty host'
-
-  await ss.execute host
-
-$.task 'wnacg', ->
-
-  m = $.require 'wnacg'
-  wnacg = m()
-
-  await wnacg.execute()
+$.task 'shell', -> await $.do_ 'shell'
 
 $.task 'upgrade', ->
 
-  await $.shell [
+  await $.shell_ [
     'git stash'
     'git stash clear'
     'git pull'
@@ -223,75 +173,72 @@ $.task 'upgrade', ->
     'gulp prune'
   ]
 
-$.task 'y', ->
-
-  listName = [
-    # 'gorgeous_mushroom'
-    # 'ke-ta'
-    # 'letdie1414'
-    # 'mamuru'
-    # 'mercurymaster'
-    'misaki_kurehito'
-    'osuman_toruko'
-    'ryo'
-    'sakimichan'
-    'sawayaka_samehada'
-    'souji_hougu'
-    'veilrain'
-    'yang-do'
-  ]
-
-  listCmd = ("gulp sankaku --target #{target}" for target in listName)
-
-  await $.shell listCmd
-
-$.task 'x', ->
-
-  listSource = await $.source '../*'
-  listCmd = []
-
-  for source in listSource
-
-    pkg = "#{source}/package.json"
-    pkg = await $.read pkg
-
-    if !pkg then continue
-
-    version = _.get pkg, 'dependencies.fire-keeper'
-    version or= _.get pkg, 'devDependencies.fire-keeper'
-
-    if !version then continue
-
-    listCmd.push "cd #{source}"
-    listCmd.push 'gulp update'
-
-  # return $.i listCmd
-  await $.shell listCmd
-  await $.say 'mission completed'
-
 $.task 'z', ->
 
-  jimp = require 'jimp'
-
-  await $.remove '~/Downloads/channel-new'
-
-  listSource = await $.source '~/Downloads/channel/*.png'
+  listSource = await $.source_ '../*'
 
   for source in listSource
 
-    target = source.toLowerCase()
-    # .replace /\s+/g, '-'
-    .replace /downloads\/channel/, 'Downloads/channel-new'
-    .replace /\.png/, '.jpg'
+    pkg = await $.read_ "#{source}/package.json"
+    if !pkg then continue
 
-    img = await jimp.read source
-    # img.scale 128 / 154
-    img.rotate 90
-    img.write target
+    ver = _.get pkg, 'dependencies.fire-keeper'
+    if ver
+      suffix = ''
+    else
+      ver = _.get pkg, 'devDependencies.fire-keeper'
+      if ver then suffix = '--save-dev'
 
-$.task 'm', ->
+    if !ver then continue
+    if ver == '0.0.107' then continue
+    if !suffix then continue
 
-  m = $.require 'momo'
-  robot = m()
+    listCmd = [
+      "cd #{source}"
+      _.trim "npm i fire-keeper@0.0.107 #{suffix}"
+    ]
 
-  await robot.compile_ './ahk/sample.coffee'
+    await $.shell_ listCmd
+
+    pathGulpfile = "#{source}/gulpfile.coffee"
+
+    await $.replace_ pathGulpfile, /\$\.([^\s\(]+)/g, (s, string) ->
+      
+      listKey = [
+        'backup'
+        'compile'
+        'copy'
+        'delay'
+        'download'
+        'isExisted'
+        'isSame'
+        'link'
+        'lint'
+        'mkdir'
+        'move'
+        'read'
+        'recover'
+        'remove'
+        'rename'
+        'replace'
+        'say'
+        'shell'
+        'source'
+        'ssh.connect'
+        'ssh.disconnect'
+        'ssh.mkdir'
+        'ssh.remove'
+        'ssh.shell'
+        'ssh.upload'
+        'stat'
+        'unzip'
+        'update'
+        'walk'
+        'write'
+        'zip'
+      ]
+
+      unless string in listKey
+        return s
+
+      "$.#{_.trim string, '_'}_"

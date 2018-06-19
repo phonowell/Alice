@@ -1,13 +1,14 @@
 # require
 
 $ = require 'fire-keeper'
-{_} = $.library
+{_} = $
 
 cheerio = require 'cheerio'
+# puppeteer = require 'puppeteer'
 
 # class
 
-class Seeker
+class M
 
   ###
   base
@@ -85,19 +86,19 @@ class Seeker
   unique_(listLink, data)
   ###
 
-  clear_: -> await $.remove './temp/seeker'
+  clear_: -> await $.remove_ './temp/seeker'
 
   downloadPage_: (data) ->
 
     for url in data.url
 
       filename = @getFilename url
-      stat = await $.stat "#{@base}/seeker/page/#{filename}"
+      stat = await $.stat_ "#{@base}/seeker/page/#{filename}"
 
       if stat and _.now() - stat.ctime.getTime() < @setting.expire
         continue
 
-      await $.download url, "#{@base}/seeker/page",
+      await $.download_ url, "#{@base}/seeker/page",
         filename: filename
         timeout: 1e4
 
@@ -196,7 +197,7 @@ class Seeker
     for url in data.url
 
       filename = @getFilename url
-      html = await $.read "#{@base}/seeker/page/#{filename}"
+      html = await $.read_ "#{@base}/seeker/page/#{filename}"
 
       listResult.push html
 
@@ -260,14 +261,14 @@ class Seeker
       else throw new Error "invalid os <#{$.os}>"
 
     $.info.pause 'seeker.openPage_'
-    await $.write target, html
-    await $.shell "#{method} #{target}"
+    await $.write_ target, html
+    await $.shell_ "#{method} #{target}"
     $.info.resume 'seeker.openPage_'
 
   unique_: (listLink, data) ->
 
     source = "#{@base}/seeker/list/#{data.title}.json"
-    listSource = await $.read source
+    listSource = await $.read_ source
     listSource or= []
 
     listResult = _.differenceBy listLink, listSource, 'url'
@@ -278,9 +279,9 @@ class Seeker
     listTarget = _.sortBy listTarget, 'time'
     listTarget = _.reverse listTarget
     listTarget = listTarget[0...@setting.size]
-    await $.write source, listTarget
+    await $.write_ source, listTarget
 
     listResult # return
 
 # return
-module.exports = (arg...) -> new Seeker arg...
+module.exports = (arg...) -> new M arg...

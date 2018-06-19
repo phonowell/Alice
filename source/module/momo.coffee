@@ -107,13 +107,13 @@ class Momo
 
   compile_: (pathSource) ->
 
-    source = await $.read pathSource
+    source = await $.read_ pathSource
     listLine = @genList source
     result = await @render_ listLine
     result = @pretty result
 
     pathOutput = pathSource.replace /\.coffee/, '.ahk'
-    await $.write pathOutput, result
+    await $.write_ pathOutput, result
 
   genList: (source) ->
     

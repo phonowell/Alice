@@ -1,7 +1,7 @@
 # require
 
 $ = require 'fire-keeper'
-{_} = $.library
+{_} = $
 
 colors = require 'colors/safe'
 
@@ -91,9 +91,9 @@ class Alice
       $.info 'alice', "Alice is watching '#{room.name}, #{room.type}'"
 
       source = './data/alice/watch.json'
-      data = await $.read source
+      data = await $.read_ source
       unless _.isEqual Qq.listWatch, data
-        await $.write source, Qq.listWatch
+        await $.write_ source, Qq.listWatch
 
     emitter.on 'error', (data) ->
       $.info 'alice', colors.red "Error: #{data}"
@@ -110,9 +110,9 @@ class Alice
       $.info "Alice stopped watching '#{room.name}, #{room.type}'"
       
       source = './data/alice/watch.json'
-      data = await $.read source
+      data = await $.read_ source
       unless _.isEqual Qq.listWatch, data
-        await $.write source, Qq.listWatch
+        await $.write_ source, Qq.listWatch
 
     emitter.on 'say', (msg) ->
       room = Qq.statusRoom
@@ -285,7 +285,7 @@ class Alice
 
     if !@isDebug
 
-      listWatch = await $.read './data/alice/watch.json'
+      listWatch = await $.read_ './data/alice/watch.json'
       unless listWatch?.length
         listWatch = []
         listWatch.push

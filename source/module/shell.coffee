@@ -1,57 +1,74 @@
 # require
 
 $ = require 'fire-keeper'
-{_} = $.library
+{_} = $
+
+inquirer = require 'inquirer'
 
 # class
 
-class Shell
-
-  constructor: ->
-
-    @validCmd = [
-      'flushdns', 'dns'
-      'resetlaunchpad', 'lanunchpad'
-      'ssh-add'
-    ]
+class M
 
   ###
-
-  execute(cmd)
-
+  map
   ###
 
-  execute: (cmd) ->
+  map:
 
-    lines = switch cmd.toLowerCase()
+    flushdns:
+      macos: 'sudo killall mDNSResponder'
 
-      when 'flushdns', 'dns'
-        macos: 'sudo killall mDNSResponder'
+    resetlaunchpad:
+      macos: [
+        'defaults write com.apple.dock ResetLaunchPad -bool true'
+        'killall Dock'
+      ]
 
-      when 'resetlaunchpad', 'launchpad'
-        macos: [
-          'defaults write com.apple.dock ResetLaunchPad -bool true'
-          'killall Dock'
-        ]
+    'ssh-add':
+      macos: [
+        'ssh-add -D'
+        'cd ~/OneDrive/密钥/Anitama'
+        'ssh-add anitama'
+        'ssh-add anitama_cn'
+        'ssh-add anitama_l'
+        'ssh-add cspg'
+        'ssh-add deploy'
+        'ssh-add -l'
+      ]
 
-      when 'ssh-add'
-        macos: [
-          'ssh-add -D'
-          'cd ~/OneDrive/密钥/Anitama'
-          'ssh-add anitama'
-          'ssh-add anitama_cn'
-          'ssh-add anitama_l'
-          'ssh-add cspg'
-          'ssh-add deploy'
-          'ssh-add -l'
-        ]
+  ###
+  ask_()
+  execute_(cmd)
+  ###
 
-      else throw new Error 'invalid cmd'
+  ask_: ->
 
-    unless lines = lines[$.os]
-      return $.info 'os', "invalid os <#{$.os}>"
+    listOption = _.keys @map
 
-    await $.shell lines
+    {answer} = await inquirer.prompt
+      type: 'checkbox'
+      name: 'answer'
+      choices: listOption
+
+    answer # return
+
+  execute_: (cmd) ->
+
+    listCmd = cmd or await @ask_()
+
+    if $.type(listCmd) != 'array'
+      listCmd = [listCmd]
+
+    for cmd in listCmd
+      cmd = cmd.toLowerCase()
+
+      item = @map[cmd]
+      if !item then throw new Error "invalid command '#{cmd}'"
+      
+      lines = item[$.os]
+      if !lines then throw new Error "invalid os '#{$.os}'"
+
+      await $.shell_ lines
 
 # return
-module.exports = (arg...) -> new Shell arg...
+module.exports = (arg...) -> new M arg...

@@ -1,7 +1,7 @@
 # require
 
 $ = require 'fire-keeper'
-{_} = $.library
+{_} = $
 
 path = require 'path'
 generate = require 'nanoid/generate'
@@ -52,14 +52,14 @@ class Image
 
     $.info 'step', 'clean'
 
-    listSource = await $.source "#{@storage}/**/.DS_Store"
-    await $.remove listSource
+    listSource = await $.source_ "#{@storage}/**/.DS_Store"
+    await $.remove_ listSource
 
   convert_: ->
 
     $.info 'step', 'convert'
 
-    listSource = await $.source [
+    listSource = await $.source_ [
       "#{@storage}/bmp/*.bmp"
       "#{@storage}/png/*.png"
       "#{@storage}/webp/*.webp"
@@ -73,9 +73,9 @@ class Image
       img = await @getImg_ source
       img.write target
 
-      await $.remove source
+      await $.remove_ source
 
-    await $.remove [
+    await $.remove_ [
       "#{@storage}/bmp"
       "#{@storage}/png"
       "#{@storage}/webp"
@@ -119,19 +119,19 @@ class Image
 
     # jpg & jpeg
     for ext in ['jpeg', 'jpg']
-      listSource = await $.source "#{@temp}/*.#{ext}"
-      await $.move listSource, "#{@storage}/jpg"
+      listSource = await $.source_ "#{@temp}/*.#{ext}"
+      await $.move_ listSource, "#{@storage}/jpg"
 
     # other
     for ext in ['bmp', 'gif', 'mp4', 'png', 'webm', 'webp']
-      listSource = await $.source "#{@temp}/*.#{ext}"
-      await $.move listSource, "#{@storage}/#{ext}"
+      listSource = await $.source_ "#{@temp}/*.#{ext}"
+      await $.move_ listSource, "#{@storage}/#{ext}"
 
   rename_: ->
 
     $.info 'step', 'rename'
 
-    listSource = await $.source [
+    listSource = await $.source_ [
       "#{@storage}/**/*.*"
       "!#{@storage}/*.*"
     ]
@@ -142,22 +142,22 @@ class Image
       if @validateBasename basename then continue
 
       basename = @genBasename()
-      await $.rename source, {basename}
+      await $.rename_ source, {basename}
 
   renameJpeg_: ->
 
     $.info 'step', 'renameJpeg'
 
-    listSource = await $.source "#{@storage}/**/*.jpeg"
+    listSource = await $.source_ "#{@storage}/**/*.jpeg"
 
     for source in listSource
-      await $.rename source, extname: '.jpg'
+      await $.rename_ source, extname: '.jpg'
 
   resize_: ->
 
     $.info 'step', 'resize'
 
-    listSource = await $.source "#{@storage}/**/*.jpg"
+    listSource = await $.source_ "#{@storage}/**/*.jpg"
 
     for source in listSource
 
