@@ -175,70 +175,45 @@ $.task 'upgrade', ->
 
 $.task 'z', ->
 
-  listSource = await $.source_ '../*'
+  pathGulpfile = '../sakura/gulpfile.coffee'
 
-  for source in listSource
-
-    pkg = await $.read_ "#{source}/package.json"
-    if !pkg then continue
-
-    ver = _.get pkg, 'dependencies.fire-keeper'
-    if ver
-      suffix = ''
-    else
-      ver = _.get pkg, 'devDependencies.fire-keeper'
-      if ver then suffix = '--save-dev'
-
-    if !ver then continue
-    if ver == '0.0.107' then continue
-    if !suffix then continue
-
-    listCmd = [
-      "cd #{source}"
-      _.trim "npm i fire-keeper@0.0.107 #{suffix}"
+  await $.replace_ pathGulpfile, /\$\.([^\s\(]+)/g, (s, string) ->
+    
+    listKey = [
+      'backup'
+      'compile'
+      'copy'
+      'delay'
+      'download'
+      'isExisted'
+      'isSame'
+      'link'
+      'lint'
+      'mkdir'
+      'move'
+      'read'
+      'recover'
+      'remove'
+      'rename'
+      'replace'
+      'say'
+      'shell'
+      'source'
+      'ssh.connect'
+      'ssh.disconnect'
+      'ssh.mkdir'
+      'ssh.remove'
+      'ssh.shell'
+      'ssh.upload'
+      'stat'
+      'unzip'
+      'update'
+      'walk'
+      'write'
+      'zip'
     ]
 
-    await $.shell_ listCmd
+    unless string in listKey
+      return s
 
-    pathGulpfile = "#{source}/gulpfile.coffee"
-
-    await $.replace_ pathGulpfile, /\$\.([^\s\(]+)/g, (s, string) ->
-      
-      listKey = [
-        'backup'
-        'compile'
-        'copy'
-        'delay'
-        'download'
-        'isExisted'
-        'isSame'
-        'link'
-        'lint'
-        'mkdir'
-        'move'
-        'read'
-        'recover'
-        'remove'
-        'rename'
-        'replace'
-        'say'
-        'shell'
-        'source'
-        'ssh.connect'
-        'ssh.disconnect'
-        'ssh.mkdir'
-        'ssh.remove'
-        'ssh.shell'
-        'ssh.upload'
-        'stat'
-        'unzip'
-        'update'
-        'walk'
-        'write'
-        'zip'
-      ]
-
-      unless string in listKey
-        return s
-
-      "$.#{_.trim string, '_'}_"
+    "$.#{_.trim string, '_'}_"
