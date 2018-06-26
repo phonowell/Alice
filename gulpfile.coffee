@@ -28,7 +28,6 @@ $.require = (name) ->
 # task
 
 ###
-alice()
 backup([target])
 check(target)
 daily()
@@ -39,13 +38,6 @@ seek([target])
 shell([cmd])
 upgrade()
 ###
-
-$.task 'alice', ->
-
-  m = $.require 'alice'
-  alice = m()
-
-  await alice.start()
 
 $.task 'backup', -> await $.do_ 'backup'
 
@@ -130,12 +122,7 @@ $.task 'daily', ->
   await $.shell_ lines
   await $.say_ 'Mission Completed'
 
-$.task 'image', ->
-
-  m = $.require 'image'
-  image = m()
-
-  await image.execute_()
+$.task 'image', -> await $.do_ 'image'
 
 $.task 'lint', ->
 
@@ -175,45 +162,50 @@ $.task 'upgrade', ->
 
 $.task 'z', ->
 
-  pathGulpfile = '../sakura/gulpfile.coffee'
+  listSource = await $.source_ [
+    '../sakura/gulpfile.coffee'
+    '../sakura/source/**/*.coffee'
+  ]
 
-  await $.replace_ pathGulpfile, /\$\.([^\s\(]+)/g, (s, string) ->
-    
-    listKey = [
-      'backup'
-      'compile'
-      'copy'
-      'delay'
-      'download'
-      'isExisted'
-      'isSame'
-      'link'
-      'lint'
-      'mkdir'
-      'move'
-      'read'
-      'recover'
-      'remove'
-      'rename'
-      'replace'
-      'say'
-      'shell'
-      'source'
-      'ssh.connect'
-      'ssh.disconnect'
-      'ssh.mkdir'
-      'ssh.remove'
-      'ssh.shell'
-      'ssh.upload'
-      'stat'
-      'unzip'
-      'update'
-      'walk'
-      'write'
-      'zip'
-    ]
+  for source in listSource
 
-    unless string in listKey
-      return s
+    await $.replace_ source, /\$\.([^\s\(]+)/g, (s, string) ->
+      
+      listKey = [
+        'backup'
+        'compile'
+        'copy'
+        'delay'
+        'download'
+        'isExisted'
+        'isSame'
+        'link'
+        'lint'
+        'mkdir'
+        'move'
+        'read'
+        'recover'
+        'remove'
+        'rename'
+        'replace'
+        'say'
+        'shell'
+        'source'
+        'ssh.connect'
+        'ssh.disconnect'
+        'ssh.mkdir'
+        'ssh.remove'
+        'ssh.shell'
+        'ssh.upload'
+        'stat'
+        'unzip'
+        'update'
+        'walk'
+        'write'
+        'zip'
+      ]
 
-    "$.#{_.trim string, '_'}_"
+      unless string in listKey
+        return s
+
+      "$.#{_.trim string, '_'}_"
