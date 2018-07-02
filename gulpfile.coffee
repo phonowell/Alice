@@ -163,8 +163,10 @@ $.task 'upgrade', ->
 $.task 'z', ->
 
   listSource = await $.source_ [
-    '../sakura/gulpfile.coffee'
-    '../sakura/source/**/*.coffee'
+    '../tamako/gulpfile.coffee'
+    '../tamako/source/**/*.coffee'
+    '../tamako/task/**/*.coffee'
+    '../tamako/test/**/*.coffee'
   ]
 
   for source in listSource
