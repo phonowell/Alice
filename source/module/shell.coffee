@@ -2,8 +2,7 @@
 
 $ = require 'fire-keeper'
 {_} = $
-
-inquirer = require 'inquirer'
+prompts = require 'prompts'
 
 # class
 
@@ -43,13 +42,13 @@ class M
 
   ask_: ->
 
-    listOption = _.keys @map
-
-    {answer} = await inquirer.prompt
-      type: 'checkbox'
+    option =
+      type: 'multiselect'
       name: 'answer'
-      choices: listOption
+      message: 'select shell(s)'
+      choices: ({title: key, value: key} for key in _.keys @map)
 
+    {answer} = await prompts option
     answer # return
 
   execute_: (cmd) ->

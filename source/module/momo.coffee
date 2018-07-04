@@ -90,7 +90,7 @@ class Renderer
     line.replace '$.setTimer', 'setTimer,'
     .replace 'false', 'off'
 
-class Momo
+class M
 
   ###
   renderer
@@ -217,4 +217,4 @@ class Momo
     listResult.join '\n' # return
 
 # return
-module.exports = (arg...) -> new Momo arg...
+module.exports = (arg...) -> new M arg...

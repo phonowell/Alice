@@ -1,11 +1,7 @@
-# require
-
 $ = require 'fire-keeper'
 {_} = $
-
 path = require 'path'
-
-inquirer = require 'inquirer'
+prompts = require 'prompts'
 
 # class
 
@@ -32,16 +28,18 @@ class M
 
   ask_: ->
 
-    listOption = [
-      'Game Save'
-      'OneDrive'
+    listChoice = [
+      {title: 'Game Save', value: 'gamesave'}
+      {title: 'OneDrive', value: 'onedrive'}
     ]
 
-    {answer} = await inquirer.prompt
-      type: 'list'
+    option =
+      type: 'multiselect'
       name: 'answer'
-      choices: listOption
+      message: 'select action(s)'
+      choices: listChoice
 
+    {answer} = await prompts option
     answer # return
 
   backupGameSave_: ->
@@ -79,14 +77,14 @@ class M
       listTask = [listTask]
 
     for task in listTask
+
       task = task.toLowerCase()
-      .replace /\s/g, ''
 
       mapMethod =
-        onedrive: 'backupOneDrive_'
         gamesave: 'backupGameSave_'
-
+        onedrive: 'backupOneDrive_'
       method = mapMethod[task] or throw new Error "invalid task '#{task}'"
+
       await @[method]()
 
 # return
