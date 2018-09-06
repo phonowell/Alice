@@ -44,11 +44,6 @@ class M
       url: 'http://www.iplaysoft.com'
       selector: 'h2.entry-title > a'
 
-    ryf:
-      title: '阮一峰的网络日志'
-      url: 'http://www.ruanyifeng.com/blog/archives.html'
-      selector: '#alpha-inner ul.module-list a'
-
     waitsun:
       title: '爱情守望者'
       url: [
@@ -113,7 +108,6 @@ class M
       'AlloyTeam'
       'AppInn'
       'iPlaySoft'
-      'Ryf'
       'waitSun'
       'williamLong'
       'Zxx'
@@ -122,23 +116,15 @@ class M
     map = {}
     for name in listTask
 
-      $.info.pause 'seeker.execute_'
-
       data = await @getData_ name
       await @downloadPage_ data
       listHtml = await @getHtml_ data
       listLink = @getLink listHtml, data
-
-      $.info.resume 'seeker.execute_'
       
       if !listLink.length
         $.info 'warning', "'#{data.title}' might be not useable"
-
-      $.info.pause 'seeker.execute_'
       
       map[data.title] = await @unique_ listLink, data
-
-      $.info.resume 'seeker.execute_'
 
     html = @genHtml map
     await @openPage_ html
