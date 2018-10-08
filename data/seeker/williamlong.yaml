@@ -1,0 +1,3 @@
+title: 月光博客
+url: http://www.williamlong.info
+selector: h2.post-title > a

@@ -3,8 +3,8 @@
 $ = require 'fire-keeper'
 {_} = $
 
+path = require 'path'
 cheerio = require 'cheerio'
-# puppeteer = require 'puppeteer'
 
 # class
 
@@ -12,57 +12,16 @@ class M
 
   ###
   base
-  map
+  browser
   setting
   ###
 
   base: './temp'
 
-  map:
-
-    acfun:
-      title: 'AcFun文章区'
-      url: 'http://www.acfun.cn/v/list63/index.htm'
-      selector: 'a.atc-title'
-      option:
-        replaceUrl: (url) -> "http://www.acfun.cn#{url}"
-
-    alloyteam:
-      title: 'AlloyTeam'
-      url: 'http://www.alloyteam.com/page/0'
-      selector: '#content a.blogTitle'
-
-    appinn:
-      title: '小众软件'
-      url: 'http://www.appinn.com'
-      selector: 'h2.entry-title > a'
-      option:
-        titleByTitle: true
-
-    iplaysoft:
-      title: '异次元软件世界'
-      url: 'http://www.iplaysoft.com'
-      selector: 'h2.entry-title > a'
-
-    waitsun:
-      title: '爱情守望者'
-      url: [
-        'https://www.waitsun.com/page/2'
-        'https://www.waitsun.com/page/3'
-      ]
-      selector: 'article .header a'
-
-    williamlong:
-      title: '月光博客'
-      url: 'http://www.williamlong.info'
-      selector: 'h2.post-title > a'
-
-    zxx:
-      title: '鑫空间'
-      url: 'http://www.zhangxinxu.com/wordpress'
-      selector: 'a.entry-title'
-      # option:
-      #   replaceTitle: (title) -> title.replace /的永久链接/, ''
+  browser: do ->
+    source = $.fn.normalizePath './source/module/browser.coffee'
+    m = require source
+    m()
 
   setting:
     expire: 3e5 # 5 min
@@ -77,6 +36,7 @@ class M
   getFilename(url)
   getHtml_(data)
   getLink(listHtml, data)
+  getRule_()
   openPage_(html)
   unique_(listLink, data)
   ###
@@ -93,37 +53,36 @@ class M
       if stat and _.now() - stat.ctime.getTime() < @setting.expire
         continue
 
-      await $.download_ url, "#{@base}/seeker/page",
-        filename: filename
-        timeout: 1e4
+      # download page
+      if data.option.viaBrowser
+        await @browser.launch_()
+        {html} = await @browser.content_ url
+        await @browser.close_()
+        await $.write_ "#{@base}/seeker/page/#{filename}", html
+      else
+        await $.download_ url, "#{@base}/seeker/page",
+          filename: filename
+          timeout: 1e4
 
   execute_: (name) ->
 
-    # await @clear_()
+    listRule = await @getRule_()
 
     listTask = if name
       [name]
-    else [
-      'AcFun'
-      'AlloyTeam'
-      'AppInn'
-      'iPlaySoft'
-      'waitSun'
-      'williamLong'
-      'Zxx'
-    ]
+    else _.keys listRule
 
     map = {}
     for name in listTask
 
-      data = await @getData_ name
+      data = @getData listRule, name
       await @downloadPage_ data
       listHtml = await @getHtml_ data
       listLink = @getLink listHtml, data
-      
+
       if !listLink.length
         $.info 'warning', "'#{data.title}' might be not useable"
-      
+
       map[data.title] = await @unique_ listLink, data
 
     html = @genHtml map
@@ -141,13 +100,13 @@ class M
     # return
     html.join '<br>'
 
-  getData_: (name) ->
+  getData: (listRule, name) ->
 
     if !name
       throw new Error 'empty name'
 
     name = name.toLowerCase()
-    data = _.get @map, name
+    data = _.get listRule, name
 
     if !data
       throw new Error "invalid name '#{name}'"
@@ -208,7 +167,7 @@ class M
 
         # title
 
-        value = data.option.titleByTitle
+        value = data.option.getTitleViaTitle
         title = if value
           $a.attr 'title'
         else $a.text()
@@ -224,15 +183,31 @@ class M
 
         url = $a.attr 'href'
 
-        fn = data.option.replaceUrl
-        if fn
-          url = fn url
+        string = data.option.replaceUrl
+        if string
+          url = string.replace /#\{url\}/g, url
 
         # push
         listResult.push {time, title, url}
 
     # return
     _.uniqBy listResult, 'url'
+
+  getRule_: ->
+
+    await $.remove_ './data/seeker/*.json'
+    await $.compile_ './data/seeker/*.yaml'
+    
+    listSource = await $.source_ './data/seeker/*.json'
+    
+    map = {}
+    for source in listSource
+      name = path.basename source, '.json'
+      map[name] = await $.read_ source
+    
+    await $.remove_ './data/seeker/*.json'
+
+    map # return
 
   openPage_: (html) ->
 

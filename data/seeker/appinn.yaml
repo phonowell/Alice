@@ -1,0 +1,5 @@
+title: 小众软件
+url: http://www.appinn.com
+selector: h2.entry-title > a
+option:
+  getTitleViaTitle: true
