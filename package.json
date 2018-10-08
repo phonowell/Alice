@@ -20,9 +20,10 @@
   "homepage": "https://github.com/phonowell/alice",
   "dependencies": {
     "cheerio": "^1.0.0-rc.2",
-    "fire-keeper": "0.0.109",
-    "jimp": "^0.4.0",
-    "nanoid": "^1.2.3",
-    "prompts": "^1.0.0"
+    "fire-keeper": "0.0.110",
+    "jimp": "^0.5.3",
+    "js2coffee": "^2.2.0",
+    "nanoid": "^1.2.6",
+    "prompts": "^1.1.1"
   }
 }
