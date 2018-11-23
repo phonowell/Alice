@@ -4,11 +4,12 @@ $ = require 'fire-keeper'
 # return
 module.exports = ->
 
-  j2c = require 'js2coffee'
-  {code} = j2c.build 'for (var x = 0; x < width; x++)
-  {
-    y = height * Math.sin((twoPI * x) / width) + height;
-    robot.moveMouse(x, y);
-  }'
+  jimp = require 'jimp'
 
-  $.i code
+  listSource = await $.source_ '~/Downloads/karakuri/*.png'
+
+  for source in listSource
+    target = source
+    .replace /\.png/, '.jpg'
+    $img = await jimp.read source
+    await $img.write target

@@ -9,7 +9,7 @@ module.exports = ->
     macos: [
       'brew update -v'
       'brew upgrade -v'
-      'gulp shell --target resetlaunchpad'
+      # 'gulp shell --target resetlaunchpad'
       'gulp image'
       'gulp backup --target onedrive'
     ]

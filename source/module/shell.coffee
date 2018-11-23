@@ -43,10 +43,11 @@ class M
   ask_: ->
 
     option =
-      type: 'multiselect'
-      name: 'answer'
-      message: 'select shell(s)'
       choices: ({title: key, value: key} for key in _.keys @map)
+      hint: '- Space to select. Return to submit.'
+      message: 'select shell(s)'
+      name: 'answer'
+      type: 'multiselect'
 
     {answer} = await prompts option
     answer # return
