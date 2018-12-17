@@ -95,9 +95,7 @@ class Sankaku
   executeList_: ->
     $.info 'step', 'executeList_'
 
-    pathData = './data/sankaku.yaml'
-    await $.compile_ pathData
-    listName = await $.read_ './data/sankaku.json'
+    listName = await $.read_ './data/sankaku.yaml'
 
     for name in listName
 

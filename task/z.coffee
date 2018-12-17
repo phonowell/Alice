@@ -1,6 +1,9 @@
 $ = require 'fire-keeper'
 {_} = $
 
+path = require 'path'
+
 # return
 module.exports = ->
-  $.info 'z'
+
+  await $.remove_ './~'

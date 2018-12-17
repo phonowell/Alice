@@ -194,18 +194,13 @@ class M
     _.uniqBy listResult, 'url'
 
   getRule_: ->
-
-    await $.remove_ './data/seeker/*.json'
-    await $.compile_ './data/seeker/*.yaml'
     
-    listSource = await $.source_ './data/seeker/*.json'
+    listSource = await $.source_ './data/seeker/*.yaml'
     
     map = {}
     for source in listSource
-      name = path.basename source, '.json'
+      name = $.getBasename source
       map[name] = await $.read_ source
-    
-    await $.remove_ './data/seeker/*.json'
 
     map # return
 
