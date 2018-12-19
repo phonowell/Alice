@@ -22,5 +22,5 @@ module.exports = ->
 
   lines = mapLines[$.os] or throw new Error "invalid os '#{$.os}'"
 
-  await $.shell_ lines
+  await $.exec_ lines
   await $.say_ 'Mission Completed'

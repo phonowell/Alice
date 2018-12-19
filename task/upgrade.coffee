@@ -4,7 +4,7 @@ $ = require 'fire-keeper'
 # return
 module.exports = ->
 
-  await $.shell_ [
+  await $.exec_ [
     'git stash'
     'git stash clear'
     'git pull'

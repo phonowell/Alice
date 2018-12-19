@@ -1,8 +1,5 @@
-# require
-
 $ = require 'fire-keeper'
 {_} = $
-prompts = require 'prompts'
 
 # class
 
@@ -43,14 +40,12 @@ class M
   ask_: ->
 
     option =
-      choices: ({title: key, value: key} for key in _.keys @map)
-      hint: '- Space to select. Return to submit.'
-      message: 'select shell(s)'
-      name: 'answer'
       type: 'multiselect'
+      message: 'select shell(s)'
+      hint: '- Space to select. Return to submit.'
+      choices: (key for key in _.keys @map)
 
-    {answer} = await prompts option
-    answer # return
+    await $.prompt option
 
   execute_: (cmd) ->
 
@@ -68,7 +63,7 @@ class M
       lines = item[$.os]
       if !lines then throw new Error "invalid os '#{$.os}'"
 
-      await $.shell_ lines
+      await $.exec_ lines
 
 # return
 module.exports = (arg...) -> new M arg...

@@ -218,7 +218,7 @@ class M
 
     $.info.pause 'seeker.openPage_'
     await $.write_ target, html
-    await $.shell_ "#{method} #{target}"
+    await $.exec_ "#{method} #{target}"
     $.info.resume 'seeker.openPage_'
 
   unique_: (listLink, data) ->

@@ -1,7 +1,6 @@
 $ = require 'fire-keeper'
 {_} = $
 path = require 'path'
-prompts = require 'prompts'
 
 # class
 
@@ -35,12 +34,10 @@ class M
 
     option =
       type: 'multiselect'
-      name: 'answer'
       message: 'select action(s)'
       choices: listChoice
 
-    {answer} = await prompts option
-    answer # return
+    await $.prompt option
 
   backupGameSave_: ->
 

@@ -17,7 +17,7 @@ module.exports = ->
     ]
     for source in listSource
       target = path.basename source
-      await $.shell_ [
+      await $.exec_ [
         "gulp check --target #{target}"
       ]
     await $.say_ 'mission completed'
