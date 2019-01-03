@@ -7,10 +7,10 @@ path = require 'path'
 class M
 
   ###
-  storage
+  pathStorage
   ###
 
-  storage: do ->
+  pathStorage: do ->
 
     mapPath =
       macos: '~/OneDrive'
@@ -56,14 +56,14 @@ class M
         continue
 
       source = "#{pathSave}/**/*.*"
-      target = "#{@storage}/存档"
+      target = "#{@pathStorage}/存档"
       filename = "#{path.basename pathSave}.zip"
 
       await $.zip_ source, target, filename
 
   backupOneDrive_: ->
-    await $.zip_ "#{@storage}/**/*.*"
-    , "#{@storage}/.."
+    await $.zip_ "#{@pathStorage}/**/*.*"
+    , "#{@pathStorage}/.."
     , 'OneDrive.zip'
 
   execute_: (target) ->

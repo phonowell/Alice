@@ -55,6 +55,8 @@ class Image
     listSource = await $.source_ "#{@storage}/**/.DS_Store"
     await $.remove_ listSource
 
+    @ # return
+
   convert_: ->
 
     $.info 'step', 'convert'
@@ -81,14 +83,19 @@ class Image
       "#{@storage}/webp"
     ]
 
+    @ # return
+
   execute_: ->
 
-    await @move_()
-    await @clean_()
-    await @convert_()
-    await @renameJpeg_()
-    await @resize_()
-    await @rename_()
+    await $.chain @
+    .move_()
+    .clean_()
+    .convert_()
+    .renameJpeg_()
+    .resize_()
+    .rename_()
+
+    @ # return
 
   genBasename: ->
     [
@@ -127,6 +134,8 @@ class Image
       listSource = await $.source_ "#{@temp}/*.#{ext}"
       await $.move_ listSource, "#{@storage}/#{ext}"
 
+    @ # return
+
   rename_: ->
 
     $.info 'step', 'rename'
@@ -144,6 +153,8 @@ class Image
       basename = @genBasename()
       await $.rename_ source, {basename}
 
+    @ # return
+
   renameJpeg_: ->
 
     $.info 'step', 'renameJpeg'
@@ -152,6 +163,8 @@ class Image
 
     for source in listSource
       await $.rename_ source, extname: '.jpg'
+
+    @ # return
 
   resize_: ->
 
@@ -175,6 +188,8 @@ class Image
 
       # save
       img.write source
+
+    @ # return
 
   validateBasename: (name) ->
     if name.length != 19 then return false

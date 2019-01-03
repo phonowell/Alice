@@ -6,4 +6,6 @@ path = require 'path'
 # return
 module.exports = ->
 
-  await $.remove_ './~'
+  a = await $.prompt
+    type: 'text'
+    timeout: 1e3
