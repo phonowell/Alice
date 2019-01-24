@@ -40,8 +40,8 @@ class M
   ask_: ->
 
     option =
-      type: 'multiselect'
-      message: 'select shell(s)'
+      type: 'select'
+      message: 'select cmd'
       hint: '- Space to select. Return to submit.'
       choices: (key for key in _.keys @map)
 
