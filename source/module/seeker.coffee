@@ -1,12 +1,7 @@
-# require
-
 $ = require 'fire-keeper'
 {_} = $
 
-path = require 'path'
 cheerio = require 'cheerio'
-
-# class
 
 class M
 
@@ -19,8 +14,7 @@ class M
   base: './temp'
 
   browser: do ->
-    source = $.fn.normalizePath './source/module/browser.coffee'
-    m = require source
+    m = $.fn.require './source/module/browser.coffee'
     m()
 
   setting:
@@ -37,6 +31,7 @@ class M
   getHtml_(data)
   getLink(listHtml, data)
   getRule_()
+  getTitleViaElement($el, [option])
   openPage_(html)
   unique_(listLink, data)
   ###
@@ -80,7 +75,7 @@ class M
       listHtml = await @getHtml_ data
       listLink = @getLink listHtml, data
 
-      if !listLink.length
+      unless listLink.length
         $.info 'warning', "'#{data.title}' might be not useable"
 
       map[data.title] = await @unique_ listLink, data
@@ -102,13 +97,13 @@ class M
 
   getData: (listRule, name) ->
 
-    if !name
+    unless name
       throw new Error 'empty name'
 
     name = name.toLowerCase()
     data = _.get listRule, name
 
-    if !data
+    unless data
       throw new Error "invalid name '#{name}'"
 
     # url
@@ -166,18 +161,7 @@ class M
         time = ts++
 
         # title
-
-        value = data.option.getTitleViaTitle
-        title = if value
-          $a.attr 'title'
-        else $a.text()
-
-        fn = data.option.replaceTitle
-        if fn
-          title = fn title
-
-        title = _.trim title
-        title or= 'blank'
+        title = @getTitleViaElement $a, data.option
 
         # url
 
@@ -204,9 +188,20 @@ class M
 
     map # return
 
+  getTitleViaElement: ($el, option = {}) ->
+
+    title = $el.text()
+
+    fn = option.replaceTitle
+    if fn
+      title = fn title
+
+    title = _.trim title
+    title or= 'blank'
+
   openPage_: (html) ->
 
-    if !html.length
+    unless html.length
       return $.info 'seeker', 'got no result(s)'
 
     target = "#{@base}/seeker/result.html"

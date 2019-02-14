@@ -49,21 +49,22 @@ class M
 
   execute_: (cmd) ->
 
-    listCmd = cmd or await @ask_()
+    cmd or= await @ask_()
 
-    if $.type(listCmd) != 'array'
-      listCmd = [listCmd]
+    unless cmd in _.keys @map
+      throw new Error "invalid command '#{cmd}'"
 
-    for cmd in listCmd
-      cmd = cmd.toLowerCase()
+    cmd = cmd.toLowerCase()
 
-      item = @map[cmd]
-      if !item then throw new Error "invalid command '#{cmd}'"
-      
-      lines = item[$.os]
-      if !lines then throw new Error "invalid os '#{$.os}'"
+    item = @map[cmd]
+    unless item
+      throw new Error "invalid command '#{cmd}'"
+    
+    lines = item[$.os]
+    unless lines
+      throw new Error "invalid os '#{$.os}'"
 
-      await $.exec_ lines
+    await $.exec_ lines
 
 # return
 module.exports = (arg...) -> new M arg...

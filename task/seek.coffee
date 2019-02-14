@@ -4,8 +4,7 @@ $ = require 'fire-keeper'
 # return
 module.exports = ->
 
-  source = $.fn.normalizePath './source/module/seeker.coffee'
-  m = require source
+  m = $.fn.require './source/module/seeker.coffee'
   m = m()
 
   {target} = $.argv

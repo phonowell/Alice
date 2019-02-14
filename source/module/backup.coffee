@@ -1,14 +1,23 @@
 $ = require 'fire-keeper'
-{_} = $
-path = require 'path'
 
 # class
 
 class M
 
   ###
+  listTarget
+  mapMethod
   pathStorage
   ###
+
+  listTarget: [
+    'Game Save'
+    'OneDrive'
+  ]
+
+  mapMethod:
+    'Game Save': 'backupGameSave_'
+    'OneDrive': 'backupOneDrive_'
 
   pathStorage: do ->
 
@@ -19,29 +28,14 @@ class M
     mapPath[$.os] or throw new Error "invalid os '#{$.os}'"
 
   ###
-  ask_()
   backupGameSave_()
   backupOneDrive_()
   execute_(target)
   ###
 
-  ask_: ->
-
-    listChoice = [
-      {title: 'Game Save', value: 'gamesave'}
-      {title: 'OneDrive', value: 'onedrive'}
-    ]
-
-    option =
-      type: 'multiselect'
-      message: 'select action(s)'
-      choices: listChoice
-
-    await $.prompt option
-
   backupGameSave_: ->
 
-    if $.os != 'windows'
+    unless $.os == 'windows'
       throw new Error "invalid os '#{$.os}'"
 
     listSave = [
@@ -61,28 +55,33 @@ class M
 
       await $.zip_ source, target, filename
 
+    @ # return
+
   backupOneDrive_: ->
+    
     await $.zip_ "#{@pathStorage}/**/*.*"
     , "#{@pathStorage}/.."
     , 'OneDrive.zip'
 
+    @ # return
+
   execute_: (target) ->
 
-    listTask = target or await @ask_()
+    target or= await $.prompt
+      type: 'select'
+      message: 'select target'
+      list: @listTarget
 
-    if $.type(listTask) != 'array'
-      listTask = [listTask]
+    unless target in @listTarget
+      throw new Error "invalid target '#{target}'"
 
-    for task in listTask
+    method = @mapMethod[target]
+    unless method
+      throw new Error "invalid target '#{target}'"
 
-      task = task.toLowerCase()
+    await @[method]()
 
-      mapMethod =
-        gamesave: 'backupGameSave_'
-        onedrive: 'backupOneDrive_'
-      method = mapMethod[task] or throw new Error "invalid task '#{task}'"
-
-      await @[method]()
+    @ # return
 
 # return
 module.exports = (arg...) -> new M arg...

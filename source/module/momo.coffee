@@ -127,7 +127,8 @@ class M
     for line, i in result.split '\n'
       
       string = _.trim line
-      if !string.length then continue
+      unless string.length
+        continue
       
       listResult.push
         content: string
@@ -191,7 +192,8 @@ class M
     for line, i in listLine
 
       # pass blank line
-      if !line.content.length then continue
+      unless line.content.length
+        continue
 
       string = line.content
 

@@ -12,6 +12,7 @@ module.exports = ->
       # 'gulp shell --target resetlaunchpad'
       'gulp image'
       'gulp backup --target onedrive'
+      'gulp clean --target trash'
     ]
 
     windows: [

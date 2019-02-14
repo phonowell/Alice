@@ -83,7 +83,8 @@ class Sankaku
         continue
 
       content = await @getSource_ urlPost
-      if !content then continue
+      unless content
+        continue
       await @downloadImage_ content, pathDownload
 
       mapIndex[urlPost] = content.filename
@@ -206,7 +207,8 @@ class Sankaku
       await page.goto "https://chan.sankakucomplex.com#{urlPost}"
 
     source = @getSource html
-    if !source then return null
+    unless source
+      return null
 
     filename = @getFilename source
     source = "https:#{source}"

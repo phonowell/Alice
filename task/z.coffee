@@ -6,4 +6,4 @@ path = require 'path'
 # return
 module.exports = ->
 
-  await $.remove_ './~'
+  await $.remove_ '~/.Trash/**/*'

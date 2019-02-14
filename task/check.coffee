@@ -7,7 +7,7 @@ path = require 'path'
 module.exports = ->
   
   {target} = $.argv
-  if !target
+  unless target
     throw new Error 'empty target'
 
   if target == 'all'
