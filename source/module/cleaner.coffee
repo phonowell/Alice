@@ -6,16 +6,25 @@ class M
 
   ###
   listTarget
-  ###
 
-  listTarget: [
-    'trash'
-  ]
-
-  ###
+  cleanDsStore_()
   cleanTrash_()
   execute_(target)
   ###
+
+  listTarget: [
+    '.ds_store'
+    'trash'
+  ]
+
+  cleanDsStore_: ->
+
+    unless $.os == 'macos'
+      throw new Error "invalid os '#{$.os}'"
+
+    await $.remove_ '~/Project/**/.DS_Store'
+
+    @ # return
 
   cleanTrash_: ->
     
@@ -28,18 +37,26 @@ class M
 
   execute_: (target) ->
 
+    {target} = $.argv
+
     target or= await $.prompt
+      id: 'cleaner'
       type: 'select'
-      message: 'select target'
+      message: 'select a target'
       list: @listTarget
 
     unless target in @listTarget
       throw new Error "invalid target '#{target}'"
 
+    if target == '.ds_store'
+      return await @cleanDsStore_()
+
     if target == 'trash'
-      await @cleanTrash_()
+      return await @cleanTrash_()
 
     @ # return
 
 # return
-module.exports = (arg...) -> new M arg...
+module.exports = ->
+  m = new M()
+  await m.execute_()

@@ -1,12 +1,11 @@
 $ = require 'fire-keeper'
-{_} = $
-
-# class
 
 class M
 
   ###
   map
+
+  execute_()
   ###
 
   map:
@@ -32,33 +31,23 @@ class M
         'ssh-add -l'
       ]
 
-  ###
-  ask_()
-  execute_(cmd)
-  ###
+  execute_: ->
 
-  ask_: ->
+    {target} = $.argv
 
-    option =
+    listKey = (key for key in $._.keys @map)
+    target or= await $.prompt
+      id: 'shell'
       type: 'select'
-      message: 'select cmd'
-      hint: '- Space to select. Return to submit.'
-      choices: (key for key in _.keys @map)
+      message: 'select a target'
+      list: listKey
 
-    await $.prompt option
+    unless target in listKey
+      throw new Error "invalid target '#{target}'"
 
-  execute_: (cmd) ->
-
-    cmd or= await @ask_()
-
-    unless cmd in _.keys @map
-      throw new Error "invalid command '#{cmd}'"
-
-    cmd = cmd.toLowerCase()
-
-    item = @map[cmd]
+    item = @map[target]
     unless item
-      throw new Error "invalid command '#{cmd}'"
+      throw new Error "invalid target '#{target}'"
     
     lines = item[$.os]
     unless lines
@@ -66,5 +55,9 @@ class M
 
     await $.exec_ lines
 
+    @ # return
+
 # return
-module.exports = (arg...) -> new M arg...
+module.exports = ->
+  m = new M()
+  await m.execute_()

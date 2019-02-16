@@ -36,7 +36,8 @@ class M
   backupGameSave_: ->
 
     unless $.os == 'windows'
-      throw new Error "invalid os '#{$.os}'"
+      $.info 'warning', "invalid os '#{$.os}'"
+      return @
 
     listSave = [
       '~/AppData/Roaming/DarkSoulsIII'
@@ -67,10 +68,14 @@ class M
 
   execute_: (target) ->
 
+    {target} = $.argv
+
     target or= await $.prompt
       type: 'select'
       message: 'select target'
       list: @listTarget
+
+    target = target.replace /_/g, ' '
 
     unless target in @listTarget
       throw new Error "invalid target '#{target}'"
@@ -84,4 +89,6 @@ class M
     @ # return
 
 # return
-module.exports = (arg...) -> new M arg...
+module.exports = ->
+  m = new M()
+  await m.execute_()

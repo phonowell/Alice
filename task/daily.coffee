@@ -9,16 +9,15 @@ module.exports = ->
     macos: [
       'brew update -v'
       'brew upgrade -v'
-      # 'gulp shell --target resetlaunchpad'
       'gulp image'
-      'gulp backup --target onedrive'
+      'gulp backup --target OneDrive'
       'gulp clean --target trash'
     ]
 
     windows: [
-      'gulp backup --target gamesave'
+      'gulp backup --target Game_Save'
       'gulp image'
-      'gulp backup --target onedrive'
+      'gulp backup --target OneDrive'
     ]
 
   lines = mapLines[$.os] or throw new Error "invalid os '#{$.os}'"

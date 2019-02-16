@@ -1,13 +1,10 @@
-# require
-
 $ = require 'fire-keeper'
-{_} = $
 
 puppeteer = require 'puppeteer'
 
 # class
 
-class Browser
+class M
 
   ###
   close_()
@@ -15,11 +12,13 @@ class Browser
   launch_()
   ###
 
-  close_: -> await @browser.close()
+  close_: ->
+    await @browser.close()
+    @ # return
 
   content_: (url) ->
 
-    new Promise (resolve) =>
+    content = await new Promise (resolve) =>
 
       page = await @browser.newPage()
 
@@ -35,7 +34,12 @@ class Browser
 
       await page.goto url
 
-  launch_: -> @browser = await puppeteer.launch()
+    content # return
+
+  launch_: ->
+    @browser = await puppeteer.launch()
+    @ # return
 
 # return
-module.exports = (arg...) -> new Browser arg...
+module.exports = ->
+  m = new M()

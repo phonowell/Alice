@@ -6,120 +6,82 @@ cheerio = require 'cheerio'
 class M
 
   ###
-  base
   browser
+  pathTemp
   setting
-  ###
 
-  base: './temp'
+  download_(rule)
+  execute_(name)
+  getFilename(url)
+  getHtml_(data)
+  getLink_(rule)
+  getRule(name)
+  loadRule_()
+  makeHtml(map)
+  seekTitle($el, [option])
+  seekUrl($el, [option])
+  setTarget_()
+  unique_(listLink, rule)
+  view_(html)
+  ###
 
   browser: do ->
     m = $.fn.require './source/module/browser.coffee'
     m()
 
+  pathTemp: './temp'
+
   setting:
     expire: 3e5 # 5 min
     size: 200 # cache size
 
-  ###
-  clear_()
-  downloadPage_(data)
-  execute_(name)
-  genHtml(map)
-  getData_(name)
-  getFilename(url)
-  getHtml_(data)
-  getLink(listHtml, data)
-  getRule_()
-  getTitleViaElement($el, [option])
-  openPage_(html)
-  unique_(listLink, data)
-  ###
+  download_: (rule) ->
 
-  clear_: -> await $.remove_ './temp/seeker'
-
-  downloadPage_: (data) ->
-
-    for url in data.url
+    for url in rule.url
 
       filename = @getFilename url
-      stat = await $.stat_ "#{@base}/seeker/page/#{filename}"
+      stat = await $.stat_ "#{@pathTemp}/seeker/page/#{filename}"
 
       if stat and _.now() - stat.ctime.getTime() < @setting.expire
         continue
 
       # download page
-      if data.option.viaBrowser
+      if rule.option.viaBrowser
         await @browser.launch_()
         {html} = await @browser.content_ url
         await @browser.close_()
-        await $.write_ "#{@base}/seeker/page/#{filename}", html
+        await $.write_ "#{@pathTemp}/seeker/page/#{filename}", html
       else
-        await $.download_ url, "#{@base}/seeker/page",
+        await $.download_ url, "#{@pathTemp}/seeker/page",
           filename: filename
           timeout: 1e4
 
-  execute_: (name) ->
+    @ # return
 
-    listRule = await @getRule_()
+  execute_: ->
 
-    listTask = if name
-      [name]
-    else _.keys listRule
+    # load rule
+    await @loadRule_()
+    await @setTarget_()
 
-    map = {}
-    for name in listTask
+    mapResult = {}
+    for name in @listTarget
 
-      data = @getData listRule, name
-      await @downloadPage_ data
-      listHtml = await @getHtml_ data
-      listLink = @getLink listHtml, data
+      rule = @getRule name
+      await @download_ rule
+      listLink = await @getLink_ rule
 
       unless listLink.length
-        $.info 'warning', "'#{data.title}' might be not useable"
+        $.info 'warning'
+        , "'#{rule.title}' may be not useable"
+        continue
 
-      map[data.title] = await @unique_ listLink, data
+      mapResult[rule.title] = await @unique_ listLink, rule
 
-    html = @genHtml map
-    await @openPage_ html
+    html = @makeHtml mapResult
+    await @view_ html
 
-  genHtml: (map) ->
-
-    html = []
-
-    for title, listLink of map when listLink.length
-      html.push "<h1>#{title}</h1>"
-      for item in listLink
-        html.push "<a href='#{item.url}' target='_blank'>#{item.title}</a>"
-
-    # return
-    html.join '<br>'
-
-  getData: (listRule, name) ->
-
-    unless name
-      throw new Error 'empty name'
-
-    name = name.toLowerCase()
-    data = _.get listRule, name
-
-    unless data
-      throw new Error "invalid name '#{name}'"
-
-    # url
-
-    url = data.url
-    type = $.type url
-
-    if type == 'string'
-      data.url = [url]
-    else if type != 'array'
-      throw new Error "invalid type '#{type}'"
-
-    # option
-    data.option or= {}
-    
-    data # return
+    @ # return
 
   getFilename: (url) ->
 
@@ -128,31 +90,33 @@ class M
     .replace /\.(?:asp|aspx|htm|html|php|shtml)/, ''
     .replace /\//g, '-'
 
-    "#{url}.html"
+    "#{url}.html" # return
 
-  getHtml_: (data) ->
+  getHtml_: (rule) ->
 
     listResult = []
 
-    for url in data.url
+    for url in rule.url
 
       filename = @getFilename url
-      html = await $.read_ "#{@base}/seeker/page/#{filename}"
+      html = await $.read_ "#{@pathTemp}/seeker/page/#{filename}"
 
       listResult.push html
 
     listResult # return
 
-  getLink: (listHtml, data) ->
+  getLink_: (rule) ->
 
     ts = _.now()
     listResult = []
 
-    for html in listHtml
+    for html in await @getHtml_ rule
 
       dom = cheerio.load html
+      seekTitle = @seekTitle
+      seekUrl = @seekUrl
 
-      dom data.selector
+      dom rule.selector
       .each ->
 
         $a = dom @
@@ -160,16 +124,8 @@ class M
         # time
         time = ts++
 
-        # title
-        title = @getTitleViaElement $a, data.option
-
-        # url
-
-        url = $a.attr 'href'
-
-        string = data.option.replaceUrl
-        if string
-          url = string.replace /#\{url\}/g, url
+        title = seekTitle $a, rule.option
+        url = seekUrl $a, rule.option
 
         # push
         listResult.push {time, title, url}
@@ -177,18 +133,48 @@ class M
     # return
     _.uniqBy listResult, 'url'
 
-  getRule_: ->
+  getRule: (name) ->
     
+    data = @mapRule[name]
+
+    # url
+
+    url = data.url
+    type = $.type url
+
+    unless type in ['array', 'string']
+      throw new Error "invalid type '#{type}'"
+
+    if type == 'string'
+      data.url = [url]
+
+    # option
+    data.option or= {}
+    
+    data # return
+
+  loadRule_: ->
+    
+    @mapRule = {}
     listSource = await $.source_ './data/seeker/*.yaml'
-    
-    map = {}
     for source in listSource
       name = $.getBasename source
-      map[name] = await $.read_ source
+      @mapRule[name] = await $.read_ source
 
-    map # return
+    @ # return
 
-  getTitleViaElement: ($el, option = {}) ->
+  makeHtml: (map) ->
+
+    html = []
+
+    for title, listLink of map when listLink.length
+      html.push "<h1>#{title}</h1>"
+      for item in listLink
+        html.push "<a href='#{item.url}' target='_blank'>#{item.title}</a>"
+
+    html.join '<br>' # return
+
+  seekTitle: ($el, option = {}) ->
 
     title = $el.text()
 
@@ -197,29 +183,41 @@ class M
       title = fn title
 
     title = _.trim title
-    title or= 'blank'
+    title or= 'blank' # return
 
-  openPage_: (html) ->
+  seekUrl: ($el, option = {}) ->
 
-    unless html.length
-      return $.info 'seeker', 'got no result(s)'
+    url = $el.attr 'href'
 
-    target = "#{@base}/seeker/result.html"
+    string = option.replaceUrl
+    if string
+      url = string.replace /#\{url\}/g, url
 
-    method = switch $.os
-      when 'linux', 'macos' then 'open'
-      when 'windows' then 'start'
-      else throw new Error "invalid os <#{$.os}>"
+    url # return
 
-    $.info.pause 'seeker.openPage_'
-    await $.write_ target, html
-    await $.exec_ "#{method} #{target}"
-    $.info.resume 'seeker.openPage_'
+  setTarget_: ->
 
-  unique_: (listLink, data) ->
+    listTarget = _.keys @mapRule
+    listTarget.unshift 'all'
 
-    source = "#{@base}/seeker/list/#{data.title}.json"
-    listSource = await $.read_ source
+    {target} = $.argv
+    target or= await $.prompt
+      id: 'seeker'
+      type: 'select'
+      message: 'select a target'
+      list: listTarget
+    unless target in listTarget
+      throw new Error "invalid target '#{target}'"
+    @listTarget = if target == 'all'
+      listTarget[1...]
+    else [target]
+
+    @ # return
+
+  unique_: (listLink, rule) ->
+
+    pathSource = "#{@pathTemp}/seeker/list/#{rule.title}.json"
+    listSource = await $.read_ pathSource
     listSource or= []
 
     listResult = _.differenceBy listLink, listSource, 'url'
@@ -230,9 +228,31 @@ class M
     listTarget = _.sortBy listTarget, 'time'
     listTarget = _.reverse listTarget
     listTarget = listTarget[0...@setting.size]
-    await $.write_ source, listTarget
+    await $.write_ pathSource, listTarget
 
     listResult # return
 
+  view_: (html) ->
+
+    unless html.length
+      return $.info 'seeker', 'got no result(s)'
+
+    target = "#{@pathTemp}/seeker/result.html"
+
+    method = switch $.os
+      when 'linux', 'macos' then 'open'
+      when 'windows' then 'start'
+      else throw new Error "invalid os <#{$.os}>"
+
+    namespace = 'seeker.view'
+    $.info.pause namespace
+    await $.write_ target, html
+    await $.exec_ "#{method} #{target}"
+    $.info.resume namespace
+
+    @ # return
+
 # return
-module.exports = (arg...) -> new M arg...
+module.exports = ->
+  m = new M()
+  await m.execute_()

@@ -3,9 +3,5 @@ $ = require 'fire-keeper'
 
 # return
 module.exports = ->
-
-  m = $.fn.require './source/module/seeker.coffee'
-  m = m()
-
-  {target} = $.argv
-  await m.execute_ target
+  fn_ = $.fn.require './source/module/seeker.coffee'
+  await fn_()

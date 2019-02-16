@@ -1,5 +1,4 @@
 $ = require 'fire-keeper'
-{_} = $
 
 class M
 
@@ -30,7 +29,7 @@ class M
 
     await $.exec_ [
       "cd #{@base}"
-      'npm i fire-keeper --save-dev'
+      'cnpm i fire-keeper --save-dev'
       'gulp kokoro'
     ]
 
@@ -84,6 +83,5 @@ class M
 
 # return
 module.exports = ->
-
   m = new M()
   await m.execute_()
