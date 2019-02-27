@@ -29,7 +29,7 @@ class M
     m = $.fn.require './source/module/browser.coffee'
     m()
 
-  pathTemp: './temp'
+  pathTemp: './temp/seeker'
 
   setting:
     expire: 3e5 # 5 min
@@ -40,21 +40,24 @@ class M
     for url in rule.url
 
       filename = @getFilename url
-      stat = await $.stat_ "#{@pathTemp}/seeker/page/#{filename}"
+      stat = await $.stat_ "#{@pathTemp}/page/#{filename}"
 
       if stat and _.now() - stat.ctime.getTime() < @setting.expire
         continue
 
-      # download page
-      if rule.option.viaBrowser
-        await @browser.launch_()
-        {html} = await @browser.content_ url
-        await @browser.close_()
-        await $.write_ "#{@pathTemp}/seeker/page/#{filename}", html
-      else
-        await $.download_ url, "#{@pathTemp}/seeker/page",
-          filename: filename
-          timeout: 1e4
+      # download
+      try
+        if rule.option.viaBrowser
+          await @browser.launch_()
+          {html} = await @browser.content_ url
+          await @browser.close_()
+          await $.write_ "#{@pathTemp}/page/#{filename}", html
+        else
+          await $.download_ url, "#{@pathTemp}/page",
+            filename: filename
+            timeout: 1e4
+      catch err
+        $.i err.stack
 
     @ # return
 
@@ -99,7 +102,10 @@ class M
     for url in rule.url
 
       filename = @getFilename url
-      html = await $.read_ "#{@pathTemp}/seeker/page/#{filename}"
+      html = await $.read_ "#{@pathTemp}/page/#{filename}"
+
+      unless html
+        continue
 
       listResult.push html
 
@@ -111,6 +117,9 @@ class M
     listResult = []
 
     for html in await @getHtml_ rule
+
+      unless html
+        continue
 
       dom = cheerio.load html
       seekTitle = @seekTitle
@@ -216,7 +225,7 @@ class M
 
   unique_: (listLink, rule) ->
 
-    pathSource = "#{@pathTemp}/seeker/list/#{rule.title}.json"
+    pathSource = "#{@pathTemp}/list/#{rule.title}.json"
     listSource = await $.read_ pathSource
     listSource or= []
 
@@ -237,7 +246,7 @@ class M
     unless html.length
       return $.info 'seeker', 'got no result(s)'
 
-    target = "#{@pathTemp}/seeker/result.html"
+    target = "#{@pathTemp}/result.html"
 
     method = switch $.os
       when 'linux', 'macos' then 'open'

@@ -3,39 +3,17 @@ $ = require 'fire-keeper'
 class M
 
   ###
-  map
-
   execute_()
+  loadData_()
   ###
-
-  map:
-
-    flushdns:
-      macos: 'sudo killall mDNSResponder'
-
-    resetlaunchpad:
-      macos: [
-        'defaults write com.apple.dock ResetLaunchPad -bool true'
-        'killall Dock'
-      ]
-
-    'ssh-add':
-      macos: [
-        'ssh-add -D'
-        'cd ~/OneDrive/密钥/Anitama'
-        'ssh-add anitama'
-        'ssh-add anitama_cn'
-        'ssh-add anitama_l'
-        'ssh-add cspg'
-        'ssh-add deploy'
-        'ssh-add -l'
-      ]
 
   execute_: ->
 
+    await @loadData_()
+
     {target} = $.argv
 
-    listKey = (key for key in $._.keys @map)
+    listKey = $._.keys @map
     target or= await $.prompt
       id: 'shell'
       type: 'select'
@@ -45,16 +23,29 @@ class M
     unless target in listKey
       throw new Error "invalid target '#{target}'"
 
-    item = @map[target]
-    unless item
-      throw new Error "invalid target '#{target}'"
-    
-    lines = item[$.os]
+    lines = @map[target]
+    type = $.type lines
+    switch type
+      when 'array'
+        null
+      when 'string'
+        lines = [lines]
+      else throw new Error "invalid target '#{target}'"
     unless lines
-      throw new Error "invalid os '#{$.os}'"
+      throw new Error "invalid target '#{target}'"
 
     await $.exec_ lines
 
+    @ # return
+
+  loadData_: ->
+    pathSource = "./data/shell/#{$.os}.yaml"
+    data = await $.read_ pathSource
+    unless data
+      $.info 'warning'
+      , "invalid os '#{$.os}'"
+      return @
+    @map = data
     @ # return
 
 # return
