@@ -210,7 +210,7 @@ class M
     listTarget.unshift 'all'
 
     {target} = $.argv
-    target or= await $.prompt
+    target or= await $.prompt_
       id: 'seeker'
       type: 'select'
       message: 'select a target'

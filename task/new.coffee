@@ -11,7 +11,7 @@ class M
 
   execute_: ->
     
-    @name = await $.prompt
+    @name = await $.prompt_
       type: 'text'
       message: 'input name of new project'
 

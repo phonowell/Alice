@@ -70,7 +70,7 @@ class M
 
     {target} = $.argv
 
-    target or= await $.prompt
+    target or= await $.prompt_
       type: 'select'
       message: 'select target'
       list: @listTarget

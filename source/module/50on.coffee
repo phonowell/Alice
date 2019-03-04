@@ -17,7 +17,7 @@ class M
     seed = parseInt Math.random() * 2
     char = char[seed]
 
-    value = await $.prompt
+    value = await $.prompt_
       type: 'text'
       message: char
       default: 'exit'

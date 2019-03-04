@@ -69,7 +69,7 @@ class M
 
     {target} = $.argv
 
-    target or= await $.prompt
+    target or= await $.prompt_
       id: 'cleaner'
       type: 'select'
       message: 'select a target'

@@ -14,7 +14,7 @@ class M
     {target} = $.argv
 
     listKey = $._.keys @map
-    target or= await $.prompt
+    target or= await $.prompt_
       id: 'shell'
       type: 'select'
       message: 'select a target'
