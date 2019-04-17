@@ -3,8 +3,9 @@
 #singleInstance force
 #useHook
 
-setKeyDelay, 0, 50
 sendMode, Event
+
+; bind key
 
 f12::exitApp
 

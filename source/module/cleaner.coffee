@@ -23,7 +23,10 @@ class M
     unless $.os == 'macos'
       throw new Error "invalid os '#{$.os}'"
 
-    await $.remove_ '~/Project/**/.DS_Store'
+    await $.remove_ [
+      '~/OneDrive/**/.DS_Store'
+      '~/Project/**/.DS_Store'
+    ]
 
     @ # return
 

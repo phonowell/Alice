@@ -16,7 +16,6 @@ class M
   ###
 
   delay: 50
-  long: 400
   mapKey:
     '0': '0'
     '1': '1'
@@ -34,14 +33,19 @@ class M
 
   execute_: ->
 
-    {long} = $.argv
-    if long
-      @long = long
+    listSource = await $.source_ './../*.txt'
+    for source in listSource
+
+      long = parseInt $.getFilename source
+      @long = long or 400
+
+      target = source
+      .replace /\.txt/, '.ahk'
     
-    list = await @load_ './data/opern/inner.txt'
-    list = @format list
-    list = @translate list
-    await @save_ '~/Downloads/opern.ahk', list
+      list = await @load_ source
+      list = @format list
+      list = @translate list
+      await @save_ target, list
     
     @ # return
 
@@ -107,6 +111,10 @@ class M
 
     cont = contWrapper.replace /xxx/
     , listIn.join '\n'
+
+    # for windows
+    cont = cont
+    .replace /\n/g, '\r\n'
     
     await $.write_ pathTarget, cont
     

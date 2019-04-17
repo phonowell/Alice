@@ -6,8 +6,9 @@ module.exports = ->
   mapLines =
 
     macos: [
-      'brew update -v'
-      'brew upgrade -v'
+      'brew update'
+      'brew upgrade'
+      # 'brew cask upgrade'
       'gulp image'
       'gulp backup --target OneDrive'
       'gulp clean --target trash'
@@ -19,7 +20,10 @@ module.exports = ->
       'gulp backup --target OneDrive'
     ]
 
-  lines = mapLines[$.os] or throw new Error "invalid os '#{$.os}'"
+  lines = mapLines[$.os]
+  lines or throw new Error "invalid os '#{$.os}'"
 
-  await $.exec_ lines
-  await $.say_ 'Mission Completed'
+  await $.chain $
+  .exec_ lines,
+    ignoreError: true
+  .say_ 'Mission Completed'

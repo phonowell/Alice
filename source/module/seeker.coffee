@@ -210,11 +210,7 @@ class M
     listTarget.unshift 'all'
 
     {target} = $.argv
-    target or= await $.prompt_
-      id: 'seeker'
-      type: 'select'
-      message: 'select a target'
-      list: listTarget
+    target or= 'all'
     unless target in listTarget
       throw new Error "invalid target '#{target}'"
     @listTarget = if target == 'all'
