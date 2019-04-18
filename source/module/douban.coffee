@@ -45,8 +45,6 @@ class M
 
   download_: (id, zone) ->
 
-    $.info.pause 'douban'
-
     filename = "#{id}-#{(zone.split ':')[0]}.json"
     pathFile = "./temp/douban/#{filename}"
 
@@ -65,14 +63,16 @@ class M
     data = await $.get_ url
     await $.write_ pathFile, data
 
-    $.info.resume 'douban'
-
     data # return
 
   execute_: ->
 
+    $.info.pause 'douban'
+
     type = await @getType_()
     await @seek_ type
+
+    $.info.resume 'douban'
     
     @ # return
 
@@ -88,8 +88,6 @@ class M
     type # return
 
   seek_: (type) ->
-
-    $.info.pause 'douban'
 
     id = @mapType[type]
 
@@ -163,8 +161,6 @@ class M
 
     if value
       return await @seek_ type
-
-    $.info.resume 'douban'
 
     @ # return
 

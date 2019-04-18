@@ -68,9 +68,9 @@ class M
 
     @base = "./../#{@name}"
 
-    isExisted = await $.isExisted_ @base
-    if isExisted
-      throw new Error "'#{@name}' existed already"
+    # isExisted = await $.isExisted_ @base
+    # if isExisted
+    #   throw new Error "'#{@name}' existed already"
 
     await $.chain $
     .mkdir_ @base

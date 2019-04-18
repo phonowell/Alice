@@ -1,18 +1,29 @@
 $ = require 'fire-keeper'
+{_} = $
+
 kleur = require 'kleur'
 
 class M
 
   ###
+  listAction
   mapResult
   mapRule
 
   check()
   execute_()
   format(string)
+  getAction_()
   makeList_()
+  makeRandomList(len, max)
+  make_()
   validate(list, goal)
   ###
+
+  listAction: [
+    'check'
+    'make'
+  ]
 
   mapResult: [
     '-'
@@ -47,27 +58,71 @@ class M
     goal = @list[0]
 
     for list, i in @list[1...]
-      $.i "#{$._.padStart (i + 1), 2, '0'}. #{@validate list, goal}"
+      $.i "#{_.padStart (i + 1), 2, '0'}. #{@validate list, goal}"
 
     @ # return
 
   execute_: ->
 
-    await @makeList_()
-    @check()
+    action = await @getAction_()
 
+    if action == 'check'
+
+      await @makeList_()
+      @check()
+      return @
+
+    if action == 'make'
+      await @make_()
+      return @
+
+    throw new Error "invalid action '#{action}'"
     @ # return
 
   format: (string) ->
 
     list = string.trim()
     .split ' '
-    $._.remove list, (item) -> item == '+'
+    _.remove list, (item) -> item == '+'
     list =
       red: list[0...5]
       blue: list[5...]
 
     list # return
+
+  getAction_: ->
+    {target} = $.argv
+    target or= await $.prompt_
+      id: 'lottery'
+      type: 'select'
+      message: 'select action'
+      list: @listAction
+    unless target in @listAction
+      throw new Error "invalid action '#{target}'"
+    target # return
+
+  make_: ->
+
+    listRed = @makeRandomList 5, 35
+    listBlue = @makeRandomList 2, 12
+
+    message = [
+      listRed...
+      '+'
+      listBlue...
+    ].join ' '
+
+    $.i kleur.green message
+
+    value = await $.prompt_
+      type: 'confirm'
+      message: 'continue?'
+      default: true
+
+    if value
+      return @make_()
+
+    @ # return
 
   makeList_: ->
 
@@ -77,6 +132,26 @@ class M
       @list.push @format line
 
     @ # return
+
+  makeRandomList: (len, max) ->
+
+    list = _.shuffle [1..max]
+
+    listResult = []
+    i = 0
+    while i < len
+      
+      n = list[parseInt Math.random() * max - 1]
+
+      if n in listResult
+        continue
+
+      listResult.push n
+
+      i++
+
+    # return
+    listResult.sort (a, b) -> a - b
 
   validate: (list, goal) ->
     

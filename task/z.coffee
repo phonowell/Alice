@@ -3,12 +3,9 @@ $ = require 'fire-keeper'
 # return
 module.exports = ->
   
-  listName = await $.read_ './data/sankaku.yaml'
+  for source in await $.source_ './../*'
 
-  for name in listName
-    
-    name = name
-    .replace /\s/g, '_'
-    .replace /[\(\)]/g, ''
-    
-    await $.exec_ "gulp yandere --keyword #{name} --type origin"
+    await $.exec_ [
+      "cd #{source}"
+      'gulp update'
+    ]
