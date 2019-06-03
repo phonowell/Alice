@@ -1,29 +1,29 @@
 {
-  "name": "alice",
-  "version": "0.0.1",
+  "author": "Mimiko Phonowell <phonowell@gmail.com>",
+  "bugs": {
+    "url": "https://github.com/phonowell/alice/issues"
+  },
+  "dependencies": {
+    "cheerio": "^1.0.0-rc.3",
+    "fire-keeper": "0.0.150",
+    "jimp": "^0.6.4",
+    "js2coffee": "^2.2.0",
+    "nanoid": "^2.0.3",
+    "puppeteer": "^1.15.0"
+  },
   "description": "Alice",
+  "homepage": "https://github.com/phonowell/alice",
+  "keywords": [
+    "alice"
+  ],
+  "license": "GPL-3.0+",
   "main": "index.js",
-  "scripts": {},
+  "name": "alice",
   "repository": {
     "type": "git",
     "url": "https://github.com/phonowell/alice.git"
   },
-  "keywords": [
-    "alice"
-  ],
-  "author": "Mimiko Phonowell <phonowell@gmail.com>",
-  "license": "GPL-3.0+",
+  "scripts": {},
   "url": "https://github.com/phonowell/alice",
-  "bugs": {
-    "url": "https://github.com/phonowell/alice/issues"
-  },
-  "homepage": "https://github.com/phonowell/alice",
-  "dependencies": {
-    "cheerio": "^1.0.0-rc.3",
-    "fire-keeper": "^0.0.148",
-    "jimp": "^0.6.4",
-    "js2coffee": "^2.2.0",
-    "nanoid": "^2.0.1",
-    "puppeteer": "^1.15.0"
-  }
+  "version": "0.0.1"
 }

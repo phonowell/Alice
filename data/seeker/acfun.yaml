@@ -1,6 +1,1 @@
-title: AcFun文章区
-url: http://www.acfun.cn/v/list164/index.htm
-selector: a.atc-title
-option:
-  replaceUrl: http://www.acfun.cn#{url}
-  viaBrowser: true
+{"title":"AcFun文章区","url":"http://www.acfun.cn/v/list164/index.htm","selector":"a.atc-title","option":{"replaceUrl":"http://www.acfun.cn#{url}","viaBrowser":true}}

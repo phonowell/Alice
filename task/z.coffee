@@ -7,5 +7,5 @@ module.exports = ->
 
     await $.exec_ [
       "cd #{source}"
-      'gulp update'
+      'gulp kokoro'
     ]
