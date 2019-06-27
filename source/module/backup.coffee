@@ -52,7 +52,7 @@ class M
 
       source = "#{pathSave}/**/*.*"
       target = "#{@pathStorage}/存档"
-      filename = "#{path.basename pathSave}.zip"
+      filename = "#{$.getBasename pathSave}.zip"
 
       await $.zip_ source, target, filename
 

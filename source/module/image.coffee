@@ -3,7 +3,6 @@
 $ = require 'fire-keeper'
 {_} = $
 
-path = require 'path'
 generate = require 'nanoid/generate'
 stringToken = '1234567890abcdefghijklmnopqrstuvwxyz'
 jimp = require 'jimp'
@@ -38,7 +37,6 @@ class Image
   convert()
   execute_()
   genBasename()
-  getBasename(source)
   getImg_(source)
   getScale(width, height, [maxWidth], [maxHeight])
   move_()
@@ -69,7 +67,7 @@ class Image
 
     for source in listSource
 
-      basename = @getBasename source
+      basename = $.getBasename source
       target = "#{@storage}/jpg/#{basename}.jpg"
 
       img = await @getImg_ source
@@ -103,10 +101,6 @@ class Image
       'x'
       generate stringToken, 8
     ].join '-'
-
-  getBasename: (source) ->
-    extname = path.extname source
-    path.basename source, extname
 
   getImg_: (source) -> await jimp.read source
 
@@ -147,7 +141,7 @@ class Image
       
     for source in listSource
 
-      basename = @getBasename source
+      basename = $.getBasename source
       if @validateBasename basename then continue
 
       basename = @genBasename()
@@ -174,7 +168,7 @@ class Image
 
     for source in listSource
 
-      basename = @getBasename source
+      basename = $.getBasename source
       if @validateBasename basename then continue
 
       img = await @getImg_ source
