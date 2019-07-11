@@ -3,8 +3,8 @@ $ = require 'fire-keeper'
 # return
 module.exports = ->
   
-  m = $.fn.require './source/module/image.coffee'
+  m = $.require './source/module/image'
   m = m()
 
-  {target} = $.argv
+  {target} = $.argv()
   await m.execute_ target

@@ -1,17 +1,15 @@
-# require
 $ = require 'fire-keeper'
 fs = require 'fs'
 path = require 'path'
 
 # task
-listFilename = fs.readdirSync './task'
-for filename in listFilename
+for filename in fs.readdirSync './task'
+  do (filename) ->
 
-  unless ~filename.search /\.coffee/
-    continue
-  
-  name = filename.replace /\.coffee/, ''
+    unless ~filename.search /\.coffee/
+      return
 
-  do (name) -> $.task name, ->
-    fn = require "./task/#{name}.coffee"
-    fn()
+    name = filename.replace /\.coffee/, ''
+    $.task name, (arg...) ->
+      fn_ = require "./task/#{name}.coffee"
+      await fn_ arg...

@@ -5,11 +5,11 @@
   },
   "dependencies": {
     "cheerio": "^1.0.0-rc.3",
-    "fire-keeper": "0.0.155",
+    "fire-keeper": "0.0.159",
     "jimp": "^0.6.4",
     "js2coffee": "^2.2.0",
     "nanoid": "^2.0.3",
-    "puppeteer": "^1.18.1"
+    "puppeteer": "^1.19.0"
   },
   "description": "Alice",
   "homepage": "https://github.com/phonowell/alice",

@@ -1,5 +1,5 @@
+_ = require 'lodash'
 $ = require 'fire-keeper'
-{_} = $
 
 class Renderer
 

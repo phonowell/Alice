@@ -2,5 +2,5 @@ $ = require 'fire-keeper'
 
 # return
 module.exports = ->
-  fn_ = $.fn.require './source/module/lottery.coffee'
+  fn_ = $.require './source/module/lottery'
   await fn_()

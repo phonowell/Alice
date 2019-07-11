@@ -1,1 +1,6 @@
-{"title":"月光博客","url":"http://www.williamlong.info","selector":"a.post-title"}
+title: 月光博客
+url: 'https://www.williamlong.info'
+selector: a.post-title
+# option:
+#   delay: 10e3
+#   viaBrowser: true

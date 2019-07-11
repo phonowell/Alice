@@ -1,5 +1,5 @@
+_ = require 'lodash'
 $ = require 'fire-keeper'
-{_} = $
 
 kleur = require 'kleur'
 
@@ -9,7 +9,7 @@ class M
   listAction
   mapResult
   mapRule
-
+  ---
   check()
   execute_()
   format(string)
@@ -91,7 +91,7 @@ class M
     list # return
 
   getAction_: ->
-    {target} = $.argv
+    {target} = $.argv()
     target or= await $.prompt_
       id: 'lottery'
       type: 'select'

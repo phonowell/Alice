@@ -1,11 +1,11 @@
+_ = require 'lodash'
 $ = require 'fire-keeper'
-{_} = $
 
 class M
 
   ###
   mapType
-
+  ---
   download_(id, zone)
   execute_()
   getType_()
@@ -67,17 +67,15 @@ class M
 
   execute_: ->
 
-    $.info.pause 'douban'
+    await $.info().silence_ =>
 
-    type = await @getType_()
-    await @seek_ type
-
-    $.info.resume 'douban'
+      type = await @getType_()
+      await @seek_ type
     
     @ # return
 
   getType_: ->
-    {type} = $.argv
+    {type} = $.argv()
     type or= await $.prompt_
       id: 'douban'
       type: 'select'

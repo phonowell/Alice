@@ -1,7 +1,5 @@
-# require
-
+_ = require 'lodash'
 $ = require 'fire-keeper'
-{_} = $
 
 generate = require 'nanoid/generate'
 stringToken = '1234567890abcdefghijklmnopqrstuvwxyz'
@@ -22,7 +20,7 @@ class Image
       macos: '~/OneDrive/图片'
       windows: 'E:/OneDrive/图片'
 
-    mapPath[$.os] or throw new Error "invalid os '#{$.os}'"
+    mapPath[$.os()] or throw new Error "invalid os '#{$.os()}'"
 
   temp: do ->
     
@@ -30,7 +28,7 @@ class Image
       macos: '~/Downloads'
       windows: 'F:'
 
-    mapPath[$.os] or throw new Error "invalid os '#{$.os}'"
+    mapPath[$.os()] or throw new Error "invalid os '#{$.os()}'"
 
   ###
   clean_()

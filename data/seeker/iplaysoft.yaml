@@ -1,1 +1,3 @@
-{"title":"异次元软件世界","url":"https://www.iplaysoft.com","selector":"h2.entry-title > a"}
+title: 异次元软件世界
+url: 'https://www.iplaysoft.com'
+selector: h2.entry-title > a

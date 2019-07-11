@@ -1,5 +1,5 @@
+_ = require 'lodash'
 $ = require 'fire-keeper'
-{_} = $
 
 cheerio = require 'cheerio'
 
@@ -9,7 +9,7 @@ class M
   browser
   pathTemp
   setting
-
+  ---
   download_(rule)
   execute_(name)
   getFilename(url)
@@ -26,7 +26,7 @@ class M
   ###
 
   browser: do ->
-    m = $.fn.require './source/module/browser.coffee'
+    m = $.require './source/module/browser'
     m()
 
   pathTemp: './temp/seeker'
@@ -49,6 +49,7 @@ class M
       try
         if rule.option.viaBrowser
           await @browser.launch_()
+          await $.delay_ rule.option.delay or 0
           {html} = await @browser.content_ url
           await @browser.close_()
           await $.write_ "#{@pathTemp}/page/#{filename}", html
@@ -209,7 +210,7 @@ class M
     listTarget = _.keys @mapRule
     listTarget.unshift 'all'
 
-    {target} = $.argv
+    {target} = $.argv()
     target or= 'all'
     unless target in listTarget
       throw new Error "invalid target '#{target}'"
@@ -244,16 +245,14 @@ class M
 
     target = "#{@pathTemp}/result.html"
 
-    method = switch $.os
+    method = switch $.os()
       when 'linux', 'macos' then 'open'
       when 'windows' then 'start'
-      else throw new Error "invalid os <#{$.os}>"
+      else throw new Error "invalid os <#{$.os()}>"
 
-    namespace = 'seeker.view'
-    $.info.pause namespace
-    await $.write_ target, html
-    await $.exec_ "#{method} #{target}"
-    $.info.resume namespace
+    await $.info().silence_ ->
+      await $.write_ target, html
+      await $.exec_ "#{method} #{target}"
 
     @ # return
 
