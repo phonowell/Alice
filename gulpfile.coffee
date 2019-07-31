@@ -1,6 +1,5 @@
 $ = require 'fire-keeper'
 fs = require 'fs'
-path = require 'path'
 
 # task
 for filename in fs.readdirSync './task'

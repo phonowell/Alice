@@ -4,15 +4,15 @@ $ = require 'fire-keeper'
 class M
 
   ###
-  ask_()
+  ask_(map)
   execute_()
   load_()
   ###
 
-  ask_: ->
+  ask_: (map) ->
 
     {target} = $.argv()
-    listKey = _.keys @map
+    listKey = _.keys map
 
     target or= await $.prompt_
       id: 'cmd'
@@ -27,17 +27,17 @@ class M
 
   execute_: ->
 
-    await @load_()
-    cmd = await @ask_()
+    map = await @load_()
+    cmd = await @ask_ map
 
-    lines = @map[cmd]
-    
-    switch type = $.type lines
-      when 'string'
-        lines = [lines]
-      else throw new Error "invalid command '#{cmd}'"
-    
-    unless lines
+    lines = map[cmd]
+    type = $.type lines
+
+    if type == 'string'
+      lines = [lines]
+      type = $.type lines
+
+    unless type == 'array'
       throw new Error "invalid command '#{cmd}'"
 
     await $.exec_ lines
@@ -49,11 +49,9 @@ class M
     unless data = await $.read_ "./data/cmd/#{$.os()}.yaml"
       $.info 'warning'
       , "invalid os '#{$.os()}'"
-      return @
+      return null
     
-    @map = data
-    
-    @ # return
+    data # return
 
 # return
 module.exports = ->

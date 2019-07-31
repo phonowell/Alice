@@ -6,9 +6,7 @@ module.exports = ->
   mapLines =
 
     macos: [
-      'brew update'
-      'brew upgrade'
-      'brew cask upgrade'
+      'gulp brew'
       'gulp image'
       'gulp backup --target OneDrive'
       'gulp clean --target trash'

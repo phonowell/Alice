@@ -1,5 +1,7 @@
 flushdns: sudo killall mDNSResponder
-resetlaunchpad: defaults write com.apple.dock ResetLaunchPad -bool true
+resetlaunchpad:
+  - defaults write com.apple.dock ResetLaunchPad -bool true
+  - killall -KILL Dock
 ssh-add:
   - ssh-add -D
   - cd ~/OneDrive/密钥/Anitama

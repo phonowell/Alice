@@ -1,5 +1,6 @@
 _ = require 'lodash'
 $ = require 'fire-keeper'
+axios = require 'axios'
 
 class M
 
@@ -60,7 +61,7 @@ class M
       '&start=0'
       '&limit=125'
     ].join ''
-    data = await $.get_ url
+    data = await axios.get url
     await $.write_ pathFile, data
 
     data # return
