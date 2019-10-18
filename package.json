@@ -6,10 +6,10 @@
   "dependencies": {
     "axios": "^0.19.0",
     "cheerio": "^1.0.0-rc.3",
-    "fire-keeper": "0.0.163",
-    "jimp": "^0.6.4",
-    "nanoid": "^2.0.4",
-    "puppeteer": "^1.19.0"
+    "fire-keeper": "0.0.166",
+    "jimp": "^0.8.4",
+    "nanoid": "^2.1.4",
+    "puppeteer": "^1.20.0"
   },
   "description": "Alice",
   "homepage": "https://github.com/phonowell/alice",
