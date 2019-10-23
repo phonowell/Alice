@@ -1,6 +1,8 @@
-$ = require 'fire-keeper'
 _ = require 'lodash'
+$ = require 'fire-keeper'
 cheerio = require 'cheerio'
+
+# function
 
 class M
 
@@ -30,11 +32,14 @@ class M
     browser = $.require './source/module/browser'
 
     await browser.launch_()
-    {html} = await browser.content_ url
+    data = await browser.content_ url
     await browser.close_()
     
-    await $.write_ source, html
+    unless data
+      return
 
+    {html} = data
+    await $.write_ source, html
     html # return
 
   execute_: ->
@@ -51,6 +56,9 @@ class M
       html = if stat and _.now() - stat.ctime.getTime() < @setting.life
         await $.read_ source
       else await @download_ {name, source, url}
+
+      unless html
+        continue
 
       listLink = await @getLink html, selector
       unless listLink.length

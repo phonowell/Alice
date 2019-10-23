@@ -52,6 +52,9 @@ jspm_packages
 # build
 build
 dist
+dist-wechat
+public
+src
 
 # compiled
 *.css

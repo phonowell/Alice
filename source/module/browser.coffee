@@ -1,6 +1,8 @@
 $ = require 'fire-keeper'
 puppeteer = require 'puppeteer'
 
+# function
+
 class M
 
   ###
@@ -21,19 +23,23 @@ class M
 
   content_: (url) ->
 
-    await new Promise (resolve) =>
+    page = await @browser.newPage()
 
-      page = await @browser.newPage()
-      
-      await page.goto url,
-        waitUntil: 'load'
+    handler = page.goto url,
+      waitUntil: 'load'
+    .then -> true
+    .catch -> false
 
-      html = await page.content()
-      cookie = await page.cookies()
+    unless await handler
+      return
 
-      await page.close()
+    html = await page.content()
+    cookie = await page.cookies()
 
-      resolve {cookie, html}
+    await page.close()
+
+    # return
+    {cookie, html}
 
   launch_: ->
     @browser = await puppeteer.launch()

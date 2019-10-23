@@ -3,13 +3,11 @@
 .idea
 .temp
 .vscode
-dist
 gurumin
 lint
 secret
 source
 storage
-task
 temp
 # file
 *.coffee
