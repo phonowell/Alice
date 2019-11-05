@@ -1,7 +1,5 @@
 $ = require 'fire-keeper'
 
+# return
 module.exports = ->
-
-  $.i 0.1 + 0.2
-
-  $.i (0.1 * 100 + 0.2 * 100) / 100
+  $.info 'z'

@@ -18,8 +18,8 @@ module.exports = ->
       'gulp backup --target OneDrive'
     ]
 
-  lines = mapLines[$.os()]
-  lines or throw new Error "invalid os '#{$.os()}'"
+  unless lines = mapLines[$.os()]
+    throw new Error "invalid os '#{$.os()}'"
 
   await $.exec_ lines,
     ignoreError: true

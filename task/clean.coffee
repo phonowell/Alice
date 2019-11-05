@@ -86,7 +86,7 @@ class M
     
     @ # return
 
-  execute_: (target) ->
+  execute_: ->
 
     method = await @ask_()
     await @[method]()
