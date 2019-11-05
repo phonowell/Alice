@@ -34,6 +34,10 @@ class M
       type: 'autocomplete'
       message: 'input'
       list: listTarget
+
+    target = target
+    .replace /_/g, ' '
+
     unless target in listTarget
       throw new Error "invalid target '#{target}'"
 
