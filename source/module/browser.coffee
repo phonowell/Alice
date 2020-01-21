@@ -1,4 +1,3 @@
-$ = require 'fire-keeper'
 puppeteer = require 'puppeteer'
 
 # function
@@ -25,12 +24,9 @@ class M
 
     page = await @browser.newPage()
 
-    handler = page.goto url,
+    result = page.goto url,
       waitUntil: 'load'
-    .then -> true
-    .catch -> false
-
-    unless await handler
+    unless result
       return
 
     html = await page.content()

@@ -77,6 +77,8 @@ class M
         continue
       await $.remove_ sdr
 
+    @ # return
+
   cleanTrash_: ->
     
     unless $.os 'macos'

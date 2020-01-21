@@ -4,12 +4,15 @@
     "url": "https://github.com/phonowell/alice/issues"
   },
   "dependencies": {
+    "@types/node": "^13.1.8",
     "axios": "^0.19.1",
     "cheerio": "^1.0.0-rc.3",
     "fire-keeper": "0.0.168",
     "jimp": "^0.9.3",
     "nanoid": "^2.1.9",
-    "puppeteer": "^2.0.0"
+    "puppeteer": "^2.0.0",
+    "ts-node": "^8.6.2",
+    "typescript": "^3.7.5"
   },
   "description": "Alice",
   "homepage": "https://github.com/phonowell/alice",

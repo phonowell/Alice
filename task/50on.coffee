@@ -33,13 +33,13 @@ class M
     $.i msg
 
     await $.info().silence_ ->
-      $.say_ char,
+      await $.say_ char,
         lang: 'ja'
     
     # loop
     return @ask_()
 
-    @ # return
+    # @ # return
 
   execute_: ->
 

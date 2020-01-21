@@ -68,11 +68,11 @@ class M
     for source in listSource
       {basename} = $.getName source
 
-      unless /[\s()]/.test basename
+      unless /[\s()[]]/.test basename
         continue
 
       basename = basename
-      .replace /[\s()]/g, ''
+      .replace /[\s()[]]/g, ''
 
       await $.rename_ source, {basename}
 
