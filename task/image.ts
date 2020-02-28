@@ -6,7 +6,6 @@ module.exports = async () => {
   let m = $.require('./source/module/image')
   m = m()
 
-  let { target } = $.argv()
+  const { target } = $.argv()
   await m.execute_(target)
-
 }

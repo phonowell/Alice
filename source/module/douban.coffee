@@ -61,7 +61,7 @@ class M
       '&start=0'
       '&limit=125'
     ].join ''
-    data = await axios.get url
+    {data} = await axios.get url
     await $.write_ pathFile, data
 
     data # return

@@ -18,7 +18,7 @@ class M
 
   execute_: ->
 
-    unless @validate_()
+    unless await @validate_()
       return
 
     await @rename_()
@@ -58,7 +58,7 @@ class M
 
   move_: (source) ->
     {basename} = $.getName source
-    await $.copy_ "#{@path.temp}/#{basename}.mobi", "#{@path.document}"
+    await $.copy_ "#{@path.temp}/#{basename}.mobi", @path.document
     @ # return
 
   rename_: ->
@@ -88,7 +88,7 @@ class M
     result = []
 
     for line in list
-      unless lien = line.trim()
+      unless line = line.trim()
         continue
       result.push "<p>#{line}</p>"
 
@@ -121,7 +121,7 @@ class M
 
     true # return
 
-# return
+# export
 module.exports = ->
   m = new M()
   await m.execute_()

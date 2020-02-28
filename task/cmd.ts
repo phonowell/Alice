@@ -5,7 +5,7 @@ import $ = require('fire-keeper')
 
 class M {
 
-  ask_ = async (map) => {
+  async ask_(map) {
 
     let { target } = $.argv()
     let listKey = _.keys(map)
@@ -21,20 +21,20 @@ class M {
       throw new Error(`invalid target '${target}'`)
     }
 
-    return target
+    return target as string
 
   }
 
-  execute_ = async () => {
+  async execute_() {
 
-    let map = await this.load_()
-    let cmd = await this.ask_(map)
+    const map = await this.load_()
+    const cmd = await this.ask_(map)
 
-    let lines = map[cmd]
-    let type = $.type(lines)
+    let lines: string | string[] = map[cmd]
+    let type: string = $.type(lines)
 
     if (type === 'string') {
-      lines = [lines]
+      lines = [lines as string]
       type = $.type(lines)
     }
 
@@ -48,9 +48,9 @@ class M {
 
   }
 
-  load_ = async () => {
+  async load_() {
 
-    let data = await $.read_(`./data/cmd/${$.os()}.yaml`)
+    const data = await $.read_(`./data/cmd/${$.os()}.yaml`)
     if (!data) {
       $.info('warning', `invalid os '${$.os()}'`)
       return null
@@ -64,6 +64,6 @@ class M {
 
 // export
 module.exports = async () => {
-  let m = new M()
+  const m = new M()
   await m.execute_()
 }

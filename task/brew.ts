@@ -10,11 +10,11 @@ class M {
 
   // ---
 
-  check_ = async (name) => {
+  async check_(name: string) {
 
-    let result = await $.exec_(`brew cask info ${name}`)
-    let lines = result[1].split('\n')
-    let version = lines[0].split(' ')[1].trim()
+    const result = await $.exec_(`brew cask info ${name}`)
+    const lines = result[1].split('\n')
+    const version = lines[0].split(' ')[1].trim()
 
     if (!~lines[2].includes(version)) {
       return true // outdated
@@ -24,20 +24,20 @@ class M {
 
   }
 
-  list_ = async () => {
+  async list_() {
 
-    let result = await $.exec_('brew cask list')
-    let lines = result[1].split('\n')
+    const result = await $.exec_('brew cask list') as string
+    const lines = result[1].split('\n')
     return lines
 
   }
 
-  execute_ = async () => {
+  async execute_() {
 
-    let list = await this.list_()
+    const list = await this.list_()
 
     let listResult = []
-    for (let name of list) {
+    for (const name of list) {
 
       if (this.listIgnore.includes(name)) {
         continue
@@ -53,7 +53,7 @@ class M {
       return this
     }
 
-    let cmd = `brew cask reinstall ${listResult.join(' ')}`
+    const cmd = `brew cask reinstall ${listResult.join(' ')}`
     await $.exec_(cmd)
 
     return this
@@ -75,7 +75,7 @@ module.exports = async () => {
     'brew cask upgrade'
   ])
 
-  let m = new M()
+  const m = new M()
   await m.execute_()
 
 }

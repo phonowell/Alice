@@ -28,5 +28,11 @@
   },
   "scripts": {},
   "url": "https://github.com/phonowell/alice",
-  "version": "0.0.1"
+  "version": "0.0.1",
+  "devDependencies": {
+    "@types/cheerio": "^0.22.16",
+    "@types/jimp": "^0.2.28",
+    "@types/lodash": "^4.14.149",
+    "@types/nanoid": "^2.1.0"
+  }
 }

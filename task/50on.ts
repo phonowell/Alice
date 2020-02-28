@@ -5,11 +5,11 @@ import kleur = require('kleur')
 
 class M {
 
-  list: []
+  list: string[]
 
   // ---
 
-  ask_ = async () => {
+  async ask_() {
 
     let seed = Math.floor(Math.random() * this.list.length)
     let [answer, char] = (this.list[seed] as string).split(',')
@@ -17,11 +17,11 @@ class M {
     seed = Math.floor(Math.random() * 2)
     char = char[seed]
 
-    let value = await $.prompt_({
+    const value = await $.prompt_({
       type: 'text',
       message: char,
       default: 'exit'
-    })
+    }) as string
 
     if (value === 'exit') {
       return this
@@ -45,7 +45,7 @@ class M {
 
   }
 
-  execute_ = async () => {
+  async execute_() {
 
     await this.loadData_()
     await this.ask_()
@@ -54,7 +54,7 @@ class M {
 
   }
 
-  loadData_ = async () => {
+  async loadData_() {
 
     this.list = await $.read_('./data/50on.yaml')
     return this
@@ -65,6 +65,6 @@ class M {
 
 // export
 module.exports = async () => {
-  let m = new M()
+  const m = new M()
   await m.execute_()
 }

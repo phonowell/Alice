@@ -12,11 +12,11 @@ class M {
 
   // ---
 
-  ask_ = async () => {
+  async ask_() {
 
     let { target } = $.argv()
     let listTarget = []
-    for (let key in this.map) {
+    for (const key in this.map) {
       listTarget.push(key)
     }
 
@@ -31,7 +31,7 @@ class M {
       throw new Error(`invalid target '${target}'`)
     }
 
-    let method = this.map[target]
+    const method: string = this.map[target]
     if (!method) {
       throw new Error(`invalid target '${target}'`)
     }
@@ -40,7 +40,7 @@ class M {
 
   }
 
-  cleanDsStore_ = async () => {
+  async cleanDsStore_() {
 
     if (!$.os('macos')) {
       throw new Error(`invalid os '${$.os()}'`)
@@ -55,18 +55,18 @@ class M {
 
   }
 
-  cleanKindle_ = async () => {
+  async cleanKindle_() {
 
     if (!$.os('macos')) {
       throw new Error(`invalid os '${$.os()}'`)
     }
 
-    let pathKindle = '/Volumes/Kindle/documents'
+    const pathKindle = '/Volumes/Kindle/documents'
     if (!await $.isExisted_(pathKindle)) {
       throw new Error(`invalid path '${pathKindle}'`)
     }
 
-    let listExtname = [
+    const listExtname = [
       '.azw',
       '.azw3',
       '.kfx',
@@ -74,16 +74,16 @@ class M {
     ]
 
     let listBook = []
-    for (let extname of listExtname) {
-      let listTemp = await $.source_(`${pathKindle}/${extname}`)
-      for (let book of listTemp) {
+    for (const extname of listExtname) {
+      const listTemp: string[] = await $.source_(`${pathKindle}/${extname}`)
+      for (const book of listTemp) {
         listBook.push($.getBasename(book))
       }
     }
 
-    let listSdr = await $.source_(`${pathKindle}/*.sdr`)
-    for (let sdr of listSdr) {
-      let basename = $.getBasename(sdr)
+    const listSdr: string[] = await $.source_(`${pathKindle}/*.sdr`)
+    for (const sdr of listSdr) {
+      const basename = $.getBasename(sdr)
       if (listBook.includes(basename)) {
         continue
       }
@@ -94,7 +94,7 @@ class M {
 
   }
 
-  cleanTrash_ = async () => {
+  async cleanTrash_() {
 
     if (!$.os('macos')) {
       throw new Error(`invalid os '${$.os()}'`)
@@ -106,9 +106,9 @@ class M {
 
   }
 
-  execute_ = async () => {
+  async execute_() {
 
-    let method = await this.ask_()
+    const method = await this.ask_()
     await this[method]()
 
     return this
@@ -119,6 +119,6 @@ class M {
 
 // export
 module.exports = async () => {
-  let m = new M()
+  const m = new M()
   await m.execute_()
 }

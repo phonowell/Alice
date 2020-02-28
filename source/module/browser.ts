@@ -8,24 +8,24 @@ class M {
 
   // ---
 
-  close_ = async () => {
+  async close_() {
     await this.browser.close()
     return this
   }
 
-  content_ = async (url) => {
+  async content_(url: string) {
 
-    let page = await this.browser.newPage()
+    const page = await this.browser.newPage()
 
-    let result = await page.got(url, {
+    const result = await page.got(url, {
       waitUntil: 'load'
     })
     if (!result) {
       return
     }
 
-    let html = await page.content()
-    let cookie = await page.cookies()
+    const html: string = await page.content()
+    const cookie: string = await page.cookies()
 
     await page.close()
 
@@ -33,7 +33,7 @@ class M {
 
   }
 
-  launch_ = async () => {
+  async launch_() {
     this.browser = await puppeteer.launch()
     return this
   }
@@ -41,4 +41,4 @@ class M {
 }
 
 // export
-module.exports = new M()
+export default new M()

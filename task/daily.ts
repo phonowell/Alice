@@ -19,7 +19,7 @@ const map = {
 // export
 module.exports = async () => {
 
-  let lines = map[$.os()]
+  const lines = map[$.os()]
   if (!lines) {
     throw new Error(`invalid os '${$.os()}'`)
   }
