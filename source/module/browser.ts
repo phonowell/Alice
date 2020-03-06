@@ -24,8 +24,8 @@ class M {
       return
     }
 
-    const html: string = await page.content()
-    const cookie: string = await page.cookies()
+    const html = await page.content() as string
+    const cookie = await page.cookies() as string
 
     await page.close()
 
