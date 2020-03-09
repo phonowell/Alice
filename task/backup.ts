@@ -20,7 +20,8 @@ class M {
       windows: 'E:/OneDrive'
     }
 
-    if (!(this.pathStorage = map[$.os()])) {
+    this.pathStorage = map[$.os()]
+    if (!this.pathStorage) {
       throw new Error(`invalid os '${$.os()}'`)
     }
 
@@ -31,8 +32,11 @@ class M {
   async ask_() {
 
     let { target }: { target: string } = $.argv()
-    let listTarget: string[] = []
+    const listTarget: string[] = []
     for (const key in this.map) {
+      if (!this.map.hasOwnProperty(key)) {
+        continue
+      }
       listTarget.push(key)
     }
 

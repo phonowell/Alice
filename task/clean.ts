@@ -15,8 +15,11 @@ class M {
   async ask_() {
 
     let { target } = $.argv()
-    let listTarget = []
+    const listTarget = []
     for (const key in this.map) {
+      if (!this.map.hasOwnProperty(key)) {
+        continue
+      }
       listTarget.push(key)
     }
 
@@ -73,7 +76,7 @@ class M {
       '.mobi'
     ]
 
-    let listBook = []
+    const listBook = []
     for (const extname of listExtname) {
       const listTemp: string[] = await $.source_(`${pathKindle}/${extname}`)
       for (const book of listTemp) {

@@ -3,7 +3,7 @@ import $ = require('fire-keeper')
 
 // interface
 
-interface iChoice {
+interface IChoice {
   title: string
   value: string
 }
@@ -29,7 +29,7 @@ class M {
       mtime = [0, 0]
     }
 
-    let choice: iChoice[] = []
+    const choice: IChoice[] = []
 
     if (isExisted[0]) {
       choice.push({
@@ -71,8 +71,11 @@ class M {
     // diff
     for (const line of data) {
 
-      let [path, extra] = line.split('@') as [string, string]
+      let path: string
+      let extra: string
+      [path, extra] = line.split('@')
       extra = extra || ''
+
       let [namespace, version] = extra.split('/') as [string, string]
       namespace = namespace || 'default'
       version = version || '0.0.1'
@@ -105,7 +108,7 @@ class M {
 
     $.info().pause()
     const listSource = await $.source_('./data/sync/**/*.yaml') as string[]
-    let listData: string[][] = []
+    const listData: string[][] = []
     for (const source of listSource) {
       const cont = await $.read_(source) as string[]
       listData.push(cont)

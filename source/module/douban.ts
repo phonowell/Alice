@@ -4,7 +4,7 @@ import axios from 'axios'
 
 // interface
 
-interface iMovie {
+interface IMovie {
   actor_count: number
   actors: string[]
   cover_url: string
@@ -67,7 +67,7 @@ class M {
 
     const isExisted = await $.isExisted_(pathFile)
     if (isExisted) {
-      return await $.read_(pathFile) as iMovie[]
+      return await $.read_(pathFile) as IMovie[]
     }
 
     const url = [
@@ -78,7 +78,7 @@ class M {
       '&start=0',
       '&limit=125'
     ].join('')
-    const { data }: { data: iMovie[] } = await axios.get(url)
+    const { data }: { data: IMovie[] } = await axios.get(url)
     await $.write_(pathFile, data)
 
     return data
@@ -117,31 +117,31 @@ class M {
 
     const id = this.mapType[type]
 
-    let list: iMovie[] = []
-    for (const item of [
+    const list: IMovie[] = []
+    for (const _item of [
       ...(await this.download_(id, '100:90')),
       ...(await this.download_(id, '90:80'))
     ]) {
 
       // score
-      const score = parseFloat(_.get(item, 'score'))
+      const score = parseFloat(_.get(_item, 'score'))
       if (!(score >= 8.4)) {
         continue
       }
 
       // vote count
-      const count = Math.floor(_.get(item, 'vote_count'))
+      const count = Math.floor(_.get(_item, 'vote_count'))
       if (!(count >= 3e4)) {
         continue
       }
 
       // year
-      const year = parseInt(_.get(item, 'release_date').split('-')[0])
+      const year = parseInt(_.get(_item, 'release_date').split('-')[0], 10)
       if (!(new Date().getFullYear() - year <= 15)) {
         continue
       }
 
-      list.push(item)
+      list.push(_item)
     }
 
     if (!list.length) {
@@ -151,11 +151,11 @@ class M {
     let listTitle: string[] = await $.read_('./data/douban.json')
     listTitle = listTitle || []
 
-    let listUnique: iMovie[] = []
-    for (const item of list) {
-      const title = _.get(item, 'title')
-      if (!listTitle.includes(title)) {
-        listUnique.push(item)
+    const listUnique: IMovie[] = []
+    for (const _item of list) {
+      const _title = _.get(_item, 'title')
+      if (!listTitle.includes(_title)) {
+        listUnique.push(_item)
       }
     }
 

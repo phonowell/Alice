@@ -8,7 +8,7 @@ class M {
   async ask_(map) {
 
     let { target } = $.argv()
-    let listKey = _.keys(map)
+    const listKey = _.keys(map)
 
     target = target || await $.prompt_({
       id: 'cmd',

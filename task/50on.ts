@@ -12,7 +12,9 @@ class M {
   async ask_() {
 
     let seed = Math.floor(Math.random() * this.list.length)
-    let [answer, char] = (this.list[seed] as string).split(',')
+    let answer: string
+    let char: string
+    [answer, char] = (this.list[seed] as string).split(',')
 
     seed = Math.floor(Math.random() * 2)
     char = char[seed]

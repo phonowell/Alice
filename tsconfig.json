@@ -1,9 +1,9 @@
 {
-	"compilerOptions": {
-		"allowSyntheticDefaultImports": true,
-		"lib": [
-			"es2019"
-		],
-		"noImplicitAny": false
-	}
+    "compilerOptions": {
+        "allowSyntheticDefaultImports": true,
+        "lib": [
+            "es2019"
+        ],
+        "noImplicitAny": false
+    }
 }

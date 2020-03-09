@@ -6,13 +6,19 @@ import browser from '../source/module/browser'
 
 // interface
 
-interface iItem {
+interface IItem {
   selector: string
   title: string
   url: string
 }
 
-interface iStat {
+interface ILink {
+  time: number
+  title: string
+  url: string
+}
+
+interface IStat {
   ctime: Date
 }
 
@@ -45,27 +51,31 @@ class M {
   }
 
   async execute_() {
-    let mapResult = {}
+    const mapResult = {}
 
-    const data = await $.read_('./data/seek.yaml') as iItem[]
+    const data = await $.read_('./data/seek.yaml') as IItem[]
     for (const name in data) {
-      const { selector, title, url } = data[name]
-
-      const source = `${this.setting.temp}/${name}.html`
-      const stat: iStat = await $.stat_(source)
-
-      let html: string
-      if (stat && _.now() - stat.ctime.getTime() < this.setting.life) {
-        html = await $.read_(source)
-      } else {
-        html = await this.download_({ name, source, url })
-      }
-
-      if (!html) {
+      if (!data.hasOwnProperty(name)) {
         continue
       }
 
-      const listLink = await this.getLink(html, selector)
+      const { selector, title, url } = data[name]
+
+      const source = `${this.setting.temp}/${name}.html`
+      const stat: IStat = await $.stat_(source)
+
+      let _html: string
+      if (stat && _.now() - stat.ctime.getTime() < this.setting.life) {
+        _html = await $.read_(source)
+      } else {
+        _html = await this.download_({ name, source, url })
+      }
+
+      if (!_html) {
+        continue
+      }
+
+      const listLink = this.getLink(_html, selector)
       if (!listLink.length) {
         $.info('warning', `'${title}' might be not useable`)
         continue
@@ -82,11 +92,7 @@ class M {
 
   getLink(html: string, selector: string) {
 
-    let listResult: {
-      time: number
-      title: string
-      url: string
-    }[] = []
+    const listResult: ILink[] = []
 
     const dom = cheerio.load(html)
     dom(selector)
@@ -103,10 +109,14 @@ class M {
     return _.uniqBy(listResult, 'url')
   }
 
-  makeHtml(map) {
-    let html: string[] = []
+  makeHtml(map: { [key: string]: ILink[] }) {
+    const html: string[] = []
 
     for (const title in map) {
+      if (!map.hasOwnProperty(title)) {
+        continue
+      }
+
       const list = map[title]
       if (!list.length) {
         continue
@@ -121,7 +131,7 @@ class M {
     return html.join('<br>')
   }
 
-  async unique_(name: string, list) {
+  async unique_(name: string, list: ILink[]) {
 
     const source = `${this.setting.temp}/${name}.json`
 

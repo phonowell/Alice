@@ -23,7 +23,8 @@ class Image {
       windows: 'E:/OneDrive/图片'
     }
 
-    if (!(this.storage = map[$.os()])) {
+    this.storage = map[$.os()]
+    if (!this.storage) {
       throw new Error(`invalid os '${$.os()}'`)
     }
 
@@ -34,7 +35,8 @@ class Image {
       windows: 'F:'
     }
 
-    if (!(this.temp = map[$.os()])) {
+    this.temp = map[$.os()]
+    if (!this.temp) {
       throw new Error(`invalid os '${$.os()}'`)
     }
 

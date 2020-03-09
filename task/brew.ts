@@ -13,10 +13,10 @@ class M {
   async check_(name: string) {
 
     const result = await $.exec_(`brew cask info ${name}`)
-    const lines = result[1].split('\n')
+    const lines = result[1].split('\n') as string[]
     const version = lines[0].split(' ')[1].trim()
 
-    if (!~lines[2].includes(version)) {
+    if (!lines[2].includes(version)) {
       return true // outdated
     }
 
@@ -36,7 +36,7 @@ class M {
 
     const list = await this.list_()
 
-    let listResult = []
+    const listResult = []
     for (const name of list) {
 
       if (this.listIgnore.includes(name)) {
