@@ -1,5 +1,5 @@
 import _ = require('lodash')
-import $ = require('fire-keeper')
+import $ from '../source/fire-keeper'
 import cheerio = require('cheerio')
 
 import browser from '../source/module/browser'
@@ -16,10 +16,6 @@ interface ILink {
   time: number
   title: string
   url: string
-}
-
-interface IStat {
-  ctime: Date
 }
 
 // function
@@ -62,7 +58,7 @@ class M {
       const { selector, title, url } = data[name]
 
       const source = `${this.setting.temp}/${name}.html`
-      const stat: IStat = await $.stat_(source)
+      const stat = await $.stat_(source)
 
       let _html: string
       if (stat && _.now() - stat.ctime.getTime() < this.setting.life) {

@@ -1,4 +1,4 @@
-import $ = require('fire-keeper')
+import $ from '../source/fire-keeper'
 
 // function
 
@@ -26,7 +26,7 @@ class M {
 
     await this.rename_()
 
-    for (const source of await $.source_(this.path.storage) as string[]) {
+    for (const source of await $.source_(this.path.storage)) {
 
       if (await this.isExisted_(source)) {
         continue
@@ -44,7 +44,7 @@ class M {
 
   async html2mobi_(source: string) {
 
-    const { basename }: { basename: string } = $.getName(source)
+    const { basename } = $.getName(source)
     const target = `${this.path.temp}/${basename}.html`
 
     const cmd = [
@@ -59,8 +59,8 @@ class M {
   }
 
   async isExisted_(source: string) {
-    const { basename }: { basename: string } = $.getName(source)
-    return await $.isExisted_(`${this.path.document}/${basename}.mobi`) as boolean
+    const { basename } = $.getName(source)
+    return await $.isExisted_(`${this.path.document}/${basename}.mobi`)
   }
 
   async move_(source: string) {

@@ -1,4 +1,4 @@
-import $ = require('fire-keeper')
+import $ from '../source/fire-keeper'
 import kleur = require('kleur')
 
 // function
@@ -23,7 +23,7 @@ class M {
       type: 'text',
       message: char,
       default: 'exit'
-    }) as string
+    })
 
     if (value === 'exit') {
       return this

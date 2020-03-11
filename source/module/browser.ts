@@ -4,7 +4,7 @@ import puppeteer = require('puppeteer')
 
 class M {
 
-  browser: any = null
+  browser: puppeteer.Browser
 
   // ---
 
@@ -17,15 +17,15 @@ class M {
 
     const page = await this.browser.newPage()
 
-    const result = await page.got(url, {
+    const result = await page.goto(url, {
       waitUntil: 'load'
     })
     if (!result) {
       return
     }
 
-    const html = await page.content() as string
-    const cookie = await page.cookies() as string
+    const html = await page.content()
+    const cookie = await page.cookies()
 
     await page.close()
 

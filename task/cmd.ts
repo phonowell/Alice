@@ -1,5 +1,5 @@
 import _ = require('lodash')
-import $ = require('fire-keeper')
+import $ from '../source/fire-keeper'
 
 // function
 
@@ -21,7 +21,7 @@ class M {
       throw new Error(`invalid target '${target}'`)
     }
 
-    return target as string
+    return target
 
   }
 

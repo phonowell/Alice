@@ -1,5 +1,5 @@
 import _ = require('lodash')
-import $ = require('fire-keeper')
+import $ from '../fire-keeper'
 import axios from 'axios'
 
 // interface
@@ -97,7 +97,7 @@ class M {
 
   async getType_() {
 
-    let { type }: { type: string } = $.argv()
+    let { type } = $.argv() as { type: string }
 
     type = type || await $.prompt_({
       id: 'douban',
@@ -145,7 +145,7 @@ class M {
     }
 
     if (!list.length) {
-      return $.i('什么也没找到') as string
+      return $.i('什么也没找到')
     }
 
     let listTitle: string[] = await $.read_('./data/douban.json')
@@ -160,7 +160,7 @@ class M {
     }
 
     if (!listUnique.length) {
-      return $.i('什么也没找到') as string
+      return $.i('什么也没找到')
     }
 
     const item = listUnique[_.random(listUnique.length - 1)]

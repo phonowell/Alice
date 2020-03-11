@@ -1,4 +1,4 @@
-import $ = require('fire-keeper')
+import $ from '../source/fire-keeper'
 
 // export
 module.exports = async () => {

@@ -1,1 +1,13 @@
-- data/sync/kokoro.yaml
+# kokoro
+- .gitignore
+- .npmignore
+- .stylintrc
+- coffeelint.json
+- license.md
+- tsconfig.json
+- tslint.json
+
+# ts
+- gulpfile.ts
+- task/sync.ts
+- source/fire-keeper.ts

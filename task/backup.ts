@@ -1,4 +1,4 @@
-import $ = require('fire-keeper')
+import $ from '../source/fire-keeper'
 
 // function
 
@@ -31,7 +31,7 @@ class M {
 
   async ask_() {
 
-    let { target }: { target: string } = $.argv()
+    let { target } = $.argv() as { target: string }
     const listTarget: string[] = []
     for (const key in this.map) {
       if (!this.map.hasOwnProperty(key)) {

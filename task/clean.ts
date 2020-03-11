@@ -1,4 +1,4 @@
-import $ = require('fire-keeper')
+import $ from '../source/fire-keeper'
 
 // function
 
@@ -6,7 +6,6 @@ class M {
 
   map = {
     '.ds_store': 'cleanDsStore_',
-    'kindle': 'cleanKindle_',
     'trash': 'cleanTrash_'
   }
 
@@ -53,45 +52,6 @@ class M {
       '~/OneDrive/**/.DS_Store',
       '~/Project/**/.DS_Store'
     ])
-
-    return this
-
-  }
-
-  async cleanKindle_() {
-
-    if (!$.os('macos')) {
-      throw new Error(`invalid os '${$.os()}'`)
-    }
-
-    const pathKindle = '/Volumes/Kindle/documents'
-    if (!await $.isExisted_(pathKindle)) {
-      throw new Error(`invalid path '${pathKindle}'`)
-    }
-
-    const listExtname = [
-      '.azw',
-      '.azw3',
-      '.kfx',
-      '.mobi'
-    ]
-
-    const listBook = []
-    for (const extname of listExtname) {
-      const listTemp: string[] = await $.source_(`${pathKindle}/${extname}`)
-      for (const book of listTemp) {
-        listBook.push($.getBasename(book))
-      }
-    }
-
-    const listSdr: string[] = await $.source_(`${pathKindle}/*.sdr`)
-    for (const sdr of listSdr) {
-      const basename = $.getBasename(sdr)
-      if (listBook.includes(basename)) {
-        continue
-      }
-      await $.remove_(sdr)
-    }
 
     return this
 

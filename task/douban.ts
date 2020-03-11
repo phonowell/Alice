@@ -1,7 +1,7 @@
-import $ = require('fire-keeper')
+import $ from '../source/fire-keeper'
 
 // export
 module.exports = async () => {
-  const fn_ = $.require('./source/module/douban')
-  await fn_()
+  const fnAsync = $.require('./source/module/douban')
+  await fnAsync()
 }

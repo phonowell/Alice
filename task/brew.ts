@@ -1,4 +1,4 @@
-import $ = require('fire-keeper')
+import $ from '../source/fire-keeper'
 
 // function
 
@@ -13,7 +13,7 @@ class M {
   async check_(name: string) {
 
     const result = await $.exec_(`brew cask info ${name}`)
-    const lines = result[1].split('\n') as string[]
+    const lines = result[1].split('\n')
     const version = lines[0].split(' ')[1].trim()
 
     if (!lines[2].includes(version)) {
@@ -26,7 +26,7 @@ class M {
 
   async list_() {
 
-    const result = await $.exec_('brew cask list') as string
+    const result = await $.exec_('brew cask list')
     const lines = result[1].split('\n')
     return lines
 
