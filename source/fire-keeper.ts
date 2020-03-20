@@ -40,6 +40,8 @@ interface FireKeeper {
   os(): 'linux' | 'macos' | 'windows'
   os(input: 'linux' | 'macos' | 'windows'): boolean
 
+  parseString(input: any): string
+
   prompt_(option: {
     default?: boolean
     id?: string
