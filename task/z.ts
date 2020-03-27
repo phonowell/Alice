@@ -1,11 +1,8 @@
-import $ = require('fire-keeper')
+import $ from '../source/fire-keeper'
 
 // export
 module.exports = async () => {
 
-  await $.remove_([
-    './source/**/*.coffee',
-    './task/**/*.coffee'
-  ])
+  $.i(await $.source_('F:/*.*'))
 
 }

@@ -1,5 +1,5 @@
-import _ = require('lodash')
 import $ from '../source/fire-keeper'
+import * as _ from 'lodash'
 
 // interface
 

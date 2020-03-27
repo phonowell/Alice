@@ -1,4 +1,4 @@
-import _ = require('lodash')
+import * as _ from 'lodash'
 import $ from '../source/fire-keeper'
 
 // function
@@ -28,6 +28,10 @@ class M {
   async execute_() {
 
     const map = await this.load_()
+    if (!map) {
+      return
+    }
+
     const cmd = await this.ask_(map)
 
     let lines: string | string[] = map[cmd]

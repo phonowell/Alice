@@ -1,5 +1,5 @@
 import $ from '../source/fire-keeper'
-import kleur = require('kleur')
+import * as kleur from 'kleur'
 
 // function
 

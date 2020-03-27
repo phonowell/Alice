@@ -1,6 +1,6 @@
-import _ = require('lodash')
 import $ from '../source/fire-keeper'
-import cheerio = require('cheerio')
+import * as _ from 'lodash'
+import * as cheerio from 'cheerio'
 
 import browser from '../source/module/browser'
 

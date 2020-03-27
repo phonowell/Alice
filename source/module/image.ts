@@ -1,9 +1,9 @@
-import _ = require('lodash')
+import * as _ from 'lodash'
 import $ from '../fire-keeper'
 
-import generate = require('nanoid/generate')
-const stringToken = '1234567890abcdefghijklmnopqrstuvwxyz'
-import jimp = require('jimp')
+import { customAlphabet } from 'nanoid'
+const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 8)
+import * as jimp from 'jimp'
 
 // function
 
@@ -94,9 +94,9 @@ class Image {
 
   genBasename() {
     return [
-      generate(stringToken, 8),
+      nanoid(),
       'x',
-      generate(stringToken, 8)
+      nanoid()
     ].join('-')
   }
 
@@ -115,15 +115,15 @@ class Image {
     $.info('step', 'move')
 
     // jpg & jpeg
-    for (const extname of ['jpeg', 'jpg']) {
-      const listSource: string[] = await $.source_(`${this.temp}/*.${extname}`)
+    for (const extname of ['.jpeg', '.jpg']) {
+      const listSource = await $.source_(`${this.temp}/*${extname}`)
       await $.move_(listSource, `${this.storage}/jpg`)
     }
 
     // other
-    for (const extname of ['bmp', 'gif', 'mp4', 'png', 'webm', 'webp']) {
-      const listSource: string[] = await $.source_(`${this.temp}/*.${extname}`)
-      await $.move_(listSource, `${this.storage}/${extname}`)
+    for (const extname of ['.gif', '.mp4', '.png', '.webm', '.webp']) {
+      const listSource = await $.source_(`${this.temp}/*${extname}`)
+      await $.move_(listSource, `${this.storage}/${extname.replace('.', '')}`)
     }
 
     return this
