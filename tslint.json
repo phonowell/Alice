@@ -1,1 +1,10 @@
-{"extends":"tslint:recommended"}
+{
+	"compilerOptions": {
+		"allowSyntheticDefaultImports": true,
+		"lib": [
+			"DOM",
+			"es2019"
+		],
+		"noImplicitAny": false
+	}
+}

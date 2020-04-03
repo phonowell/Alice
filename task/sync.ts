@@ -1,6 +1,13 @@
 import $ from '../lib/fire-keeper'
 import * as _ from 'lodash'
 
+// interface
+
+interface IChoice {
+  title: string
+  value: string
+}
+
 // function
 
 class M {

@@ -66,7 +66,8 @@ class M {
 export default async () => {
 
   if (!$.os('macos')) {
-    throw new Error(`invalid os '${$.os()}'`)
+    $.info(`invalid os '${$.os()}'`)
+    return
   }
 
   await $.exec_([

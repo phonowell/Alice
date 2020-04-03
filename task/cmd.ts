@@ -28,6 +28,10 @@ class M {
   async execute_() {
 
     const map = await this.load_()
+    if (!map) {
+      return
+    }
+
     const cmd = await this.ask_(map)
 
     let lines: string | string[] = map[cmd]

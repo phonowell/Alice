@@ -45,7 +45,8 @@ class M {
   async cleanDsStore_() {
 
     if (!$.os('macos')) {
-      throw new Error(`invalid os '${$.os()}'`)
+      $.info(`invalid os '${$.os()}'`)
+      return
     }
 
     await $.remove_([
@@ -60,7 +61,8 @@ class M {
   async cleanTrash_() {
 
     if (!$.os('macos')) {
-      throw new Error(`invalid os '${$.os()}'`)
+      $.info(`invalid os '${$.os()}'`)
+      return
     }
 
     await $.remove_('~/.Trash/**/*')
