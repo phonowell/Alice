@@ -1,7 +1,7 @@
-import $ from '../source/fire-keeper'
+import $ from '../lib/fire-keeper'
 
 // export
-module.exports = async () => {
+export default async () => {
 
   let m = $.require('./source/module/image')
   m = m()

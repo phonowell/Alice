@@ -1,11 +1,8 @@
-import $ = require('fire-keeper')
+import $ from '../lib/fire-keeper'
 
 // export
-module.exports = async () => {
+export default async () => {
 
-  await $.remove_([
-    './source/**/*.coffee',
-    './task/**/*.coffee'
-  ])
+  $.info('z')
 
 }

@@ -1,4 +1,4 @@
-import $ from '../source/fire-keeper'
+import $ from '../lib/fire-keeper'
 
 // const
 
@@ -17,7 +17,7 @@ const map = {
 }
 
 // export
-module.exports = async () => {
+export default async () => {
 
   const lines = map[$.os()]
   if (!lines) {

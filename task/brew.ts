@@ -1,4 +1,4 @@
-import $ from '../source/fire-keeper'
+import $ from '../lib/fire-keeper'
 
 // function
 
@@ -63,7 +63,7 @@ class M {
 }
 
 // export
-module.exports = async () => {
+export default async () => {
 
   if (!$.os('macos')) {
     throw new Error(`invalid os '${$.os()}'`)
@@ -75,7 +75,6 @@ module.exports = async () => {
     'brew cask upgrade'
   ])
 
-  const m = new M()
-  await m.execute_()
+  await (new M()).execute_()
 
 }

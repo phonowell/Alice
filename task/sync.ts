@@ -1,12 +1,5 @@
-import _ = require('lodash')
-import $ from '../source/fire-keeper'
-
-// interface
-
-interface IChoice {
-  title: string
-  value: string
-}
+import $ from '../lib/fire-keeper'
+import * as _ from 'lodash'
 
 // function
 
@@ -19,20 +12,18 @@ class M {
       await $.isExisted_(target)
     ]
 
-    let mtime: number[]
-    if (isExisted[0] && isExisted[1]) {
-      mtime = [
-        (await $.stat_(source)).mtimeMs,
-        (await $.stat_(target)).mtimeMs
-      ]
-    } else {
-      mtime = [0, 0]
-    }
+    const mtime = isExisted[0] && isExisted[1] ? [
+      (await $.stat_(source)).mtimeMs,
+      (await $.stat_(target)).mtimeMs
+    ] : [0, 0]
 
-    const listChoice = [] as IChoice[]
+    const choice = [] as {
+      title: string
+      value: string
+    }[]
 
     if (isExisted[0]) {
-      listChoice.push({
+      choice.push({
         title: [
           'overwrite, export',
           mtime[0] > mtime[1] ? '(newer)' : ''
@@ -42,7 +33,7 @@ class M {
     }
 
     if (isExisted[1]) {
-      listChoice.push({
+      choice.push({
         title: [
           'overwrite, import',
           mtime[1] > mtime[0] ? '(newer)' : ''
@@ -51,13 +42,13 @@ class M {
       })
     }
 
-    listChoice.push({
+    choice.push({
       title: 'skip',
       value: 'skip'
     })
 
     return await $.prompt_({
-      list: listChoice,
+      list: choice,
       message: 'and you decide to...',
       type: 'select'
     })
@@ -71,14 +62,14 @@ class M {
     // diff
     for (const line of data) {
 
-      let path: string
-      let extra: string
-      [path, extra] = line.split('@')
-      extra = extra || ''
+      const _list = line.split('@')
+      const [path, extra] = [_list[0], _list[1] || '']
 
-      let [namespace, version] = extra.split('/')
-      namespace = namespace || 'default'
-      version = version || '0.0.1'
+      const _list2 = extra.split('/')
+      const [namespace, version] = [
+        _list2[0] || 'default',
+        _list2[1] || 'latest'
+      ]
 
       const source = `./${path}`
       let target = `../midway/${path}`
@@ -100,6 +91,8 @@ class M {
 
     }
 
+    return this
+
   }
 
   async load_() {
@@ -108,8 +101,7 @@ class M {
     const listSource = await $.source_('./data/sync/**/*.yaml')
     const listData = [] as string[][]
     for (const source of listSource) {
-      const cont = await $.read_(source) as string[]
-      listData.push(cont)
+      listData.push(await $.read_(source))
     }
     $.info().resume()
 
@@ -131,21 +123,18 @@ class M {
     if (value === 'export') {
       const { dirname, filename } = $.getName(target)
       await $.copy_(source, dirname, filename)
-      return
     }
 
     if (value === 'import') {
       const { dirname, filename } = $.getName(source)
       await $.copy_(target, dirname, filename)
-      return
     }
+
+    return this
 
   }
 
 }
 
 // export
-module.exports = async () => {
-  const m = new M()
-  await m.execute_()
-}
+export default async () => await (new M()).execute_()

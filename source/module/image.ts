@@ -1,5 +1,5 @@
 import _ = require('lodash')
-import $ from '../fire-keeper'
+import $ from '../../lib/fire-keeper'
 
 import generate = require('nanoid/generate')
 const stringToken = '1234567890abcdefghijklmnopqrstuvwxyz'

@@ -1,4 +1,4 @@
-import $ from '../source/fire-keeper'
+import $ from '../lib/fire-keeper'
 
 // function
 
@@ -143,7 +143,4 @@ class M {
 }
 
 // export
-module.exports = async () => {
-  const m = new M()
-  await m.execute_()
-}
+export default async () => await (new M()).execute_()

@@ -9,5 +9,5 @@
 
 # ts
 - gulpfile.ts
+- lib/fire-keeper.ts
 - task/sync.ts
-- source/fire-keeper.ts

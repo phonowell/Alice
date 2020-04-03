@@ -1,6 +1,6 @@
-import _ = require('lodash')
-import $ from '../source/fire-keeper'
-import cheerio = require('cheerio')
+import $ from '../lib/fire-keeper'
+import * as _ from 'lodash'
+import * as cheerio from 'cheerio'
 
 import browser from '../source/module/browser'
 
@@ -181,7 +181,4 @@ class M {
 }
 
 // export
-module.exports = async () => {
-  const m = new M()
-  await m.execute_()
-}
+export default async () => await (new M()).execute_()

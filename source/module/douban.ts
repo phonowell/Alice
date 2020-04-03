@@ -1,5 +1,5 @@
 import _ = require('lodash')
-import $ from '../fire-keeper'
+import $ from '../../lib/fire-keeper'
 import axios from 'axios'
 
 // interface

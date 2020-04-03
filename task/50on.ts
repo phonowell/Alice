@@ -1,5 +1,5 @@
-import $ from '../source/fire-keeper'
-import kleur = require('kleur')
+import $ from '../lib/fire-keeper'
+import * as kleur from 'kleur'
 
 // function
 
@@ -14,7 +14,7 @@ class M {
     let seed = Math.floor(Math.random() * this.list.length)
     let answer: string
     let char: string
-    [answer, char] = (this.list[seed] as string).split(',')
+    [answer, char] = (this.list[seed]).split(',')
 
     seed = Math.floor(Math.random() * 2)
     char = char[seed]
@@ -66,7 +66,4 @@ class M {
 }
 
 // export
-module.exports = async () => {
-  const m = new M()
-  await m.execute_()
-}
+export default async () => await (new M()).execute_()
