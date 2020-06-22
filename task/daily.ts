@@ -29,5 +29,4 @@ export default async () => {
   })
 
   await $.say_('Mission Completed')
-
 }

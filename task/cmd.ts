@@ -5,7 +5,7 @@ import $ from '../lib/fire-keeper'
 
 class M {
 
-  async ask_(map) {
+  async ask_(map: object) {
 
     let { target } = $.argv()
     const listKey = _.keys(map)
@@ -22,7 +22,6 @@ class M {
     }
 
     return target
-
   }
 
   async execute_() {
@@ -47,23 +46,18 @@ class M {
     }
 
     await $.exec_(lines)
-
-    return this
-
   }
 
   async load_() {
 
-    const data = await $.read_(`./data/cmd/${$.os()}.yaml`)
+    const data = await $.read_(`./data/cmd/${$.os()}.yaml`) as object
     if (!data) {
       $.info('warning', `invalid os '${$.os()}'`)
       return null
     }
 
     return data
-
   }
-
 }
 
 // export

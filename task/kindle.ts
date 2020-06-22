@@ -6,7 +6,7 @@ class M {
 
   path = {
     document: '/Volumes/Kindle/documents',
-    kindlegen: '/usr/local/bin/kindlegen',
+    kindlegen: '~/OneDrive/程序/kindlegen/kindlegen',
     storage: '~/OneDrive/书籍/同步/*.txt',
     temp: './temp/kindle'
   }
@@ -15,7 +15,6 @@ class M {
 
   async clean_() {
     await $.remove_(this.path.temp)
-    return this
   }
 
   async execute_() {
@@ -35,11 +34,9 @@ class M {
       await this.txt2html_(source)
       await this.html2mobi_(source)
       await this.move_(source)
-
     }
 
     await this.clean_()
-    return this
   }
 
   async html2mobi_(source: string) {
@@ -55,7 +52,6 @@ class M {
     ].join(' ')
 
     await $.exec_(cmd)
-    return this
   }
 
   async isExisted_(source: string) {
@@ -66,7 +62,6 @@ class M {
   async move_(source: string) {
     const { basename }: { basename: string } = $.getName(source)
     await $.copy_(`${this.path.temp}/${basename}.mobi`, this.path.document)
-    return this
   }
 
   async rename_() {
@@ -84,8 +79,6 @@ class M {
 
       await $.rename_(source, { basename })
     }
-
-    return this
   }
 
   async txt2html_(source: string) {
@@ -93,7 +86,7 @@ class M {
     const { basename }: { basename: string } = $.getName(source)
     const target = `${this.path.temp}/${basename}.html`
 
-    const cont: string = await $.read_(source)
+    const cont = await $.read_(source) as string
     const list = cont.split('\n')
     let result: string[] = []
 
@@ -117,7 +110,6 @@ class M {
     ]
 
     await $.write_(target, result.join(''))
-    return this
   }
 
   async validate_() {
@@ -139,7 +131,6 @@ class M {
 
     return true
   }
-
 }
 
 // export

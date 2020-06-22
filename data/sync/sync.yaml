@@ -4,7 +4,7 @@
 - .stylintrc
 - coffeelint.json
 - license.md
-- tsconfig.json
+- tsconfig.json@node
 - tslint.json
 
 # ts

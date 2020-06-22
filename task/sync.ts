@@ -19,17 +19,18 @@ class M {
       await $.isExisted_(target)
     ]
 
-    const mtime = isExisted[0] && isExisted[1] ? [
-      (await $.stat_(source)).mtimeMs,
-      (await $.stat_(target)).mtimeMs
-    ] : [0, 0]
+    const mtime = [0, 0]
+    if (isExisted[0])
+      mtime[0] = (await $.stat_(source)).mtimeMs
+    if (isExisted[1])
+      mtime[1] = (await $.stat_(target)).mtimeMs
 
     const choice = [] as {
       title: string
       value: string
     }[]
 
-    if (isExisted[0]) {
+    if (isExisted[0])
       choice.push({
         title: [
           'overwrite, export',
@@ -37,9 +38,8 @@ class M {
         ].join(' '),
         value: 'export'
       })
-    }
 
-    if (isExisted[1]) {
+    if (isExisted[1])
       choice.push({
         title: [
           'overwrite, import',
@@ -47,6 +47,10 @@ class M {
         ].join(' '),
         value: 'import'
       })
+
+    if (!choice.length) {
+      $.info('skip')
+      return 'skip'
     }
 
     choice.push({
@@ -59,7 +63,6 @@ class M {
       message: 'and you decide to...',
       type: 'select'
     })
-
   }
 
   async execute_() {
@@ -83,23 +86,15 @@ class M {
       const { basename, dirname, extname } = $.getName(target)
       target = `${dirname}/${basename}-${namespace}-${version}${extname}`
 
-      if (await $.isSame_([source, target])) {
-        continue
-      }
+      if (await $.isSame_([source, target])) continue
 
       $.info(`'${source}' is different from '${target}'`)
 
       const value = await this.ask_(source, target)
-      if (!value) {
-        break
-      }
+      if (!value) break
 
       await this.overwrite_(value, source, target)
-
     }
-
-    return this
-
   }
 
   async load_() {
@@ -107,22 +102,19 @@ class M {
     $.info().pause()
     const listSource = await $.source_('./data/sync/**/*.yaml')
     const listData = [] as string[][]
-    for (const source of listSource) {
-      listData.push(await $.read_(source))
-    }
+    for (const source of listSource)
+      listData.push(await $.read_(source) as string[])
     $.info().resume()
 
     let result = [] as string[]
 
-    for (const data of listData) {
+    for (const data of listData)
       result = [
         ...result,
         ...data
       ]
-    }
 
     return _.uniq(result)
-
   }
 
   async overwrite_(value: string, source: string, target: string) {
@@ -136,11 +128,7 @@ class M {
       const { dirname, filename } = $.getName(source)
       await $.copy_(target, dirname, filename)
     }
-
-    return this
-
   }
-
 }
 
 // export

@@ -39,7 +39,6 @@ class Image {
     if (!this.temp) {
       throw new Error(`invalid os '${$.os()}'`)
     }
-
   }
 
   // ---
@@ -68,7 +67,6 @@ class Image {
       img.write(target)
 
       await $.remove_(source)
-
     }
 
     await $.remove_([
@@ -76,8 +74,6 @@ class Image {
       `${this.storage}/png`,
       `${this.storage}/webp`
     ])
-
-    return this
   }
 
   async execute_() {
@@ -88,8 +84,6 @@ class Image {
     await this.renameJpeg_()
     await this.resize_()
     await this.rename_()
-
-    return this
   }
 
   genBasename() {
@@ -108,7 +102,7 @@ class Image {
     return _.min([
       maxWidth / width,
       maxHeight / height
-    ])
+    ]) as number
   }
 
   async move_() {
@@ -125,8 +119,6 @@ class Image {
       const listSource = await $.source_(`${this.temp}/*${extname}`)
       await $.move_(listSource, `${this.storage}/${extname.replace('.', '')}`)
     }
-
-    return this
   }
 
   async rename_() {
@@ -148,8 +140,6 @@ class Image {
       await $.rename_(source, { basename })
 
     }
-
-    return this
   }
 
   async renameJpeg_() {
@@ -161,8 +151,6 @@ class Image {
         extname: '.jpg'
       })
     }
-
-    return this
   }
 
   async resize_() {
@@ -189,10 +177,7 @@ class Image {
 
       // save
       img.write(source)
-
     }
-
-    return this
   }
 
   validateBasename(name: string) {
@@ -205,6 +190,4 @@ class Image {
 }
 
 // export
-module.exports = () => {
-  return new Image()
-}
+export default new Image()

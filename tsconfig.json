@@ -2,9 +2,15 @@
 	"compilerOptions": {
 		"allowSyntheticDefaultImports": true,
 		"lib": [
-			"DOM",
-			"es2019"
+			"dom",
+			"esnext"
 		],
-		"noImplicitAny": false
+		"module": "commonjs",
+		"moduleResolution": "node",
+		"noImplicitAny": false,
+		"resolveJsonModule": true,
+		"sourceMap": false,
+		"strict": true,
+		"target": "esnext"
 	}
 }

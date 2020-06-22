@@ -14,7 +14,7 @@ class M {
   async ask_() {
 
     let { target } = $.argv()
-    const listTarget = []
+    const listTarget = [] as string[]
     for (const key in this.map) {
       if (!this.map.hasOwnProperty(key)) {
         continue
@@ -39,7 +39,6 @@ class M {
     }
 
     return method
-
   }
 
   async cleanDsStore_() {
@@ -53,9 +52,6 @@ class M {
       '~/OneDrive/**/.DS_Store',
       '~/Project/**/.DS_Store'
     ])
-
-    return this
-
   }
 
   async cleanTrash_() {
@@ -66,20 +62,12 @@ class M {
     }
 
     await $.remove_('~/.Trash/**/*')
-
-    return this
-
   }
 
   async execute_() {
-
     const method = await this.ask_()
     await this[method]()
-
-    return this
-
   }
-
 }
 
 // export

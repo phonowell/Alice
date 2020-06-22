@@ -46,7 +46,8 @@ jspm_packages
 # Yarn Integrity file
 .yarn-integrity
 
-# ---
+#
+#
 
 # build
 build
@@ -72,6 +73,9 @@ www
 .gitattributes
 .gitignore
 
+# gurumin
+gurumin
+
 # ide
 .idea
 .vscode
@@ -89,3 +93,9 @@ coffeelint.json
 # temp
 .temp
 temp
+
+# history
+.history
+
+# storage
+storage

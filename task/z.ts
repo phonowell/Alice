@@ -2,7 +2,5 @@ import $ from '../lib/fire-keeper'
 
 // export
 export default async () => {
-
-  $.info('z')
-
+  $.i(await $.exec_(`brew cask info qq`))
 }

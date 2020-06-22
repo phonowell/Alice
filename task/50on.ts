@@ -9,6 +9,12 @@ class M {
 
   // ---
 
+  constructor() {
+    this.list = []
+  }
+
+  // ---
+
   async ask_() {
 
     let seed = Math.floor(Math.random() * this.list.length)
@@ -42,27 +48,16 @@ class M {
 
     // loop
     return this.ask_()
-
-    // return this
-
   }
 
   async execute_() {
-
     await this.loadData_()
     await this.ask_()
-
-    return this
-
   }
 
   async loadData_() {
-
-    this.list = await $.read_('./data/50on.yaml')
-    return this
-
+    this.list = await $.read_('./data/50on.yaml') as string[]
   }
-
 }
 
 // export
