@@ -6,6 +6,7 @@ import * as kleur from 'kleur'
 class M {
 
   list: string[]
+  path = './data/50on.yaml'
 
   // ---
 
@@ -31,20 +32,19 @@ class M {
       default: 'exit'
     })
 
-    if (value === 'exit') {
-      return this
-    }
+    if (value === 'exit') return
 
     let msg = `${char} -> ${answer}`
-    msg = value === answer ? kleur.green(msg) : kleur.red(msg)
-
+    msg = value === answer
+      ? kleur.green(msg)
+      : kleur.red(msg)
     $.i(msg)
 
-    await $.info().silence_(async () => {
-      await $.say_(char, {
-        lang: 'ja'
-      })
+    $.info().pause()
+    await $.say_(char, {
+      lang: 'ja'
     })
+    $.info().resume()
 
     // loop
     return this.ask_()
@@ -56,7 +56,7 @@ class M {
   }
 
   async loadData_() {
-    this.list = await $.read_('./data/50on.yaml') as string[]
+    this.list = await $.read_(this.path) as string[]
   }
 }
 

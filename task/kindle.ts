@@ -19,17 +19,13 @@ class M {
 
   async execute_() {
 
-    if (!await this.validate_()) {
-      return
-    }
+    if (!await this.validate_()) return
 
     await this.rename_()
 
     for (const source of await $.source_(this.path.storage)) {
 
-      if (await this.isExisted_(source)) {
-        continue
-      }
+      if (await this.isExisted_(source)) continue
 
       await this.txt2html_(source)
       await this.html2mobi_(source)
@@ -70,9 +66,7 @@ class M {
     for (const source of listSource) {
       let { basename }: { basename: string } = $.getName(source)
 
-      if (!(/[\s()[]]/).test(basename)) {
-        continue
-      }
+      if (!(/[\s()[]]/).test(basename)) continue
 
       basename = basename
         .replace(/[\s()[]]/g, '')
@@ -88,13 +82,11 @@ class M {
 
     const cont = await $.read_(source) as string
     const list = cont.split('\n')
-    let result: string[] = []
+    let result = [] as string[]
 
     for (let line of list) {
       line = line.trim()
-      if (!line) {
-        continue
-      }
+      if (!line) continue
       result.push(`<p>${line}</p>`)
     }
 

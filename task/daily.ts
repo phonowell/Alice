@@ -1,13 +1,13 @@
 import $ from '../lib/fire-keeper'
 
-// const
+// variable
 
 const map = {
   macos: [
     'gulp brew',
     'gulp image',
     'gulp backup --target OneDrive',
-    'gulp clean --target trash'
+    'gulp cmd --target resetlaunchpad'
   ],
   windows: [
     'gulp backup --target Game_Save',
@@ -20,9 +20,8 @@ const map = {
 export default async () => {
 
   const lines = map[$.os()]
-  if (!lines) {
+  if (!lines)
     throw new Error(`invalid os '${$.os()}'`)
-  }
 
   await $.exec_(lines, {
     ignoreError: true

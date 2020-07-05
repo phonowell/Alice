@@ -5,8 +5,7 @@ import $ from '../lib/fire-keeper'
 class M {
 
   map = {
-    '.ds_store': 'cleanDsStore_',
-    'trash': 'cleanTrash_'
+    '.ds_store': 'cleanDsStore_'
   }
 
   // ---
@@ -14,13 +13,7 @@ class M {
   async ask_() {
 
     let { target } = $.argv()
-    const listTarget = [] as string[]
-    for (const key in this.map) {
-      if (!this.map.hasOwnProperty(key)) {
-        continue
-      }
-      listTarget.push(key)
-    }
+    const listTarget = Object.keys(this.map)
 
     target = target || await $.prompt_({
       id: 'clean',
@@ -29,14 +22,12 @@ class M {
       list: listTarget
     })
 
-    if (!listTarget.includes(target)) {
+    if (!listTarget.includes(target))
       throw new Error(`invalid target '${target}'`)
-    }
 
     const method: string = this.map[target]
-    if (!method) {
+    if (!method)
       throw new Error(`invalid target '${target}'`)
-    }
 
     return method
   }
@@ -48,20 +39,14 @@ class M {
       return
     }
 
-    await $.remove_([
+    const source = await $.source_([
       '~/OneDrive/**/.DS_Store',
       '~/Project/**/.DS_Store'
     ])
-  }
 
-  async cleanTrash_() {
-
-    if (!$.os('macos')) {
-      $.info(`invalid os '${$.os()}'`)
+    if (!source.length)
       return
-    }
-
-    await $.remove_('~/.Trash/**/*')
+    await $.remove_(source)
   }
 
   async execute_() {

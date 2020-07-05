@@ -1,4 +1,3 @@
-import * as _ from 'lodash'
 import $ from '../../lib/fire-keeper'
 
 import { customAlphabet } from 'nanoid'
@@ -7,61 +6,42 @@ import * as jimp from 'jimp'
 
 // function
 
-class Image {
+class M {
 
-  storage: string
-  temp: string
+  path: {
+    storage: string
+    temp: string
+  }
 
   // ---
 
   constructor() {
-
-    // storage
-
-    let map = {
-      macos: '~/OneDrive/图片',
-      windows: 'E:/OneDrive/图片'
-    }
-
-    this.storage = map[$.os()]
-    if (!this.storage) {
+    const path = this.getPath()
+    if (!path)
       throw new Error(`invalid os '${$.os()}'`)
-    }
-
-    // temp
-
-    map = {
-      macos: '~/Downloads',
-      windows: 'F:'
-    }
-
-    this.temp = map[$.os()]
-    if (!this.temp) {
-      throw new Error(`invalid os '${$.os()}'`)
-    }
+    this.path = path
   }
 
   // ---
 
   async clean_() {
     $.info('step', 'clean')
-    await $.remove_(await $.source_(`${this.storage}/**/.DS_Store`))
-    return this
+    await $.remove_(await $.source_(`${this.path.storage}/**/.DS_Store`))
   }
 
   async convert_() {
     $.info('step', 'convert')
 
-    const listSource: string[] = await $.source_([
-      `${this.storage}/bmp/*.bmp`,
-      `${this.storage}/png/*.png`,
-      `${this.storage}/webp/*.webp`
+    const listSource = await $.source_([
+      `${this.path.storage}/bmp/*.bmp`,
+      `${this.path.storage}/png/*.png`,
+      `${this.path.storage}/webp/*.webp`
     ])
 
     for (const source of listSource) {
 
-      const basename: string = $.getBasename(source)
-      const target = `${this.storage}/jpg/${basename}.jpg`
+      const basename = $.getBasename(source)
+      const target = `${this.path.storage}/jpg/${basename}.jpg`
 
       const img = await this.getImg_(source)
       img.write(target)
@@ -70,14 +50,13 @@ class Image {
     }
 
     await $.remove_([
-      `${this.storage}/bmp`,
-      `${this.storage}/png`,
-      `${this.storage}/webp`
+      `${this.path.storage}/bmp`,
+      `${this.path.storage}/png`,
+      `${this.path.storage}/webp`
     ])
   }
 
   async execute_() {
-
     await this.move_()
     await this.clean_()
     await this.convert_()
@@ -98,54 +77,71 @@ class Image {
     return await jimp.read(source)
   }
 
+  getPath() {
+    const os = $.os()
+
+    if (os === 'macos') {
+      return {
+        storage: $.normalizePath('~/OneDrive/图片'),
+        temp: $.normalizePath('~/Downloads')
+      }
+    }
+
+    if (os === 'windows') {
+      return {
+        storage: $.normalizePath('E:/OneDrive/图片'),
+        temp: $.normalizePath('F:')
+      }
+    }
+
+    return null
+  }
+
   getScale(width: number, height: number, maxWidth = 1920, maxHeight = 1080) {
-    return _.min([
+    return Math.min(
       maxWidth / width,
       maxHeight / height
-    ]) as number
+    )
   }
 
   async move_() {
     $.info('step', 'move')
 
-    // jpg & jpeg
-    for (const extname of ['.jpeg', '.jpg']) {
-      const listSource = await $.source_(`${this.temp}/*${extname}`)
-      await $.move_(listSource, `${this.storage}/jpg`)
+    // common
+    for (const extname of ['.gif', '.jpg', '.mp4', '.png', '.webm', '.webp']) {
+      const listSource = await $.source_(`${this.path.temp}/*${extname}`)
+      await $.move_(listSource, `${this.path.storage}/${extname.replace('.', '')}`)
     }
 
-    // other
-    for (const extname of ['.gif', '.mp4', '.png', '.webm', '.webp']) {
-      const listSource = await $.source_(`${this.temp}/*${extname}`)
-      await $.move_(listSource, `${this.storage}/${extname.replace('.', '')}`)
-    }
+    // jpeg
+    const listSource = await $.source_(`${this.path.temp}/*.jpeg`)
+    await $.move_(listSource, `${this.path.storage}/jpg`)
   }
 
   async rename_() {
     $.info('step', 'rename')
 
-    const listSource: string[] = await $.source_([
-      `${this.storage}/**/*`,
-      `!${this.storage}/*`
+    const listSource = await $.source_([
+      `${this.path.storage}/**/*`,
+      `!${this.path.storage}/*`
     ])
 
     for (const source of listSource) {
 
-      let basename: string = $.getBasename(source)
+      let basename = $.getBasename(source)
       if (this.validateBasename(basename)) {
         continue
       }
 
       basename = this.genBasename()
       await $.rename_(source, { basename })
-
     }
   }
 
   async renameJpeg_() {
     $.info('step', 'renameJpeg')
 
-    const listSource: string[] = await $.source_(`${this.storage}/**/*.jpeg`)
+    const listSource = await $.source_(`${this.path.storage}/**/*.jpeg`)
     for (const source of listSource) {
       await $.rename_(source, {
         extname: '.jpg'
@@ -156,7 +152,7 @@ class Image {
   async resize_() {
     $.info('step', 'resize')
 
-    const listSource: string[] = await $.source_(`${this.storage}/**/*.jpg`)
+    const listSource = await $.source_(`${this.path.storage}/**/*.jpg`)
     for (const source of listSource) {
 
       const basename: string = $.getBasename(source)
@@ -181,13 +177,11 @@ class Image {
   }
 
   validateBasename(name: string) {
-    if (name.length !== 19) {
+    if (name.length !== 19)
       return false
-    }
     return name.search(/-x-/) === 8
   }
-
 }
 
 // export
-export default new Image()
+export default new M()
