@@ -2,8 +2,7 @@ import $ from './lib/fire-keeper'
 import * as fs from 'fs'
 
 // interface
-
-type IFn = (...args: any[]) => unknown
+type IFnAsync = (...args: any[]) => Promise<unknown>
 
 // task
 for (const filename of fs.readdirSync('./task')) {
@@ -12,7 +11,7 @@ for (const filename of fs.readdirSync('./task')) {
 
   const name = filename.replace('.ts', '')
   $.task(name, async (...args: any[]) => {
-    const fnAsync = (await import(`./task/${name}.ts`)).default as IFn
+    const fnAsync = (await import(`./task/${name}.ts`)).default as IFnAsync
     await fnAsync(...args)
   })
 }

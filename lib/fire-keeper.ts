@@ -1,20 +1,14 @@
 import * as $ from 'fire-keeper'
 
-type IFn = (...args: any[]) => unknown
-
-type IFnAsync = (...args: any[]) => Promise<unknown>
+type ISource = string[] | string
 
 interface FireKeeper {
 
   argv(): { [key: string]: string }
 
-  copy_(source: string[] | string, target: string, option?: string | {
-    [key: string]: unknown
-  }): Promise<FireKeeper>
+  copy_(source: ISource, target: string, option?: string | Object): Promise<FireKeeper>
 
-  compile_(source: string[] | string, target?: string, option?: {
-    [key: string]: unknown
-  }): Promise<FireKeeper>
+  compile_(source: ISource, target?: string, option?: Object): Promise<FireKeeper>
 
   exec_(lines: string[] | string, option?: {
     ignoreError?: boolean
@@ -36,16 +30,16 @@ interface FireKeeper {
   info(): {
     pause(): FireKeeper
     resume(): FireKeeper
-    silence_(fn: IFn): Promise<FireKeeper>
+    silence_(fn: Function): Promise<FireKeeper>
   }
   info(message: unknown): string
   info(title: string, message: unknown): string
 
-  isExisted_(source: string[] | string): Promise<boolean>
+  isExisted_(source: ISource): Promise<boolean>
 
   isSame_(source: string[]): Promise<boolean>
 
-  move_(source: string[] | string, target: string): Promise<FireKeeper>
+  move_(source: ISource, target: string): Promise<FireKeeper>
 
   normalizePath(source: string): string
 
@@ -87,9 +81,9 @@ interface FireKeeper {
     basename?: string
   }): Promise<FireKeeper>
 
-  require(path: string): IFn
+  require(path: string): unknown
 
-  remove_(source: string | string[]): Promise<FireKeeper>
+  remove_(source: ISource): Promise<FireKeeper>
 
   say_(text: string, option?: {
     lang?: string
@@ -97,24 +91,23 @@ interface FireKeeper {
 
   sleep_(ms: number): Promise<FireKeeper>
 
-  source_(source: string[] | string): Promise<string[]>
+  source_(source: ISource): Promise<string[]>
 
   stat_(source: string): Promise<{
     ctime: Date
     mtimeMs: number
   }>
 
-  task(name: string): IFn
-  task(name: string, fn: IFn): FireKeeper
+  task(name: string): Function
+  task(name: string, fn: Function): FireKeeper
 
   type(input: unknown): string
 
-  watch(source: string[] | string, fn: IFn): FireKeeper
+  watch(source: string[] | string, fn: Function): FireKeeper
 
   write_(target: string, content: unknown): Promise<FireKeeper>
 
   zip_(source: string, target: string, option: string): Promise<FireKeeper>
-
 }
 
 // export

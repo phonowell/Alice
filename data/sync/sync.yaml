@@ -10,4 +10,5 @@
 # ts
 - gulpfile.ts
 - lib/fire-keeper.ts
+- task/alice.ts
 - task/sync.ts
