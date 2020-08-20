@@ -18,6 +18,10 @@ interface FireKeeper {
 
   getDirname(source: string): string
 
+  getExtname(source: string): string
+
+  getFilename(source: string): string
+
   getName(path: string): {
     basename: string
     dirname: string
