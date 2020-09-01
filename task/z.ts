@@ -1,4 +1,4 @@
-import $ from '../lib/fire-keeper'
+import $ from 'fire-keeper'
 
 // export
 export default async () => {

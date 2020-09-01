@@ -5,10 +5,8 @@
 - coffeelint.json
 - license.md
 - tsconfig.json@node
-- tslint.json
 
 # ts
 - gulpfile.ts
-- lib/fire-keeper.ts
 - task/alice.ts
 - task/sync.ts

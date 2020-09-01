@@ -1,7 +1,8 @@
-import $ from '../lib/fire-keeper'
+import $ from 'fire-keeper'
 
-// export
-export default async () => {
+// function
+
+async function main_(): Promise<void> {
 
   if (!$.os('macos')) {
     $.info(`invalid os '${$.os()}'`)
@@ -14,3 +15,6 @@ export default async () => {
     'brew cask upgrade'
   ])
 }
+
+// export
+export default main_

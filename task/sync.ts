@@ -1,9 +1,9 @@
-import $ from '../lib/fire-keeper'
-import * as _ from 'lodash'
+import $ from 'fire-keeper'
+import _ from 'lodash'
 
 // interface
 
-interface IChoice {
+interface Choice {
   title: string
   value: string
 }
@@ -20,15 +20,20 @@ class M {
     ]
 
     const mtime: [number, number] = [0, 0]
-    if (isExisted[0])
-      mtime[0] = (await $.stat_(source)).mtimeMs
-    if (isExisted[1])
-      mtime[1] = (await $.stat_(target)).mtimeMs
+    if (isExisted[0]) {
+      const stat = await $.stat_(source)
+      mtime[0] = stat
+        ? stat.mtimeMs
+        : 0
+    }
+    if (isExisted[1]) {
+      const stat = await $.stat_(target)
+      mtime[1] = stat
+        ? stat.mtimeMs
+        : 0
+    }
 
-    const choice: {
-      title: string
-      value: string
-    }[] = []
+    const choice: Choice[] = []
 
     if (isExisted[0])
       choice.push({

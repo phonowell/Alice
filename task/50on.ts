@@ -1,12 +1,12 @@
-import $ from '../lib/fire-keeper'
-import * as kleur from 'kleur'
+import $ from 'fire-keeper'
+import kleur from 'kleur'
 
 // function
 
 class M {
 
   list: string[]
-  path = './data/50on.yaml'
+  path = './data/50on.yaml' as const
 
   // ---
 
@@ -16,7 +16,7 @@ class M {
 
   // ---
 
-  async ask_() {
+  async ask_(): Promise<string> {
 
     let seed = Math.floor(Math.random() * this.list.length)
     let answer: string
@@ -32,7 +32,7 @@ class M {
       default: 'exit'
     })
 
-    if (value === 'exit') return
+    if (value === 'exit') return ''
 
     let msg = `${char} -> ${answer}`
     msg = value === answer
@@ -50,15 +50,16 @@ class M {
     return this.ask_()
   }
 
-  async execute_() {
-    await this.loadData_()
+  async execute_(): Promise<void> {
+    await this.load_()
     await this.ask_()
   }
 
-  async loadData_() {
+  async load_(): Promise<void> {
     this.list = await $.read_(this.path) as string[]
   }
 }
 
 // export
-export default async () => await (new M()).execute_()
+const m = new M()
+export default m.execute_.bind(m) as typeof m.execute_

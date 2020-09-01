@@ -1,4 +1,4 @@
-import $ from '../../lib/fire-keeper'
+import $ from 'fire-keeper'
 
 import { customAlphabet } from 'nanoid'
 const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 8)
