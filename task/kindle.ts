@@ -9,15 +9,15 @@ class M {
     kindlegen: '~/OneDrive/程序/kindlegen/kindlegen',
     storage: '~/OneDrive/书籍/同步/*.txt',
     temp: './temp/kindle'
-  }
+  } as const
 
   // ---
 
-  async clean_() {
+  async clean_(): Promise<void> {
     await $.remove_(this.path.temp)
   }
 
-  async execute_() {
+  async execute_(): Promise<void> {
 
     if (!await this.validate_()) return
 
@@ -35,7 +35,9 @@ class M {
     await this.clean_()
   }
 
-  async html2mobi_(source: string) {
+  async html2mobi_(
+    source: string
+  ): Promise<void> {
 
     const { basename } = $.getName(source)
     const target = `${this.path.temp}/${basename}.html`
@@ -50,17 +52,23 @@ class M {
     await $.exec_(cmd)
   }
 
-  async isExisted_(source: string) {
+  async isExisted_(
+    source: string
+  ): Promise<boolean> {
+
     const { basename } = $.getName(source)
     return await $.isExisted_(`${this.path.document}/${basename}.mobi`)
   }
 
-  async move_(source: string) {
+  async move_(
+    source: string
+  ): Promise<void> {
+
     const { basename }: { basename: string } = $.getName(source)
     await $.copy_(`${this.path.temp}/${basename}.mobi`, this.path.document)
   }
 
-  async rename_() {
+  async rename_(): Promise<void> {
 
     const listSource = await $.source_(this.path.storage)
     for (const source of listSource) {
@@ -75,7 +83,9 @@ class M {
     }
   }
 
-  async txt2html_(source: string) {
+  async txt2html_(
+    source: string
+  ): Promise<void> {
 
     const { basename }: { basename: string } = $.getName(source)
     const target = `${this.path.temp}/${basename}.html`
@@ -104,7 +114,7 @@ class M {
     await $.write_(target, result.join(''))
   }
 
-  async validate_() {
+  async validate_(): Promise<boolean> {
 
     if (!$.os('macos')) {
       $.info(`invalid os '${$.os()}'`)
@@ -126,4 +136,5 @@ class M {
 }
 
 // export
-export default async () => await (new M()).execute_()
+const m = new M()
+export default m.execute_.bind(m) as typeof m.execute_

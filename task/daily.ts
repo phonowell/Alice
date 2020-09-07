@@ -14,7 +14,7 @@ const map = {
     'gulp image',
     'gulp backup --target OneDrive'
   ]
-}
+} as const
 
 // export
 export default async () => {

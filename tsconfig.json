@@ -4,6 +4,7 @@
     "alwaysStrict": true,
     "baseUrl": ".",
     "declaration": true,
+    "declarationDir": "dist",
     "esModuleInterop": true,
     "experimentalDecorators": true,
     "jsx": "preserve",
@@ -16,14 +17,14 @@
     "module": "commonjs",
     "moduleResolution": "node",
     "noFallthroughCasesInSwitch": true,
-    "noImplicitAny": false,
+    "noImplicitAny": true,
     "noImplicitReturns": true,
     "noImplicitThis": true,
     "noUnusedLocals": true,
-    "noUnusedParameters": false,
+    "noUnusedParameters": true,
     "paths": {
       "@/*": [
-        "src/*"
+        "source/*"
       ]
     },
     "removeComments": true,
@@ -35,18 +36,13 @@
     "strictPropertyInitialization": true,
     "target": "esnext",
     "types": [
-      "node",
-      "webpack-env"
+      "node"
     ]
   },
   "exclude": [
     "node_modules"
   ],
   "include": [
-    "src/**/*.ts",
-    "src/**/*.tsx",
-    "src/**/*.vue",
-    "tests/**/*.ts",
-    "tests/**/*.tsx"
+    "source/**/*.ts"
   ]
 }

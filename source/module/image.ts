@@ -1,19 +1,23 @@
 import $ from 'fire-keeper'
-
+import jimp from 'jimp'
 import { customAlphabet } from 'nanoid'
+
+// interface
+
+type Path = {
+  storage: string
+  temp: string
+}
+
+// variable
+
 const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 8)
-import * as jimp from 'jimp'
 
 // function
 
 class M {
 
-  path: {
-    storage: string
-    temp: string
-  }
-
-  // ---
+  path: Path
 
   constructor() {
     const path = this.getPath()
@@ -22,14 +26,14 @@ class M {
     this.path = path
   }
 
-  // ---
+  async clean_(): Promise<void> {
 
-  async clean_() {
     $.info('step', 'clean')
     await $.remove_(await $.source_(`${this.path.storage}/**/.DS_Store`))
   }
 
-  async convert_() {
+  async convert_(): Promise<void> {
+
     $.info('step', 'convert')
 
     const listSource = await $.source_([
@@ -56,7 +60,8 @@ class M {
     ])
   }
 
-  async execute_() {
+  async execute_(): Promise<void> {
+
     await this.move_()
     await this.clean_()
     await this.convert_()
@@ -65,7 +70,7 @@ class M {
     await this.rename_()
   }
 
-  genBasename() {
+  genBasename(): string {
     return [
       nanoid(),
       'x',
@@ -73,38 +78,44 @@ class M {
     ].join('-')
   }
 
-  async getImg_(source: string) {
+  async getImg_(source: string): Promise<jimp> {
     return await jimp.read(source)
   }
 
-  getPath() {
-    const os = $.os()
+  getPath(): Path | undefined {
 
-    if (os === 'macos') {
+    if ($.os('macos')) {
       return {
         storage: $.normalizePath('~/OneDrive/图片'),
         temp: $.normalizePath('~/Downloads')
       }
     }
 
-    if (os === 'windows') {
+    if ($.os('windows')) {
       return {
         storage: $.normalizePath('E:/OneDrive/图片'),
         temp: $.normalizePath('F:')
       }
     }
 
-    return null
+    return
   }
 
-  getScale(width: number, height: number, maxWidth = 1920, maxHeight = 1080) {
+  getScale(
+    width: number,
+    height: number,
+    maxWidth = 1920,
+    maxHeight = 1080
+  ): number {
+
     return Math.min(
       maxWidth / width,
       maxHeight / height
     )
   }
 
-  async move_() {
+  async move_(): Promise<void> {
+
     $.info('step', 'move')
 
     // common
@@ -118,7 +129,8 @@ class M {
     await $.move_(listSource, `${this.path.storage}/jpg`)
   }
 
-  async rename_() {
+  async rename_(): Promise<void> {
+
     $.info('step', 'rename')
 
     const listSource = await $.source_([
@@ -138,7 +150,8 @@ class M {
     }
   }
 
-  async renameJpeg_() {
+  async renameJpeg_(): Promise<void> {
+
     $.info('step', 'renameJpeg')
 
     const listSource = await $.source_(`${this.path.storage}/**/*.jpeg`)
@@ -149,7 +162,8 @@ class M {
     }
   }
 
-  async resize_() {
+  async resize_(): Promise<void> {
+
     $.info('step', 'resize')
 
     const listSource = await $.source_(`${this.path.storage}/**/*.jpg`)
@@ -176,7 +190,8 @@ class M {
     }
   }
 
-  validateBasename(name: string) {
+  validateBasename(name: string): boolean {
+
     if (name.length !== 19)
       return false
     return name.search(/-x-/) === 8

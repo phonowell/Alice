@@ -15,7 +15,7 @@
     "@types/jimp": "^0.2.28",
     "@types/lodash": "^4.14.161",
     "@types/nanoid": "^2.1.0",
-    "@types/node": "^14.6.2"
+    "@types/node": "^14.6.4"
   },
   "homepage": "https://github.com/phonowell/alice",
   "keywords": [

@@ -5,16 +5,8 @@ import kleur from 'kleur'
 
 class M {
 
-  list: string[]
+  list: string[] = []
   path = './data/50on.yaml' as const
-
-  // ---
-
-  constructor() {
-    this.list = []
-  }
-
-  // ---
 
   async ask_(): Promise<string> {
 

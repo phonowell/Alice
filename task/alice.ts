@@ -4,13 +4,10 @@ import $ from 'fire-keeper'
 
 class M {
 
-  list: string[]
-
-  constructor() {
-    this.list = []
-  }
+  list: string[] = []
 
   async ask_(): Promise<void> {
+
     const task: string = await $.prompt_({
       id: 'default-task',
       list: this.list,
@@ -41,6 +38,7 @@ class M {
   }
 
   async load_(): Promise<void> {
+
     const listSource: string[] = await $.source_('./task/*.ts')
     const listTask: string[] = []
     for (const source of listSource) {
@@ -52,6 +50,7 @@ class M {
   }
 
   async run_(task: string): Promise<void> {
+
     const [source]: string[] = await $.source_(`./task/${task}.ts`)
     const fn_: Function = (await import(source)).default
     await fn_()
