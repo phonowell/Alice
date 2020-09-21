@@ -14,14 +14,16 @@ const map = {
     'gulp image',
     'gulp backup --target OneDrive'
   ]
-} as const
+}
 
 // export
 export default async () => {
 
-  const lines = map[$.os()]
-  if (!lines)
-    throw new Error(`invalid os '${$.os()}'`)
+  const os = $.os()
+  if (os !== 'macos' && os !== 'windows')
+    throw new Error(`invalid os '${os}'`)
+
+  const lines = map[os]
 
   await $.exec_(lines, {
     ignoreError: true
