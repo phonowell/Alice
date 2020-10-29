@@ -4,7 +4,11 @@ import $ from 'fire-keeper'
 
 class M {
 
-  list: string[] = []
+  list: string[]
+
+  constructor() {
+    this.list = []
+  }
 
   async ask_(): Promise<void> {
 
@@ -18,7 +22,19 @@ class M {
     await this.run_(task)
   }
 
-  async execute_(): Promise<void> {
+  async load_(): Promise<void> {
+
+    const listSource: string[] = await $.source_('./task/*.ts')
+    const listTask: string[] = []
+    for (const source of listSource) {
+      const basename: string = $.getBasename(source)
+      if (basename === 'alice') continue
+      listTask.push(basename)
+    }
+    this.list = listTask
+  }
+
+  async main_(): Promise<void> {
 
     const task: string = $.argv()._[0]
 
@@ -37,19 +53,9 @@ class M {
     $.i(`found no task named as '${task}'`)
   }
 
-  async load_(): Promise<void> {
-
-    const listSource: string[] = await $.source_('./task/*.ts')
-    const listTask: string[] = []
-    for (const source of listSource) {
-      const basename: string = $.getBasename(source)
-      if (basename === 'alice') continue
-      listTask.push(basename)
-    }
-    this.list = listTask
-  }
-
-  async run_(task: string): Promise<void> {
+  async run_(
+    task: string
+  ): Promise<void> {
 
     const [source]: string[] = await $.source_(`./task/${task}.ts`)
     const fn_: Function = (await import(source)).default
@@ -58,4 +64,4 @@ class M {
 }
 
 // execute
-new M().execute_()
+new M().main_()
