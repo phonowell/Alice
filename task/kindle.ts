@@ -72,12 +72,19 @@ async function rename_(): Promise<void> {
   for (const source of listSource) {
     let { basename } = $.getName(source)
 
-    if (!(/[\s()[]]/).test(basename)) continue
+    const _basename = basename
+      .replace(/,/g, '，')
+      .replace(/:/g, '：')
+      .replace(/\(/g, '（')
+      .replace(/\)/g, '）')
+      .replace(/\</g, '《')
+      .replace(/\>/g, '》')
+      .replace(/\[/g, '【')
+      .replace(/\]/g, '】')
+      // .replace(/\s/g, '')
 
-    basename = basename
-      .replace(/[\s()[]]/g, '')
-
-    await $.rename_(source, { basename })
+    if (_basename === basename) continue
+    await $.rename_(source, { basename: _basename })
   }
 }
 
@@ -88,28 +95,29 @@ async function txt2html_(
   const { basename } = $.getName(source)
   const target = `${path.temp}/${basename}.html`
 
-  const cont = await $.read_(source) as string
-  const list = cont.split('\n')
-  let result = [] as string[]
+  const listContent = (
+    await $.read_(source) as string
+  ).split('\n')
+  const listResult: string[] = []
 
-  for (let line of list) {
+  for (let line of listContent) {
     line = line.trim()
     if (!line) continue
-    result.push(`<p>${line}</p>`)
+    listResult.push(`<p>${line}</p>`)
   }
 
-  result = [
+  const content = [
     '<html lang="zh-cmn-Hans">',
     '<head>',
     '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
     '</head>',
     '<body>',
-    result.join('\n'),
+    listResult.join('\n'),
     '</body>',
     '</html>'
   ]
 
-  await $.write_(target, result.join(''))
+  await $.write_(target, content.join(''))
 }
 
 async function validate_(): Promise<boolean> {
@@ -125,7 +133,7 @@ async function validate_(): Promise<boolean> {
   }
 
   if (!await $.isExisted_(path.document)) {
-    $.info(`found no '${path.document}'`)
+    $.info(`found no '${path.document}', kindle must be connected`)
     return false
   }
 
