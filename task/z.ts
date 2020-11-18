@@ -4,11 +4,7 @@ import $ from 'fire-keeper'
 
 async function main_(): Promise<void> {
 
-  class M {
-    static value: number = 0
-  }
-
-  $.i(M.value)
+  $.info('z')
 }
 
 // export

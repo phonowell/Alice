@@ -4,16 +4,18 @@ import $ from 'fire-keeper'
 
 async function main_(): Promise<void> {
 
-  const map = {
+  type Os = 'macos' | 'windows'
+
+  const os = $.os() as Os
+  if (!['macos', 'windows'].includes(os))
+    throw new Error(`invalid os '${os}'`)
+
+  const path = {
     macos: '~/OneDrive',
     windows: 'E:/OneDrive'
-  }
+  }[os]
 
-  const pathStorage = map[$.os()]
-  if (!pathStorage)
-    throw new Error(`invalid os '${$.os()}'`)
-
-  await $.zip_(`${pathStorage}/**/*`, `${pathStorage}/..`, 'OneDrive.zip')
+  await $.zip_(`${path}/**/*`, `${path}/..`, 'OneDrive.zip')
 }
 
 // export

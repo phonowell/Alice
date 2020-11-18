@@ -1,140 +1,136 @@
 import $ from 'fire-keeper'
 
+// variable
+
+const path = {
+  document: '/Volumes/Kindle/documents',
+  kindlegen: '~/OneDrive/程序/kindlegen/kindlegen',
+  storage: '~/OneDrive/书籍/同步/*.txt',
+  temp: './temp/kindle'
+} as const
+
 // function
 
-class M {
+async function clean_(): Promise<void> {
+  await $.remove_(path.temp)
+}
 
-  path = {
-    document: '/Volumes/Kindle/documents',
-    kindlegen: '~/OneDrive/程序/kindlegen/kindlegen',
-    storage: '~/OneDrive/书籍/同步/*.txt',
-    temp: './temp/kindle'
-  } as const
+async function html2mobi_(
+  source: string
+): Promise<void> {
 
-  // ---
+  const { basename } = $.getName(source)
+  const target = `${path.temp}/${basename}.html`
 
-  async clean_(): Promise<void> {
-    await $.remove_(this.path.temp)
+  const cmd = [
+    path.kindlegen,
+    `"${target}"`,
+    '-c1',
+    '-dont_append_source'
+  ].join(' ')
+
+  await $.exec_(cmd)
+}
+
+async function isExisted_(
+  source: string
+): Promise<boolean> {
+
+  const { basename } = $.getName(source)
+  return await $.isExisted_(`${path.document}/${basename}.mobi`)
+}
+
+async function main_(): Promise<void> {
+
+  if (!await validate_()) return
+
+  await rename_()
+
+  for (const source of await $.source_(path.storage)) {
+
+    if (await isExisted_(source)) continue
+
+    await txt2html_(source)
+    await html2mobi_(source)
+    await move_(source)
   }
 
-  async execute_(): Promise<void> {
+  await clean_()
+}
 
-    if (!await this.validate_()) return
+async function move_(
+  source: string
+): Promise<void> {
 
-    await this.rename_()
+  const { basename } = $.getName(source)
+  await $.copy_(`${path.temp}/${basename}.mobi`, path.document)
+}
 
-    for (const source of await $.source_(this.path.storage)) {
+async function rename_(): Promise<void> {
 
-      if (await this.isExisted_(source)) continue
+  const listSource = await $.source_(path.storage)
+  for (const source of listSource) {
+    let { basename } = $.getName(source)
 
-      await this.txt2html_(source)
-      await this.html2mobi_(source)
-      await this.move_(source)
-    }
+    if (!(/[\s()[]]/).test(basename)) continue
 
-    await this.clean_()
-  }
+    basename = basename
+      .replace(/[\s()[]]/g, '')
 
-  async html2mobi_(
-    source: string
-  ): Promise<void> {
-
-    const { basename } = $.getName(source)
-    const target = `${this.path.temp}/${basename}.html`
-
-    const cmd = [
-      this.path.kindlegen,
-      `"${target}"`,
-      '-c1',
-      '-dont_append_source'
-    ].join(' ')
-
-    await $.exec_(cmd)
-  }
-
-  async isExisted_(
-    source: string
-  ): Promise<boolean> {
-
-    const { basename } = $.getName(source)
-    return await $.isExisted_(`${this.path.document}/${basename}.mobi`)
-  }
-
-  async move_(
-    source: string
-  ): Promise<void> {
-
-    const { basename }: { basename: string } = $.getName(source)
-    await $.copy_(`${this.path.temp}/${basename}.mobi`, this.path.document)
-  }
-
-  async rename_(): Promise<void> {
-
-    const listSource = await $.source_(this.path.storage)
-    for (const source of listSource) {
-      let { basename }: { basename: string } = $.getName(source)
-
-      if (!(/[\s()[]]/).test(basename)) continue
-
-      basename = basename
-        .replace(/[\s()[]]/g, '')
-
-      await $.rename_(source, { basename })
-    }
-  }
-
-  async txt2html_(
-    source: string
-  ): Promise<void> {
-
-    const { basename }: { basename: string } = $.getName(source)
-    const target = `${this.path.temp}/${basename}.html`
-
-    const cont = await $.read_(source) as string
-    const list = cont.split('\n')
-    let result = [] as string[]
-
-    for (let line of list) {
-      line = line.trim()
-      if (!line) continue
-      result.push(`<p>${line}</p>`)
-    }
-
-    result = [
-      '<html lang="zh-cmn-Hans">',
-      '<head>',
-      '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
-      '</head>',
-      '<body>',
-      result.join('\n'),
-      '</body>',
-      '</html>'
-    ]
-
-    await $.write_(target, result.join(''))
-  }
-
-  async validate_(): Promise<boolean> {
-
-    if (!$.os('macos')) {
-      $.info(`invalid os '${$.os()}'`)
-      return false
-    }
-
-    if (!await $.isExisted_(this.path.kindlegen)) {
-      $.info("found no 'kindlegen', run 'brew cask install kindlegen' to install it")
-      return false
-    }
-
-    if (!await $.isExisted_(this.path.document)) {
-      $.info(`found no '${this.path.document}'`)
-      return false
-    }
-
-    return true
+    await $.rename_(source, { basename })
   }
 }
 
+async function txt2html_(
+  source: string
+): Promise<void> {
+
+  const { basename } = $.getName(source)
+  const target = `${path.temp}/${basename}.html`
+
+  const cont = await $.read_(source) as string
+  const list = cont.split('\n')
+  let result = [] as string[]
+
+  for (let line of list) {
+    line = line.trim()
+    if (!line) continue
+    result.push(`<p>${line}</p>`)
+  }
+
+  result = [
+    '<html lang="zh-cmn-Hans">',
+    '<head>',
+    '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
+    '</head>',
+    '<body>',
+    result.join('\n'),
+    '</body>',
+    '</html>'
+  ]
+
+  await $.write_(target, result.join(''))
+}
+
+async function validate_(): Promise<boolean> {
+
+  if (!$.os('macos')) {
+    $.info(`invalid os '${$.os()}'`)
+    return false
+  }
+
+  if (!await $.isExisted_(path.kindlegen)) {
+    $.info("found no 'kindlegen', run 'brew cask install kindlegen' to install it")
+    return false
+  }
+
+  if (!await $.isExisted_(path.document)) {
+    $.info(`found no '${path.document}'`)
+    return false
+  }
+
+  return true
+}
+
 // export
-const m = new M()
-export default m.execute_.bind(m) as typeof m.execute_
+export default main_

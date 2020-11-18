@@ -1,58 +1,64 @@
 import $ from 'fire-keeper'
 
+// interface
+
+type Os = 'macos'
+
+type Data = {
+  [key: string]: string | string[]
+}
+
 // function
 
-class M {
+async function ask_(
+  data: Data
+): Promise<string> {
 
-  async ask_(map: object) {
+  const list = Object.keys(data)
 
-    let { target } = $.argv()
-    const listKey = Object.keys(map)
+  const value = await $.prompt_({
+    id: 'cmd',
+    type: 'auto',
+    message: 'command',
+    list: list
+  })
 
-    target = target || await $.prompt_({
-      id: 'cmd',
-      type: 'auto',
-      message: 'command',
-      list: listKey
-    })
+  if (!list.includes(value))
+    return ''
 
-    if (!listKey.includes(target))
-      throw new Error(`invalid target '${target}'`)
+  return value
+}
 
-    return target
+async function main_(): Promise<void> {
+
+  const os = $.os() as Os
+  if (!['macos'].includes(os))
+    throw new Error(`invalid os '${os}'`)
+
+  const data = await load_(os)
+
+  const target: string = $.argv()._[1] || $.argv().target || await ask_(data)
+  if (!target) return
+
+  const item = data[target]
+  const cmd = typeof item === 'string'
+    ? [item]
+    : item
+
+  await $.exec_(cmd)
+}
+
+async function load_(
+  os: Os
+): Promise<Data> {
+
+  type File = {
+    [key: string]: Data
   }
 
-  async execute_() {
-
-    const map = await this.load_()
-    if (!map) return
-
-    const cmd = await this.ask_(map)
-
-    let lines = map[cmd]
-
-    if (typeof lines === 'string')
-      lines = [lines]
-
-    if (!(lines instanceof Array))
-      throw new Error(`invalid command '${cmd}'`)
-
-    await $.exec_(lines)
-  }
-
-  async load_() {
-
-    const data = await $.read_(`./data/cmd/${$.os()}.yaml`) as {
-      [key: string]: string[] | string
-    }
-    if (!data) {
-      $.info('warning', `invalid os '${$.os()}'`)
-      return null
-    }
-
-    return data
-  }
+  const data = await $.read_('./data/cmd.yaml') as File
+  return data[os]
 }
 
 // export
-export default async () => await (new M()).execute_()
+export default main_

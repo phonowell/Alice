@@ -12,7 +12,7 @@ async function main_(): Promise<void> {
   await $.exec_([
     'brew update',
     'brew upgrade',
-    'brew cask upgrade'
+    'brew upgrade --cask'
   ])
 }
 

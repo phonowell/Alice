@@ -7,6 +7,6 @@
 - tsconfig.json@node
 
 # ts
-- gulpfile.ts
 - task/alice.ts
 - task/sync.ts
+- task/update.ts
