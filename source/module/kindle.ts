@@ -1,196 +1,143 @@
 import $ from 'fire-keeper'
-import jimp from 'jimp'
-import { customAlphabet } from 'nanoid'
-
-// interface
-
-type Path = {
-  storage: string
-  temp: string
-}
 
 // variable
 
-const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 8)
+const path = {
+  document: '/Volumes/Kindle/documents',
+  kindlegen: '~/OneDrive/程序/kindlegen/kindlegen',
+  storage: '~/OneDrive/书籍/同步/*.txt',
+  temp: './temp/kindle'
+} as const
 
 // function
 
-async function clean_(
-  path: Path
-): Promise<void> {
-
-  $.info('step', 'clean')
-  await $.remove_(await $.source_(`${path.storage}/**/.DS_Store`))
+async function clean_(): Promise<void> {
+  await $.remove_(path.temp)
 }
 
-async function convert_(
-  path: Path
-): Promise<void> {
-
-  $.info('step', 'convert')
-
-  const listSource = await $.source_([
-    `${path.storage}/bmp/*.bmp`,
-    `${path.storage}/png/*.png`,
-    `${path.storage}/webp/*.webp`
-  ])
-
-  for (const source of listSource) {
-
-    const basename = $.getBasename(source)
-    const target = `${path.storage}/jpg/${basename}.jpg`
-
-    const img = await getImg_(source)
-    img.write(target)
-
-    await $.remove_(source)
-  }
-
-  await $.remove_([
-    `${path.storage}/bmp`,
-    `${path.storage}/png`,
-    `${path.storage}/webp`
-  ])
-}
-
-function genBasename(): string {
-  return [
-    nanoid(),
-    'x',
-    nanoid()
-  ].join('-')
-}
-
-async function getImg_(
+async function html2mobi_(
   source: string
-): Promise<jimp> {
+): Promise<void> {
 
-  return await jimp.read(source)
+  const { basename } = $.getName(source)
+  const target = `${path.temp}/${basename}.html`
+
+  const cmd = [
+    path.kindlegen,
+    `"${target}"`,
+    '-c1',
+    '-dont_append_source'
+  ].join(' ')
+
+  await $.exec_(cmd)
 }
 
-function getPath(): Path {
+async function isExisted_(
+  source: string
+): Promise<boolean> {
 
-  const os = $.os()
-
-  if (os === 'macos') return {
-    storage: $.normalizePath('~/OneDrive/图片'),
-    temp: $.normalizePath('~/Downloads')
-  }
-
-  if (os === 'windows') return {
-    storage: $.normalizePath('E:/OneDrive/图片'),
-    temp: $.normalizePath('F:')
-  }
-
-  throw new Error(`invalid os '${os}'`)
-}
-
-function getScale(
-  width: number,
-  height: number,
-  maxWidth = 1920,
-  maxHeight = 1080
-): number {
-
-  return Math.min(
-    maxWidth / width,
-    maxHeight / height
-  )
+  const { basename } = $.getName(source)
+  return await $.isExisted_(`${path.document}/${basename}.mobi`)
 }
 
 async function main_(): Promise<void> {
 
-  const path = getPath()
+  if (!await validate_()) return
 
-  await move_(path)
-  await clean_(path)
-  await convert_(path)
-  await renameJpeg_(path)
-  await resize_(path)
-  await rename_(path)
+  await rename_()
+
+  for (const source of await $.source_(path.storage)) {
+
+    if (await isExisted_(source)) continue
+
+    await txt2html_(source)
+    await html2mobi_(source)
+    await move_(source)
+  }
+
+  await clean_()
 }
 
 async function move_(
-  path: Path
+  source: string
 ): Promise<void> {
 
-  $.info('step', 'move')
-
-  // common
-  for (const extname of ['.gif', '.jpg', '.mp4', '.png', '.webm', '.webp']) {
-    const listSource = await $.source_(`${path.temp}/*${extname}`)
-    await $.move_(listSource, `${path.storage}/${extname.replace('.', '')}`)
-  }
-
-  // jpeg
-  const listSource = await $.source_(`${path.temp}/*.jpeg`)
-  await $.move_(listSource, `${path.storage}/jpg`)
+  const { basename } = $.getName(source)
+  await $.copy_(`${path.temp}/${basename}.mobi`, path.document)
 }
 
-async function rename_(
-  path: Path
-): Promise<void> {
+async function rename_(): Promise<void> {
 
-  $.info('step', 'rename')
-
-  const listSource = await $.source_([
-    `${path.storage}/**/*`,
-    `!${path.storage}/*`
-  ])
-
+  const listSource = await $.source_(path.storage)
   for (const source of listSource) {
+    let { basename } = $.getName(source)
 
-    let basename = $.getBasename(source)
-    if (validateBasename(basename)) continue
+    const _basename = basename
+      .replace(/,/g, '，')
+      .replace(/:/g, '：')
+      .replace(/\(/g, '（')
+      .replace(/\)/g, '）')
+      .replace(/\</g, '《')
+      .replace(/\>/g, '》')
+      .replace(/\[/g, '【')
+      .replace(/\]/g, '】')
+    // .replace(/\s/g, '')
 
-    basename = genBasename()
-    await $.rename_(source, { basename })
+    if (_basename === basename) continue
+    await $.rename_(source, { basename: _basename })
   }
 }
 
-async function renameJpeg_(
-  path: Path
+async function txt2html_(
+  source: string
 ): Promise<void> {
 
-  $.info('step', 'renameJpeg')
+  const { basename } = $.getName(source)
+  const target = `${path.temp}/${basename}.html`
 
-  const listSource = await $.source_(`${path.storage}/**/*.jpeg`)
-  for (const source of listSource)
-    await $.rename_(source, {
-      extname: '.jpg'
-    })
-}
+  const listContent = (
+    await $.read_(source) as string
+  ).split('\n')
+  const listResult: string[] = []
 
-async function resize_(
-  path: Path
-): Promise<void> {
-
-  $.info('step', 'resize')
-
-  const listSource = await $.source_(`${path.storage}/**/*.jpg`)
-  for (const source of listSource) {
-
-    const basename: string = $.getBasename(source)
-    if (validateBasename(basename)) continue
-
-    const img = await getImg_(source)
-
-    // check size
-    const { width, height } = img.bitmap
-    if (width <= 1920 && height <= 1080) continue
-
-    // scale
-    img.scale(getScale(width, height))
-
-    // save
-    img.write(source)
+  for (let line of listContent) {
+    line = line.trim()
+    if (!line) continue
+    listResult.push(`<p>${line}</p>`)
   }
+
+  const content = [
+    '<html lang="zh-cmn-Hans">',
+    '<head>',
+    '<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>',
+    '</head>',
+    '<body>',
+    listResult.join('\n'),
+    '</body>',
+    '</html>'
+  ]
+
+  await $.write_(target, content.join(''))
 }
 
-function validateBasename(name: string): boolean {
+async function validate_(): Promise<boolean> {
 
-  if (name.length !== 19) return false
-  return name.search(/-x-/) === 8
+  if (!$.os('macos')) {
+    $.info(`invalid os '${$.os()}'`)
+    return false
+  }
+
+  if (!await $.isExisted_(path.kindlegen)) {
+    $.info("found no 'kindlegen', run 'brew cask install kindlegen' to install it")
+    return false
+  }
+
+  if (!await $.isExisted_(path.document)) {
+    $.info(`found no '${path.document}', kindle must be connected`)
+    return false
+  }
+
+  return true
 }
 
 // export
