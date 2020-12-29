@@ -10,17 +10,17 @@ async function ask_(
 ): Promise<string> {
 
   let seed = Math.floor(Math.random() * list.length)
-  let answer: string
-  let char: string
-  [answer, char] = (list[seed]).split(',')
+  const _list = list[seed].split(',')
+  const answer = _list[0]
+  let char = _list[1]
 
   seed = Math.floor(Math.random() * 2)
   char = char[seed]
 
   const value = await $.prompt_({
-    type: 'text',
+    default: 'exit',
     message: char,
-    default: 'exit'
+    type: 'text',
   })
 
   if (value === 'exit') return ''
@@ -33,7 +33,7 @@ async function ask_(
 
   $.info().pause()
   await $.say_(char, {
-    lang: 'ja'
+    lang: 'ja',
   })
   $.info().resume()
 

@@ -11,7 +11,7 @@ async function main_(): Promise<void> {
 
   const listSource = await $.source_([
     '~/OneDrive/**/.DS_Store',
-    '~/Project/**/.DS_Store'
+    '~/Project/**/.DS_Store',
   ])
 
   if (!listSource.length) return

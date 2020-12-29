@@ -1,6 +1,6 @@
 import $ from 'fire-keeper'
-import jimp from 'jimp'
 import { customAlphabet } from 'nanoid'
+import jimp from 'jimp'
 
 // interface
 
@@ -32,10 +32,12 @@ async function convert_(
   const listSource = await $.source_([
     `${path.storage}/bmp/*.bmp`,
     `${path.storage}/png/*.png`,
-    `${path.storage}/webp/*.webp`
+    `${path.storage}/webp/*.webp`,
   ])
 
-  for (const source of listSource) {
+  async function sub_(
+    source: string
+  ): Promise<void> {
 
     const basename = $.getBasename(source)
     const target = `${path.storage}/jpg/${basename}.jpg`
@@ -46,10 +48,12 @@ async function convert_(
     await $.remove_(source)
   }
 
+  await Promise.all(listSource.map(sub_))
+
   await $.remove_([
     `${path.storage}/bmp`,
     `${path.storage}/png`,
-    `${path.storage}/webp`
+    `${path.storage}/webp`,
   ])
 }
 
@@ -57,7 +61,7 @@ function genBasename(): string {
   return [
     nanoid(),
     'x',
-    nanoid()
+    nanoid(),
   ].join('-')
 }
 
@@ -65,7 +69,7 @@ async function getImg_(
   source: string
 ): Promise<jimp> {
 
-  return await jimp.read(source)
+  return jimp.read(source)
 }
 
 function getPath(): Path {
@@ -74,12 +78,12 @@ function getPath(): Path {
 
   if (os === 'macos') return {
     storage: $.normalizePath('~/OneDrive/图片'),
-    temp: $.normalizePath('~/Downloads')
+    temp: $.normalizePath('~/Downloads'),
   }
 
   if (os === 'windows') return {
     storage: $.normalizePath('E:/OneDrive/图片'),
-    temp: $.normalizePath('F:')
+    temp: $.normalizePath('F:'),
   }
 
   throw new Error(`invalid os '${os}'`)
@@ -117,10 +121,14 @@ async function move_(
   $.info('step', 'move')
 
   // common
-  for (const extname of ['.gif', '.jpg', '.mp4', '.png', '.webm', '.webp']) {
+  async function sub_(
+    extname: string
+  ): Promise<void> {
+
     const listSource = await $.source_(`${path.temp}/*${extname}`)
     await $.move_(listSource, `${path.storage}/${extname.replace('.', '')}`)
   }
+  await Promise.all(['.gif', '.jpg', '.mp4', '.png', '.webm', '.webp'].map(sub_))
 
   // jpeg
   const listSource = await $.source_(`${path.temp}/*.jpeg`)
@@ -135,17 +143,20 @@ async function rename_(
 
   const listSource = await $.source_([
     `${path.storage}/**/*`,
-    `!${path.storage}/*`
+    `!${path.storage}/*`,
   ])
 
-  for (const source of listSource) {
+  async function sub_(
+    source: string
+  ): Promise<void> {
 
     let basename = $.getBasename(source)
-    if (validateBasename(basename)) continue
+    if (validateBasename(basename)) return
 
     basename = genBasename()
     await $.rename_(source, { basename })
   }
+  await Promise.all(listSource.map(sub_))
 }
 
 async function renameJpeg_(
@@ -154,11 +165,12 @@ async function renameJpeg_(
 
   $.info('step', 'renameJpeg')
 
-  const listSource = await $.source_(`${path.storage}/**/*.jpeg`)
-  for (const source of listSource)
-    await $.rename_(source, {
-      extname: '.jpg'
-    })
+  await Promise.all(
+    (await $.source_(`${path.storage}/**/*.jpeg`))
+      .map(source => $.rename_(source, {
+        extname: '.jpg',
+      }))
+  )
 }
 
 async function resize_(
@@ -167,17 +179,18 @@ async function resize_(
 
   $.info('step', 'resize')
 
-  const listSource = await $.source_(`${path.storage}/**/*.jpg`)
-  for (const source of listSource) {
+  async function sub_(
+    source: string
+  ): Promise<void> {
 
     const basename: string = $.getBasename(source)
-    if (validateBasename(basename)) continue
+    if (validateBasename(basename)) return
 
     const img = await getImg_(source)
 
     // check size
     const { width, height } = img.bitmap
-    if (width <= 1920 && height <= 1080) continue
+    if (width <= 1920 && height <= 1080) return
 
     // scale
     img.scale(getScale(width, height))
@@ -185,12 +198,17 @@ async function resize_(
     // save
     img.write(source)
   }
+
+  await Promise.all(
+    (await $.source_(`${path.storage}/**/*.jpg`))
+      .map(sub_)
+  )
 }
 
 function validateBasename(name: string): boolean {
 
   if (name.length !== 19) return false
-  return name.search(/-x-/) === 8
+  return name.search(/-x-/u) === 8
 }
 
 // export

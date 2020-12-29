@@ -4,7 +4,7 @@ import $ from 'fire-keeper'
 
 async function main_(): Promise<void> {
 
-  $.info('z')
+  await $.sleep_()
 }
 
 // export

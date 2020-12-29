@@ -12,7 +12,7 @@ async function main_(): Promise<void> {
 
   const path = {
     macos: '~/OneDrive',
-    windows: 'E:/OneDrive'
+    windows: 'E:/OneDrive',
   }[os]
 
   await $.zip_(`${path}/**/*`, `${path}/..`, 'OneDrive.zip')

@@ -18,9 +18,9 @@ async function ask_(
 
   const value = await $.prompt_({
     id: 'cmd',
-    type: 'auto',
+    list,
     message: 'command',
-    list: list
+    type: 'auto',
   })
 
   if (!list.includes(value))

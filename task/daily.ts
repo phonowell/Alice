@@ -7,12 +7,12 @@ const mapCmd = {
     'npm run alice brew',
     'npm run alice image',
     'npm run alice backup',
-    'npm run alice cmd resetlaunchpad'
+    'npm run alice cmd resetlaunchpad',
   ],
   windows: [
     'npm run alice image',
-    'npm run alice backup'
-  ]
+    'npm run alice backup',
+  ],
 }
 
 // function
@@ -28,7 +28,7 @@ async function main_(): Promise<void> {
   const cmd: string[] = mapCmd[os]
 
   await $.exec_(cmd, {
-    ignoreError: true
+    ignoreError: true,
   })
 
   await $.say_('Mission Completed')
