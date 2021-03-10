@@ -1,12 +1,13 @@
-import $ from 'fire-keeper'
+import $os from 'fire-keeper/os'
+import $zip_ from 'fire-keeper/zip_'
 
 // function
 
-async function main_(): Promise<void> {
+const main_ = async (): Promise<void> => {
 
   type Os = 'macos' | 'windows'
 
-  const os = $.os() as Os
+  const os = $os() as Os
   if (!['macos', 'windows'].includes(os))
     throw new Error(`invalid os '${os}'`)
 
@@ -15,7 +16,7 @@ async function main_(): Promise<void> {
     windows: 'E:/OneDrive',
   }[os]
 
-  await $.zip_(`${path}/**/*`, `${path}/..`, 'OneDrive.zip')
+  await $zip_(`${path}/**/*`, `${path}/..`, 'OneDrive.zip')
 }
 
 // export

@@ -1,4 +1,11 @@
-import $ from 'fire-keeper'
+import $getBasename from 'fire-keeper/getBasename'
+import $info from 'fire-keeper/info'
+import $move_ from 'fire-keeper/move_'
+import $normalizePath from 'fire-keeper/normalizePath'
+import $os from 'fire-keeper/os'
+import $remove_ from 'fire-keeper/remove_'
+import $rename_ from 'fire-keeper/rename_'
+import $source_ from 'fire-keeper/source_'
 import { customAlphabet } from 'nanoid'
 import jimp from 'jimp'
 
@@ -15,49 +22,49 @@ const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 8)
 
 // function
 
-async function clean_(
+const clean_ = async (
   path: Path
-): Promise<void> {
+): Promise<void> => {
 
-  $.info('step', 'clean')
-  await $.remove_(await $.source_(`${path.storage}/**/.DS_Store`))
+  $info('step', 'clean')
+  await $remove_(await $source_(`${path.storage}/**/.DS_Store`))
 }
 
-async function convert_(
+const convert_ = async (
   path: Path
-): Promise<void> {
+): Promise<void> => {
 
-  $.info('step', 'convert')
+  $info('step', 'convert')
 
-  const listSource = await $.source_([
+  const listSource = await $source_([
     `${path.storage}/bmp/*.bmp`,
     `${path.storage}/png/*.png`,
     `${path.storage}/webp/*.webp`,
   ])
 
-  async function sub_(
+  const sub_ = async (
     source: string
-  ): Promise<void> {
+  ): Promise<void> => {
 
-    const basename = $.getBasename(source)
+    const basename = $getBasename(source)
     const target = `${path.storage}/jpg/${basename}.jpg`
 
     const img = await getImg_(source)
     img.write(target)
 
-    await $.remove_(source)
+    await $remove_(source)
   }
 
   await Promise.all(listSource.map(sub_))
 
-  await $.remove_([
+  await $remove_([
     `${path.storage}/bmp`,
     `${path.storage}/png`,
     `${path.storage}/webp`,
   ])
 }
 
-function genBasename(): string {
+const genBasename = (): string => {
   return [
     nanoid(),
     'x',
@@ -65,36 +72,36 @@ function genBasename(): string {
   ].join('-')
 }
 
-async function getImg_(
+const getImg_ = async (
   source: string
-): Promise<jimp> {
+): Promise<jimp> => {
 
   return jimp.read(source)
 }
 
-function getPath(): Path {
+const getPath = (): Path => {
 
-  const os = $.os()
+  const os = $os()
 
   if (os === 'macos') return {
-    storage: $.normalizePath('~/OneDrive/图片'),
-    temp: $.normalizePath('~/Downloads'),
+    storage: $normalizePath('~/OneDrive/图片'),
+    temp: $normalizePath('~/Downloads'),
   }
 
   if (os === 'windows') return {
-    storage: $.normalizePath('E:/OneDrive/图片'),
-    temp: $.normalizePath('F:'),
+    storage: $normalizePath('E:/OneDrive/图片'),
+    temp: $normalizePath('F:'),
   }
 
   throw new Error(`invalid os '${os}'`)
 }
 
-function getScale(
+const getScale = (
   width: number,
   height: number,
   maxWidth = 1920,
   maxHeight = 1080
-): number {
+): number => {
 
   return Math.min(
     maxWidth / width,
@@ -102,7 +109,7 @@ function getScale(
   )
 }
 
-async function main_(): Promise<void> {
+const main_ = async (): Promise<void> => {
 
   const path = getPath()
 
@@ -114,76 +121,76 @@ async function main_(): Promise<void> {
   await rename_(path)
 }
 
-async function move_(
+const move_ = async (
   path: Path
-): Promise<void> {
+): Promise<void> => {
 
-  $.info('step', 'move')
+  $info('step', 'move')
 
   // common
-  async function sub_(
+  const sub_ = async (
     extname: string
-  ): Promise<void> {
+  ): Promise<void> => {
 
-    const listSource = await $.source_(`${path.temp}/*${extname}`)
-    await $.move_(listSource, `${path.storage}/${extname.replace('.', '')}`)
+    const listSource = await $source_(`${path.temp}/*${extname}`)
+    await $move_(listSource, `${path.storage}/${extname.replace('.', '')}`)
   }
   await Promise.all(['.gif', '.jpg', '.mp4', '.png', '.webm', '.webp'].map(sub_))
 
   // jpeg
-  const listSource = await $.source_(`${path.temp}/*.jpeg`)
-  await $.move_(listSource, `${path.storage}/jpg`)
+  const listSource = await $source_(`${path.temp}/*.jpeg`)
+  await $move_(listSource, `${path.storage}/jpg`)
 }
 
-async function rename_(
+const rename_ = async (
   path: Path
-): Promise<void> {
+): Promise<void> => {
 
-  $.info('step', 'rename')
+  $info('step', 'rename')
 
-  const listSource = await $.source_([
+  const listSource = await $source_([
     `${path.storage}/**/*`,
     `!${path.storage}/*`,
   ])
 
-  async function sub_(
+  const sub_ = async (
     source: string
-  ): Promise<void> {
+  ): Promise<void> => {
 
-    let basename = $.getBasename(source)
+    let basename = $getBasename(source)
     if (validateBasename(basename)) return
 
     basename = genBasename()
-    await $.rename_(source, { basename })
+    await $rename_(source, { basename })
   }
   await Promise.all(listSource.map(sub_))
 }
 
-async function renameJpeg_(
+const renameJpeg_ = async (
   path: Path
-): Promise<void> {
+): Promise<void> => {
 
-  $.info('step', 'renameJpeg')
+  $info('step', 'renameJpeg')
 
   await Promise.all(
-    (await $.source_(`${path.storage}/**/*.jpeg`))
-      .map(source => $.rename_(source, {
+    (await $source_(`${path.storage}/**/*.jpeg`))
+      .map(source => $rename_(source, {
         extname: '.jpg',
       }))
   )
 }
 
-async function resize_(
+const resize_ = async (
   path: Path
-): Promise<void> {
+): Promise<void> => {
 
-  $.info('step', 'resize')
+  $info('step', 'resize')
 
-  async function sub_(
+  const sub_ = async (
     source: string
-  ): Promise<void> {
+  ): Promise<void> => {
 
-    const basename: string = $.getBasename(source)
+    const basename: string = $getBasename(source)
     if (validateBasename(basename)) return
 
     const img = await getImg_(source)
@@ -200,12 +207,12 @@ async function resize_(
   }
 
   await Promise.all(
-    (await $.source_(`${path.storage}/**/*.jpg`))
+    (await $source_(`${path.storage}/**/*.jpg`))
       .map(sub_)
   )
 }
 
-function validateBasename(name: string): boolean {
+const validateBasename = (name: string): boolean => {
 
   if (name.length !== 19) return false
   return name.search(/-x-/u) === 8

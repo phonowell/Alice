@@ -1,4 +1,8 @@
-import $ from 'fire-keeper'
+import $argv from 'fire-keeper/argv'
+import $exec_ from 'fire-keeper/exec_'
+import $os from 'fire-keeper/os'
+import $prompt_ from 'fire-keeper/prompt_'
+import $read_ from 'fire-keeper/read_'
 
 // interface
 
@@ -10,13 +14,13 @@ type Data = {
 
 // function
 
-async function ask_(
+const ask_ = async (
   data: Data
-): Promise<string> {
+): Promise<string> => {
 
   const list = Object.keys(data)
 
-  const value = await $.prompt_({
+  const value = await $prompt_({
     id: 'cmd',
     list,
     message: 'command',
@@ -29,15 +33,15 @@ async function ask_(
   return value
 }
 
-async function main_(): Promise<void> {
+const main_ = async (): Promise<void> => {
 
-  const os = $.os() as Os
+  const os = $os() as Os
   if (!['macos'].includes(os))
     throw new Error(`invalid os '${os}'`)
 
   const data = await load_(os)
 
-  const target: string = $.argv()._[1] || $.argv().target || await ask_(data)
+  const target: string = $argv()._[1] || $argv().target || await ask_(data)
   if (!target) return
 
   const item = data[target]
@@ -45,18 +49,18 @@ async function main_(): Promise<void> {
     ? [item]
     : item
 
-  await $.exec_(cmd)
+  await $exec_(cmd)
 }
 
-async function load_(
+const load_ = async (
   os: Os
-): Promise<Data> {
+): Promise<Data> => {
 
   type File = {
     [key: string]: Data
   }
 
-  const data = await $.read_('./data/cmd.yaml') as File
+  const data = await $read_('./data/cmd.yaml') as File
   return data[os]
 }
 

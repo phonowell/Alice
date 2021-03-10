@@ -1,13 +1,17 @@
-import $ from 'fire-keeper'
+import $i from 'fire-keeper/i'
+import $info from 'fire-keeper/info'
+import $prompt_ from 'fire-keeper/prompt_'
+import $read_ from 'fire-keeper/read_'
+import $say_ from 'fire-keeper/say_'
 import kleur from 'kleur'
 
 // function
 
 const path = './data/50on.yaml' as const
 
-async function ask_(
+const ask_ = async (
   list: string[]
-): Promise<string> {
+): Promise<string> => {
 
   let seed = Math.floor(Math.random() * list.length)
   const _list = list[seed].split(',')
@@ -17,7 +21,7 @@ async function ask_(
   seed = Math.floor(Math.random() * 2)
   char = char[seed]
 
-  const value = await $.prompt_({
+  const value = await $prompt_({
     default: 'exit',
     message: char,
     type: 'text',
@@ -29,24 +33,24 @@ async function ask_(
   msg = value === answer
     ? kleur.green(msg)
     : kleur.red(msg)
-  $.i(msg)
+  $i(msg)
 
-  $.info().pause()
-  await $.say_(char, {
+  $info().pause()
+  await $say_(char, {
     lang: 'ja',
   })
-  $.info().resume()
+  $info().resume()
 
   // loop
   return ask_(list)
 }
 
-async function main_(): Promise<void> {
+const main_ = async (): Promise<void> => {
   await ask_(await load_())
 }
 
-async function load_(): Promise<string[]> {
-  return await $.read_(path) as string[]
+const load_ = async (): Promise<string[]> => {
+  return await $read_(path) as string[]
 }
 
 // export

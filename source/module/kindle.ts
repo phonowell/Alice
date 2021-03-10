@@ -1,4 +1,16 @@
-import $ from 'fire-keeper'
+import $copy_ from 'fire-keeper/copy_'
+import $exec_ from 'fire-keeper/exec_'
+import $getBasename from 'fire-keeper/getBasename'
+import $getName from 'fire-keeper/getName'
+import $info from 'fire-keeper/info'
+import $isExisted_ from 'fire-keeper/isExisted_'
+import $os from 'fire-keeper/os'
+import $read_ from 'fire-keeper/read_'
+import $remove_ from 'fire-keeper/remove_'
+import $rename_ from 'fire-keeper/rename_'
+import $source_ from 'fire-keeper/source_'
+import $wrapList from 'fire-keeper/wrapList'
+import $write_ from 'fire-keeper/write_'
 
 // variable
 
@@ -11,38 +23,38 @@ const path = {
 
 // function
 
-async function checkUnicode_(): Promise<boolean> {
+const checkUnicode_ = async (): Promise<boolean> => {
 
-  async function sub_(
+  const sub_ = async (
     source: string
-  ): Promise<boolean> {
+  ): Promise<boolean> => {
 
-    const content = await $.read_(source) as string
+    const content = await $read_(source) as string
     return !~content.search(/我/u)
   }
 
-  const listSource = await $.source_(path.storage)
+  const listSource = await $source_(path.storage)
   const listResult = await Promise.all(listSource.map(sub_))
   const listOutput: string[] = []
   listResult.forEach((result, i) => {
-    if (result) listOutput.push($.getBasename(listSource[i]))
+    if (result) listOutput.push($getBasename(listSource[i]))
   })
 
   if (listOutput.length)
-    $.info(`invalid file encoding: ${$.wrapList(listOutput)}`)
+    $info(`invalid file encoding: ${$wrapList(listOutput)}`)
 
   return listOutput.length === 0
 }
 
-async function clean_(): Promise<void> {
-  await $.remove_(path.temp)
+const clean_ = async (): Promise<void> => {
+  await $remove_(path.temp)
 }
 
-async function html2mobi_(
+const html2mobi_ = async (
   source: string
-): Promise<void> {
+): Promise<void> => {
 
-  const { basename } = $.getName(source)
+  const { basename } = $getName(source)
   const target = `${path.temp}/${basename}.html`
 
   const cmd = [
@@ -52,27 +64,27 @@ async function html2mobi_(
     '-dont_append_source',
   ].join(' ')
 
-  await $.exec_(cmd)
+  await $exec_(cmd)
 }
 
-async function isExistedOnKindle_(
+const isExistedOnKindle_ = async (
   source: string
-): Promise<boolean> {
+): Promise<boolean> => {
 
-  const { basename } = $.getName(source)
-  return $.isExisted_(`${path.document}/${basename}.mobi`)
+  const { basename } = $getName(source)
+  return $isExisted_(`${path.document}/${basename}.mobi`)
 }
 
-async function main_(): Promise<void> {
+const main_ = async (): Promise<void> => {
 
   if (!await validateEnvironment_()) return
 
   await renameBook_()
   if (!await checkUnicode_()) return
 
-  async function sub_(
+  const sub_ = async (
     source: string
-  ): Promise<void> {
+  ): Promise<void> => {
 
     if (await isExistedOnKindle_(source)) return
 
@@ -82,28 +94,28 @@ async function main_(): Promise<void> {
   }
 
   await Promise.all(
-    (await $.source_(path.storage))
+    (await $source_(path.storage))
       .map(sub_)
   )
 
   await clean_()
 }
 
-async function moveToKindle_(
+const moveToKindle_ = async (
   source: string
-): Promise<void> {
+): Promise<void> => {
 
-  const { basename } = $.getName(source)
-  await $.copy_(`${path.temp}/${basename}.mobi`, path.document)
+  const { basename } = $getName(source)
+  await $copy_(`${path.temp}/${basename}.mobi`, path.document)
 }
 
-async function renameBook_(): Promise<void> {
+const renameBook_ = async (): Promise<void> => {
 
-  async function sub_(
+  const sub_ = async (
     source: string
-  ): Promise<void> {
+  ): Promise<void> => {
 
-    const { basename } = $.getName(source)
+    const { basename } = $getName(source)
 
     const _basename = basename
       .replace(/,/gu, '，')
@@ -114,27 +126,26 @@ async function renameBook_(): Promise<void> {
       .replace(/>/gu, '》')
       .replace(/\[/gu, '【')
       .replace(/\]/gu, '】')
-    // .replace(/\s/g, '')
 
     if (_basename === basename) return
-    await $.rename_(source, { basename: _basename })
+    await $rename_(source, { basename: _basename })
   }
 
   await Promise.all(
-    (await $.source_(path.storage))
+    (await $source_(path.storage))
       .map(sub_)
   )
 }
 
-async function txt2html_(
+const txt2html_ = async (
   source: string
-): Promise<void> {
+): Promise<void> => {
 
-  const { basename } = $.getName(source)
+  const { basename } = $getName(source)
   const target = `${path.temp}/${basename}.html`
 
   const listContent = (
-    await $.read_(source) as string
+    await $read_(source) as string
   ).split('\n')
   const listResult: string[] = []
 
@@ -155,23 +166,23 @@ async function txt2html_(
     '</html>',
   ]
 
-  await $.write_(target, content.join(''))
+  await $write_(target, content.join(''))
 }
 
-async function validateEnvironment_(): Promise<boolean> {
+const validateEnvironment_ = async (): Promise<boolean> => {
 
-  if (!$.os('macos')) {
-    $.info(`invalid os '${$.os()}'`)
+  if (!$os('macos')) {
+    $info(`invalid os '${$os()}'`)
     return false
   }
 
-  if (!await $.isExisted_(path.kindlegen)) {
-    $.info("found no 'kindlegen', run 'brew cask install kindlegen' to install it")
+  if (!await $isExisted_(path.kindlegen)) {
+    $info("found no 'kindlegen', run 'brew cask install kindlegen' to install it")
     return false
   }
 
-  if (!await $.isExisted_(path.document)) {
-    $.info(`found no '${path.document}', kindle must be connected`)
+  if (!await $isExisted_(path.document)) {
+    $info(`found no '${path.document}', kindle must be connected`)
     return false
   }
 

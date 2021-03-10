@@ -1,4 +1,5 @@
-import $ from 'fire-keeper'
+import $exec_ from 'fire-keeper/exec_'
+import $os from 'fire-keeper/os'
 
 // variable
 
@@ -17,21 +18,17 @@ const mapCmd = {
 
 // function
 
-async function main_(): Promise<void> {
+const main_ = async (): Promise<void> => {
 
-  type Os = 'macos' | 'windows'
-
-  const os = $.os() as Os
+  const os = $os()
   if (!['macos', 'windows'].includes(os))
     throw new Error(`invalid os '${os}'`)
 
   const cmd: string[] = mapCmd[os]
 
-  await $.exec_(cmd, {
+  await $exec_(cmd, {
     ignoreError: true,
   })
-
-  await $.say_('Mission Completed')
 }
 
 // export

@@ -1,10 +1,10 @@
-import $ from 'fire-keeper'
+import $sleep_ from 'fire-keeper/sleep_'
 
 // function
 
-async function main_(): Promise<void> {
+const main_ = async (): Promise<void> => {
 
-  await $.sleep_()
+  await $sleep_(0)
 }
 
 // export
