@@ -1,4 +1,4 @@
-import main_ from '../source/module/kindle'
+import main from '../source/module/kindle'
 
 // export
-export default main_
+export default main

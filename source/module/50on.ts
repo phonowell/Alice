@@ -5,11 +5,13 @@ import $read_ from 'fire-keeper/read_'
 import $say_ from 'fire-keeper/say_'
 import kleur from 'kleur'
 
-// function
+// variable
 
 const path = './data/50on.yaml' as const
 
-const ask_ = async (
+// function
+
+const ask = async (
   list: string[]
 ): Promise<string> => {
 
@@ -29,11 +31,12 @@ const ask_ = async (
 
   if (value === 'exit') return ''
 
-  let msg = `${char} -> ${answer}`
-  msg = value === answer
-    ? kleur.green(msg)
-    : kleur.red(msg)
-  $i(msg)
+  const msg = `${char} -> ${answer}`
+  $i(
+    value === answer
+      ? kleur.green(msg)
+      : kleur.red(msg)
+  )
 
   $info().pause()
   await $say_(char, {
@@ -42,16 +45,16 @@ const ask_ = async (
   $info().resume()
 
   // loop
-  return ask_(list)
+  return ask(list)
 }
 
-const main_ = async (): Promise<void> => {
-  await ask_(await load_())
+const main = async (): Promise<void> => {
+  await ask(await load())
 }
 
-const load_ = async (): Promise<string[]> => {
+const load = async (): Promise<string[]> => {
   return await $read_(path) as string[]
 }
 
 // export
-export default main_
+export default main

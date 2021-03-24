@@ -22,7 +22,7 @@ const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 8)
 
 // function
 
-const clean_ = async (
+const clean = async (
   path: Path
 ): Promise<void> => {
 
@@ -30,7 +30,7 @@ const clean_ = async (
   await $remove_(await $source_(`${path.storage}/**/.DS_Store`))
 }
 
-const convert_ = async (
+const convert = async (
   path: Path
 ): Promise<void> => {
 
@@ -49,7 +49,7 @@ const convert_ = async (
     const basename = $getBasename(source)
     const target = `${path.storage}/jpg/${basename}.jpg`
 
-    const img = await getImg_(source)
+    const img = await getImg(source)
     img.write(target)
 
     await $remove_(source)
@@ -72,7 +72,7 @@ const genBasename = (): string => {
   ].join('-')
 }
 
-const getImg_ = async (
+const getImg = async (
   source: string
 ): Promise<jimp> => {
 
@@ -109,19 +109,19 @@ const getScale = (
   )
 }
 
-const main_ = async (): Promise<void> => {
+const main = async (): Promise<void> => {
 
   const path = getPath()
 
-  await move_(path)
-  await clean_(path)
-  await convert_(path)
-  await renameJpeg_(path)
-  await resize_(path)
-  await rename_(path)
+  await move(path)
+  await clean(path)
+  await convert(path)
+  await renameJpeg(path)
+  await resize(path)
+  await rename(path)
 }
 
-const move_ = async (
+const move = async (
   path: Path
 ): Promise<void> => {
 
@@ -142,7 +142,7 @@ const move_ = async (
   await $move_(listSource, `${path.storage}/jpg`)
 }
 
-const rename_ = async (
+const rename = async (
   path: Path
 ): Promise<void> => {
 
@@ -166,7 +166,7 @@ const rename_ = async (
   await Promise.all(listSource.map(sub_))
 }
 
-const renameJpeg_ = async (
+const renameJpeg = async (
   path: Path
 ): Promise<void> => {
 
@@ -180,7 +180,7 @@ const renameJpeg_ = async (
   )
 }
 
-const resize_ = async (
+const resize = async (
   path: Path
 ): Promise<void> => {
 
@@ -193,7 +193,7 @@ const resize_ = async (
     const basename: string = $getBasename(source)
     if (validateBasename(basename)) return
 
-    const img = await getImg_(source)
+    const img = await getImg(source)
 
     // check size
     const { width, height } = img.bitmap
@@ -219,4 +219,4 @@ const validateBasename = (name: string): boolean => {
 }
 
 // export
-export default main_
+export default main

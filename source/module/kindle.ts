@@ -23,7 +23,7 @@ const path = {
 
 // function
 
-const checkUnicode_ = async (): Promise<boolean> => {
+const checkUnicode = async (): Promise<boolean> => {
 
   const sub_ = async (
     source: string
@@ -46,11 +46,11 @@ const checkUnicode_ = async (): Promise<boolean> => {
   return listOutput.length === 0
 }
 
-const clean_ = async (): Promise<void> => {
+const clean = async (): Promise<void> => {
   await $remove_(path.temp)
 }
 
-const html2mobi_ = async (
+const html2mobi = async (
   source: string
 ): Promise<void> => {
 
@@ -67,7 +67,7 @@ const html2mobi_ = async (
   await $exec_(cmd)
 }
 
-const isExistedOnKindle_ = async (
+const isExistedOnKindle = async (
   source: string
 ): Promise<boolean> => {
 
@@ -75,22 +75,22 @@ const isExistedOnKindle_ = async (
   return $isExisted_(`${path.document}/${basename}.mobi`)
 }
 
-const main_ = async (): Promise<void> => {
+const main = async (): Promise<void> => {
 
-  if (!await validateEnvironment_()) return
+  if (!await validateEnvironment()) return
 
-  await renameBook_()
-  if (!await checkUnicode_()) return
+  await renameBook()
+  if (!await checkUnicode()) return
 
   const sub_ = async (
     source: string
   ): Promise<void> => {
 
-    if (await isExistedOnKindle_(source)) return
+    if (await isExistedOnKindle(source)) return
 
-    await txt2html_(source)
-    await html2mobi_(source)
-    await moveToKindle_(source)
+    await txt2html(source)
+    await html2mobi(source)
+    await moveToKindle(source)
   }
 
   await Promise.all(
@@ -98,10 +98,10 @@ const main_ = async (): Promise<void> => {
       .map(sub_)
   )
 
-  await clean_()
+  await clean()
 }
 
-const moveToKindle_ = async (
+const moveToKindle = async (
   source: string
 ): Promise<void> => {
 
@@ -109,7 +109,7 @@ const moveToKindle_ = async (
   await $copy_(`${path.temp}/${basename}.mobi`, path.document)
 }
 
-const renameBook_ = async (): Promise<void> => {
+const renameBook = async (): Promise<void> => {
 
   const sub_ = async (
     source: string
@@ -137,7 +137,7 @@ const renameBook_ = async (): Promise<void> => {
   )
 }
 
-const txt2html_ = async (
+const txt2html = async (
   source: string
 ): Promise<void> => {
 
@@ -169,7 +169,7 @@ const txt2html_ = async (
   await $write_(target, content.join(''))
 }
 
-const validateEnvironment_ = async (): Promise<boolean> => {
+const validateEnvironment = async (): Promise<boolean> => {
 
   if (!$os('macos')) {
     $info(`invalid os '${$os()}'`)
@@ -190,4 +190,4 @@ const validateEnvironment_ = async (): Promise<boolean> => {
 }
 
 // export
-export default main_
+export default main

@@ -1,4 +1,4 @@
-import main_ from '../source/module/50on'
+import main from '../source/module/50on'
 
 // export
-export default main_
+export default main

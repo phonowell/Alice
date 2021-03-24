@@ -3,7 +3,7 @@ import $zip_ from 'fire-keeper/zip_'
 
 // function
 
-const main_ = async (): Promise<void> => {
+const main = async (): Promise<void> => {
 
   type Os = 'macos' | 'windows'
 
@@ -20,4 +20,4 @@ const main_ = async (): Promise<void> => {
 }
 
 // export
-export default main_
+export default main

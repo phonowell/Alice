@@ -4,7 +4,7 @@ import $os from 'fire-keeper/os'
 
 // function
 
-const main_ = async (): Promise<void> => {
+const main = async (): Promise<void> => {
 
   if (!$os('macos')) {
     $info(`invalid os '${$os()}'`)
@@ -19,4 +19,4 @@ const main_ = async (): Promise<void> => {
 }
 
 // export
-export default main_
+export default main

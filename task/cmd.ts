@@ -1,4 +1,4 @@
-import main_ from '../source/module/cmder'
+import main from '../source/module/cmder'
 
 // export
-export default main_
+export default main

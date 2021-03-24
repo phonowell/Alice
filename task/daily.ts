@@ -1,6 +1,10 @@
 import $exec_ from 'fire-keeper/exec_'
 import $os from 'fire-keeper/os'
 
+// interface
+
+type Os = 'macos' | 'windows'
+
 // variable
 
 const mapCmd = {
@@ -18,9 +22,9 @@ const mapCmd = {
 
 // function
 
-const main_ = async (): Promise<void> => {
+const main = async (): Promise<void> => {
 
-  const os = $os()
+  const os = $os() as Os
   if (!['macos', 'windows'].includes(os))
     throw new Error(`invalid os '${os}'`)
 
@@ -32,4 +36,4 @@ const main_ = async (): Promise<void> => {
 }
 
 // export
-export default main_
+export default main

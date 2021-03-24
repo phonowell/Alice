@@ -14,7 +14,7 @@ type Data = {
 
 // function
 
-const ask_ = async (
+const ask = async (
   data: Data
 ): Promise<string> => {
 
@@ -33,15 +33,15 @@ const ask_ = async (
   return value
 }
 
-const main_ = async (): Promise<void> => {
+const main = async (): Promise<void> => {
 
   const os = $os() as Os
   if (!['macos'].includes(os))
     throw new Error(`invalid os '${os}'`)
 
-  const data = await load_(os)
+  const data = await load(os)
 
-  const target: string = $argv()._[1] || $argv().target || await ask_(data)
+  const target: string = $argv()._[1] || $argv().target || await ask(data)
   if (!target) return
 
   const item = data[target]
@@ -52,7 +52,7 @@ const main_ = async (): Promise<void> => {
   await $exec_(cmd)
 }
 
-const load_ = async (
+const load = async (
   os: Os
 ): Promise<Data> => {
 
@@ -65,4 +65,4 @@ const load_ = async (
 }
 
 // export
-export default main_
+export default main

@@ -1,4 +1,4 @@
-import main_ from '../source/module/image'
+import main from '../source/module/image'
 
 // export
-export default main_
+export default main
