@@ -35,13 +35,15 @@ const ask = async (
 
 const main = async (): Promise<void> => {
 
-  const os = $os() as Os
-  if (!['macos'].includes(os))
+  const os = $os()
+  if (os !== 'macos')
     throw new Error(`invalid os '${os}'`)
 
   const data = await load(os)
 
-  const target: string = $argv()._[1] || $argv().target || await ask(data)
+  const target: string = $argv()._[1] as string
+    || $argv().target as string
+    || await ask(data)
   if (!target) return
 
   const item = data[target]
@@ -60,7 +62,7 @@ const load = async (
     [key: string]: Data
   }
 
-  const data = await $read_('./data/cmd.yaml') as File
+  const data = await $read_<File>('./data/cmd.yaml')
   return data[os]
 }
 

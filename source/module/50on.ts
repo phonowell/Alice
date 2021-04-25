@@ -12,7 +12,7 @@ const path = './data/50on.yaml' as const
 // function
 
 const ask = async (
-  list: string[]
+  list: string[],
 ): Promise<string> => {
 
   let seed = Math.floor(Math.random() * list.length)
@@ -52,9 +52,7 @@ const main = async (): Promise<void> => {
   await ask(await load())
 }
 
-const load = async (): Promise<string[]> => {
-  return await $read_(path) as string[]
-}
+const load = async (): Promise<string[]> => await $read_<string[]>(path)
 
 // export
 export default main

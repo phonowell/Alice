@@ -23,7 +23,7 @@ const nanoid = customAlphabet('1234567890abcdefghijklmnopqrstuvwxyz', 8)
 // function
 
 const clean = async (
-  path: Path
+  path: Path,
 ): Promise<void> => {
 
   $info('step', 'clean')
@@ -31,7 +31,7 @@ const clean = async (
 }
 
 const convert = async (
-  path: Path
+  path: Path,
 ): Promise<void> => {
 
   $info('step', 'convert')
@@ -43,7 +43,7 @@ const convert = async (
   ])
 
   const sub_ = async (
-    source: string
+    source: string,
   ): Promise<void> => {
 
     const basename = $getBasename(source)
@@ -73,7 +73,7 @@ const genBasename = (): string => {
 }
 
 const getImg = async (
-  source: string
+  source: string,
 ): Promise<jimp> => {
 
   return jimp.read(source)
@@ -122,7 +122,7 @@ const main = async (): Promise<void> => {
 }
 
 const move = async (
-  path: Path
+  path: Path,
 ): Promise<void> => {
 
   $info('step', 'move')
@@ -143,7 +143,7 @@ const move = async (
 }
 
 const rename = async (
-  path: Path
+  path: Path,
 ): Promise<void> => {
 
   $info('step', 'rename')
@@ -167,7 +167,7 @@ const rename = async (
 }
 
 const renameJpeg = async (
-  path: Path
+  path: Path,
 ): Promise<void> => {
 
   $info('step', 'renameJpeg')
@@ -181,13 +181,13 @@ const renameJpeg = async (
 }
 
 const resize = async (
-  path: Path
+  path: Path,
 ): Promise<void> => {
 
   $info('step', 'resize')
 
   const sub_ = async (
-    source: string
+    source: string,
   ): Promise<void> => {
 
     const basename: string = $getBasename(source)

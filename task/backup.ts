@@ -5,10 +5,8 @@ import $zip_ from 'fire-keeper/zip_'
 
 const main = async (): Promise<void> => {
 
-  type Os = 'macos' | 'windows'
-
-  const os = $os() as Os
-  if (!['macos', 'windows'].includes(os))
+  const os = $os()
+  if (os !== 'macos' && os !== 'windows')
     throw new Error(`invalid os '${os}'`)
 
   const path = {

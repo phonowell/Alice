@@ -26,10 +26,10 @@ const path = {
 const checkUnicode = async (): Promise<boolean> => {
 
   const sub_ = async (
-    source: string
+    source: string,
   ): Promise<boolean> => {
 
-    const content = await $read_(source) as string
+    const content = await $read_<string>(source)
     return !~content.search(/我/u)
   }
 
@@ -51,7 +51,7 @@ const clean = async (): Promise<void> => {
 }
 
 const html2mobi = async (
-  source: string
+  source: string,
 ): Promise<void> => {
 
   const { basename } = $getName(source)
@@ -68,7 +68,7 @@ const html2mobi = async (
 }
 
 const isExistedOnKindle = async (
-  source: string
+  source: string,
 ): Promise<boolean> => {
 
   const { basename } = $getName(source)
@@ -102,7 +102,7 @@ const main = async (): Promise<void> => {
 }
 
 const moveToKindle = async (
-  source: string
+  source: string,
 ): Promise<void> => {
 
   const { basename } = $getName(source)
@@ -112,7 +112,7 @@ const moveToKindle = async (
 const renameBook = async (): Promise<void> => {
 
   const sub_ = async (
-    source: string
+    source: string,
   ): Promise<void> => {
 
     const { basename } = $getName(source)
@@ -138,14 +138,14 @@ const renameBook = async (): Promise<void> => {
 }
 
 const txt2html = async (
-  source: string
+  source: string,
 ): Promise<void> => {
 
   const { basename } = $getName(source)
   const target = `${path.temp}/${basename}.html`
 
   const listContent = (
-    await $read_(source) as string
+    await $read_<string>(source)
   ).split('\n')
   const listResult: string[] = []
 

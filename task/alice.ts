@@ -6,7 +6,7 @@ import _compact from 'lodash/compact'
 
 // interface
 
-type FnAsync = () => Promise<unknown>
+type FnAsync = <T>() => Promise<T>
 
 // function
 
