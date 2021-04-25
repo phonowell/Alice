@@ -23,18 +23,14 @@ const path = {
 
 // function
 
-const checkUnicode = async (): Promise<boolean> => {
+const checkUnicode = async () => {
 
-  const sub_ = async (
+  const sub = async (
     source: string,
-  ): Promise<boolean> => {
-
-    const content = await $read_<string>(source)
-    return !~content.search(/我/u)
-  }
+  ) => !~(await $read_<string>(source)).search(/我/u)
 
   const listSource = await $source_(path.storage)
-  const listResult = await Promise.all(listSource.map(sub_))
+  const listResult = await Promise.all(listSource.map(sub))
   const listOutput: string[] = []
   listResult.forEach((result, i) => {
     if (result) listOutput.push($getBasename(listSource[i]))
@@ -46,13 +42,13 @@ const checkUnicode = async (): Promise<boolean> => {
   return listOutput.length === 0
 }
 
-const clean = async (): Promise<void> => {
+const clean = async () => {
   await $remove_(path.temp)
 }
 
 const html2mobi = async (
   source: string,
-): Promise<void> => {
+) => {
 
   const { basename } = $getName(source)
   const target = `${path.temp}/${basename}.html`
@@ -69,22 +65,22 @@ const html2mobi = async (
 
 const isExistedOnKindle = async (
   source: string,
-): Promise<boolean> => {
+) => {
 
   const { basename } = $getName(source)
   return $isExisted_(`${path.document}/${basename}.mobi`)
 }
 
-const main = async (): Promise<void> => {
+const main = async () => {
 
   if (!await validateEnvironment()) return
 
   await renameBook()
   if (!await checkUnicode()) return
 
-  const sub_ = async (
-    source: string
-  ): Promise<void> => {
+  const sub = async (
+    source: string,
+  ) => {
 
     if (await isExistedOnKindle(source)) return
 
@@ -93,27 +89,23 @@ const main = async (): Promise<void> => {
     await moveToKindle(source)
   }
 
-  await Promise.all(
-    (await $source_(path.storage))
-      .map(sub_)
-  )
-
+  await Promise.all((await $source_(path.storage)).map(sub))
   await clean()
 }
 
 const moveToKindle = async (
   source: string,
-): Promise<void> => {
+) => {
 
   const { basename } = $getName(source)
   await $copy_(`${path.temp}/${basename}.mobi`, path.document)
 }
 
-const renameBook = async (): Promise<void> => {
+const renameBook = async () => {
 
-  const sub_ = async (
+  const sub = async (
     source: string,
-  ): Promise<void> => {
+  ) => {
 
     const { basename } = $getName(source)
 
@@ -131,15 +123,12 @@ const renameBook = async (): Promise<void> => {
     await $rename_(source, { basename: _basename })
   }
 
-  await Promise.all(
-    (await $source_(path.storage))
-      .map(sub_)
-  )
+  await Promise.all((await $source_(path.storage)).map(sub))
 }
 
 const txt2html = async (
   source: string,
-): Promise<void> => {
+) => {
 
   const { basename } = $getName(source)
   const target = `${path.temp}/${basename}.html`
@@ -169,7 +158,7 @@ const txt2html = async (
   await $write_(target, content.join(''))
 }
 
-const validateEnvironment = async (): Promise<boolean> => {
+const validateEnvironment = async () => {
 
   if (!$os('macos')) {
     $info(`invalid os '${$os()}'`)

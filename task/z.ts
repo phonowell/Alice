@@ -2,8 +2,7 @@ import $sleep_ from 'fire-keeper/sleep_'
 
 // function
 
-const main = async (): Promise<void> => {
-
+const main = async () => {
   await $sleep_(0)
 }
 

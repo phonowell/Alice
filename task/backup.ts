@@ -3,7 +3,7 @@ import $zip_ from 'fire-keeper/zip_'
 
 // function
 
-const main = async (): Promise<void> => {
+const main = async () => {
 
   const os = $os()
   if (os !== 'macos' && os !== 'windows')

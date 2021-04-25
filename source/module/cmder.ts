@@ -6,17 +6,21 @@ import $read_ from 'fire-keeper/read_'
 
 // interface
 
-type Os = 'macos'
-
 type Data = {
   [key: string]: string | string[]
 }
 
+type File = {
+  [key: string]: Data
+}
+
+type Os = 'macos'
+
 // function
 
 const ask = async (
-  data: Data
-): Promise<string> => {
+  data: Data,
+) => {
 
   const list = Object.keys(data)
 
@@ -33,7 +37,7 @@ const ask = async (
   return value
 }
 
-const main = async (): Promise<void> => {
+const main = async () => {
 
   const os = $os()
   if (os !== 'macos')
@@ -55,16 +59,8 @@ const main = async (): Promise<void> => {
 }
 
 const load = async (
-  os: Os
-): Promise<Data> => {
-
-  type File = {
-    [key: string]: Data
-  }
-
-  const data = await $read_<File>('./data/cmd.yaml')
-  return data[os]
-}
+  os: Os,
+) => (await $read_<File>('./data/cmd.yaml'))[os]
 
 // export
 export default main

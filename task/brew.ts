@@ -4,7 +4,7 @@ import $os from 'fire-keeper/os'
 
 // function
 
-const main = async (): Promise<void> => {
+const main = async () => {
 
   if (!$os('macos')) {
     $info(`invalid os '${$os()}'`)

@@ -18,15 +18,13 @@ const mapCmd = {
 
 // function
 
-const main = async (): Promise<void> => {
+const main = async () => {
 
   const os = $os()
   if (os !== 'macos' && os !== 'windows')
     throw new Error(`invalid os '${os}'`)
 
-  const cmd = mapCmd[os]
-
-  await $exec_(cmd, {
+  await $exec_(mapCmd[os], {
     ignoreError: true,
   })
 }
