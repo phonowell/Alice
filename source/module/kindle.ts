@@ -12,14 +12,32 @@ import $source_ from 'fire-keeper/source_'
 import $wrapList from 'fire-keeper/wrapList'
 import $write_ from 'fire-keeper/write_'
 
+// interface
+
+type Path = {
+  document: string
+  kindlegen: string
+  storage: string
+  temp: string
+}
+
 // variable
 
-const path = {
-  document: '/Volumes/Kindle/documents',
-  kindlegen: '~/OneDrive/程序/kindlegen/kindlegen',
-  storage: '~/OneDrive/书籍/同步',
-  temp: './temp/kindle',
-} as const
+const isWindows = $os('windows')
+
+const path: Path = isWindows
+  ? {
+    document: 'G:/documents',
+    kindlegen: 'E:/OneDrive/程序/kindlegen/kindlegen.exe',
+    storage: 'E:/OneDrive/书籍/同步',
+    temp: './temp/kindle',
+  } as const
+  : {
+    document: '/Volumes/Kindle/documents',
+    kindlegen: '~/OneDrive/程序/kindlegen/kindlegen',
+    storage: '~/OneDrive/书籍/同步',
+    temp: './temp/kindle',
+  } as const
 
 const html = [
   '<html lang="zh-cmn-Hans">',
@@ -55,16 +73,24 @@ const checkUnicode = async (): Promise<boolean> => {
 
 const clean = (): Promise<void> => $remove_(path.temp)
 
+const formatPathWindows = (
+  input: string,
+): string => input
+  .replace(/\[/g, '`[')
+  .replace(/\]/g, '`]')
+
 const html2mobi = async (
   source: string,
 ): Promise<void> => {
 
   const { basename } = $getName(source)
-  const target = `${path.temp}/${basename}.html`
+  const target = isWindows
+    ? `${path.temp}/${basename}.html`
+    : `"${path.temp}/${basename}.html"`
 
   const cmd = [
     path.kindlegen,
-    `"${target}"`,
+    `${target}`,
     '-c1',
     '-dont_append_source',
   ].join(' ')
@@ -122,7 +148,7 @@ const main = async (): Promise<void> => {
     await moveToKindle(source)
   }
 
-  await Promise.all((await $source_([`${path.storage}/*`, `!${path.storage}/*.txt`])).map(subManga))
+  if (!isWindows) await Promise.all((await $source_([`${path.storage}/*`, `!${path.storage}/*.txt`])).map(subManga))
   await Promise.all((await $source_(`${path.storage}/*.txt`)).map(subNovel))
   await clean()
 }
@@ -130,7 +156,6 @@ const main = async (): Promise<void> => {
 const moveToKindle = async (
   source: string,
 ): Promise<void> => {
-
   const { basename } = $getName(source)
   await $copy_(`${path.temp}/${basename}.mobi`, path.document)
 }
@@ -138,14 +163,15 @@ const moveToKindle = async (
 const rename = (
   input: string,
 ): string => input
-  .replace(/,/gu, '，')
-  .replace(/:/gu, '：')
-  .replace(/\(/gu, '（')
-  .replace(/\)/gu, '）')
-  .replace(/</gu, '《')
-  .replace(/>/gu, '》')
-  .replace(/\[/gu, '【')
-  .replace(/\]/gu, '】')
+  .replace(/,/g, '，')
+  .replace(/:/g, '：')
+  .replace(/\!/g, '！')
+  .replace(/\(/g, '（')
+  .replace(/\)/g, '）')
+  .replace(/</g, '《')
+  .replace(/>/g, '》')
+  .replace(/\[/g, '【')
+  .replace(/\]/g, '】')
 
 const renameManga = async () => {
 
@@ -157,7 +183,13 @@ const renameManga = async () => {
     if (_basename === basename) return
 
     const _source = source.replace(basename, _basename)
-    await $exec_(`mv "${source}" "${_source}"`)
+
+    const line = isWindows
+      ? `ren '${formatPathWindows(source)}' '${_basename}'`
+      : `mv "${source}" "${_source}"`
+
+    console.log(line)
+    await $exec_(line)
   }
 
   await Promise.all((await $source_([`${path.storage}/*`, `!${path.storage}/*.txt`])).map(sub))
@@ -201,11 +233,6 @@ const txt2html = async (
 }
 
 const validateEnvironment = async (): Promise<boolean> => {
-
-  if (!$os('macos')) {
-    $info(`invalid os '${$os()}'`)
-    return false
-  }
 
   if (!await $isExisted_(path.kindlegen)) {
     $info("found no 'kindlegen', run 'brew cask install kindlegen' to install it")
